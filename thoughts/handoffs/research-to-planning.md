@@ -17,13 +17,14 @@
 
 ## Key Decisions (Locked for Planning)
 
-1. **Browser-first architecture** — MediaPipe Face Landmarker in-browser; Silero VAD; metrics + coaching client-side; WebSocket for session state; backend for post-session LLM.
-2. **Video:** MediaPipe Face Landmarker (not OpenCV, not cloud) — latency and cost.
-3. **Audio:** Silero VAD + channel-based diarization when possible; WhisperLiveKit or GPT-4o Transcribe for single-mic.
-4. **Gaze:** MediaPipe landmarks + temporal smoothing; target ≥85%.
-5. **Coaching:** Rule-based + state machine; configurable thresholds; cooldowns.
-6. **Post-session:** GPT-4o mini for summaries.
-7. **Deployment:** Fly.io if WebRTC needed; Railway if browser-only (no video upload).
+1. **WebRTC/LiveKit required** — Live tutor–student interaction requires both video feeds; `getUserMedia` cannot access remote participant. WebRTC/LiveKit conducts the video call.
+2. **Browser-first processing** — MediaPipe Face Landmarker in-browser on both streams; Silero VAD; metrics + coaching client-side; WebSocket for session state; backend for post-session LLM and LiveKit tokens.
+3. **Video:** MediaPipe Face Landmarker (not OpenCV, not cloud) — latency and cost. Process local + remote streams separately.
+4. **Audio:** Silero VAD + channel-based diarization when possible; WhisperLiveKit or GPT-4o Transcribe for single-mic.
+5. **Gaze:** MediaPipe landmarks + temporal smoothing; target ≥85%.
+6. **Coaching:** Rule-based + state machine; configurable thresholds; cooldowns.
+7. **Post-session:** GPT-4o mini for summaries.
+8. **Deployment:** Fly.io or LiveKit Cloud (WebRTC required; Railway blocks UDP).
 
 ---
 
@@ -51,19 +52,20 @@ See `thoughts/research/video-pipeline-deep-dive.md` for:
 
 ## Recommended Build Order (from Research)
 
-1. Video ingestion + frame extraction (browser)
-2. Face detection + gaze (MediaPipe)
-3. Audio pipeline: VAD + diarization
-4. Metrics aggregation + JSON output
-5. Coaching engine (2 triggers MVP → 5 full)
-6. Post-session (template → LLM)
-7. Dashboard / UI
-8. Deployment + one-command
+1. WebRTC/LiveKit video call (tutor + student join room; both streams to analysis client)
+2. Video ingestion + frame extraction from both streams (browser)
+3. Face detection + gaze (MediaPipe, per stream)
+4. Audio pipeline: VAD + diarization
+5. Metrics aggregation + JSON output
+6. Coaching engine (2 triggers MVP → 5 full)
+7. Post-session (template → LLM)
+8. Dashboard / UI
+9. Deployment + one-command (Fly.io or LiveKit Cloud)
 
 ---
 
 ## Risks to Mitigate in Plan
 
 - Gaze accuracy: include calibration/validation step.
-- Railway UDP: confirm browser-only path or plan Fly.io.
+- WebRTC deployment: use Fly.io or LiveKit Cloud; Railway blocks UDP.
 - Latency budget: allocate per-stage targets in plan.
