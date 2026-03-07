@@ -2,6 +2,8 @@
 
 A HumanLayer-inspired workflow for complex tasks.
 
+**Greenfield projects only.** This workflow is designed for new projects and codebases. For brownfield (existing) codebases, use a different approach—the research/plan/implement flow assumes you're building from scratch, not integrating into established systems.
+
 ## Tool Split
 
 | Phase | Tool | Why |
@@ -17,10 +19,10 @@ A HumanLayer-inspired workflow for complex tasks.
 
 | Use this workflow | Skip to Implement |
 |-------------------|-------------------|
+| **Greenfield projects** (new codebases) | Brownfield / existing codebases |
 | Complex features or refactors | Simple, single-file changes |
-| Brownfield codebase changes | Small bug fixes |
-| Multi-file implementations | Obvious one-liners |
-| Need mental alignment across sessions | |
+| Multi-file implementations | Small bug fixes |
+| Need mental alignment across sessions | Obvious one-liners |
 
 ---
 
@@ -96,7 +98,7 @@ From Cursor's terminal:
 
 ```
 claude
-/implement thoughts/plans/[file].md
+/implement_plan thoughts/plans/[file].md
 ```
 
 Have the plan file path ready. Claude Code will read the plan and execute phase-by-phase.
@@ -167,7 +169,7 @@ In a new session: "Read thoughts/handoffs/[file].md and continue from the Action
 |-------|------|------------|
 | Research | Cursor | `@agent/prompts/research.md` + "Research: [question]" |
 | Plan | Cursor | `@agent/prompts/plan.md` + research + "Create plan for [task]" |
-| Implement | **Claude Code** | `claude` → `/implement thoughts/plans/[file].md` |
+| Implement | **Claude Code** | `claude` → `/implement_plan thoughts/plans/[file].md` |
 | Validate | Cursor | `@agent/prompts/validate.md` + plan + "Validate..." |
 | Handoff | Cursor | `@agent/prompts/handoff.md` + "Create handoff" |
 
