@@ -84,6 +84,31 @@ Review and approve the plan before implementation. A bad plan → hundreds of ba
 
 ---
 
+## Phase 2.5: Milestones (Optional)
+
+**Goal**: Break an approved plan into trackable milestones and tasks.
+
+### When to Run
+
+After plan approval, when you want granular task tracking or coordination across sessions.
+
+### How to Run (Cursor)
+
+Attach `@agent/prompts/milestones-from-plan.md` and `@thoughts/plans/[your-plan].md`, then: "Generate milestones and tasks from [plan path]"
+
+### Output
+
+- **Artifact**: `thoughts/plans/milestones/` with:
+  - `_index.md` — master index
+  - `NN-milestone-slug/README.md` — per-milestone overview
+  - `NN-milestone-slug/tasks/MMM-task-slug.md` — individual tasks
+
+### Human Checkpoint
+
+Review task granularity; adjust if tasks are too coarse or too fine.
+
+---
+
 ## Phase 3: Implement
 
 **Goal**: Execute the plan phase-by-phase, verifying each step before proceeding.
@@ -169,6 +194,7 @@ In a new session: "Read thoughts/handoffs/[file].md and continue from the Action
 |-------|------|------------|
 | Research | Cursor | `@agent/prompts/research.md` + "Research: [question]" |
 | Plan | Cursor | `@agent/prompts/plan.md` + research + "Create plan for [task]" |
+| **Milestones** | Cursor | `@agent/prompts/milestones-from-plan.md` + plan + "Generate milestones and tasks" |
 | Implement | **Claude Code** | `claude` → `/implement_plan thoughts/plans/[file].md` |
 | Validate | Cursor | `@agent/prompts/validate.md` + plan + "Validate..." |
 | Handoff | Cursor | `@agent/prompts/handoff.md` + "Create handoff" |
@@ -190,4 +216,5 @@ In a new session: "Read thoughts/handoffs/[file].md and continue from the Action
 |------|------|
 | Research | `thoughts/research/` |
 | Plans | `thoughts/plans/` |
+| Milestones & Tasks | `thoughts/plans/milestones/` |
 | Handoffs | `thoughts/handoffs/` |
