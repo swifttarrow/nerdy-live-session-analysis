@@ -6,6 +6,12 @@
 
 ---
 
+## Fundamental Requirement: Live Tutor–Student Interaction
+
+**The system must analyze live video interactions between a tutor and a student.** Both participants are typically in different locations (remote tutoring). Therefore we need **both video feeds** (tutor + student). A single browser's `getUserMedia` only captures that device's camera—it cannot access the remote participant's video. **WebRTC/LiveKit (or equivalent) is required** to conduct the video call and deliver both streams to the analysis client.
+
+---
+
 ## Phase 1: Define Your Constraints
 
 ### 1. Scale and load
@@ -85,15 +91,16 @@
 
 | Topic                        | Finding                                                                                                                       |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Source of video feeds        | WebRTC/LiveKit: local stream (own camera) + remote stream (other participant); analysis client receives both                  |
 | MediaPipe vs OpenCV vs cloud | MediaPipe: ~2–10 ms inference, 468 landmarks, gaze-capable; OpenCV: lower-level; cloud: $1–1.50/1K images, 200–500 ms latency |
 | Frame rate for 1–2 Hz        | 1–2 fps analysis sufficient; sample every 15–30 frames at 30 fps                                                              |
-| Multiple participants        | Two feeds (tutor, student); process separately; assign by stream/channel                                                      |
+| Multiple participants        | Two feeds (tutor, student) from WebRTC; process each stream separately; assign by local vs remote                              |
 
 | **Decision** | **Rationale** |
 | ------------ | ------------- |
 | MediaPipe Face Landmarker in-browser | Latency target <500 ms; cloud adds 200–500 ms round-trip; MediaPipe ~2–10 ms inference keeps us well under budget. Zero inference cost. |
 | Sample at 1–2 fps (every 15–30 frames @ 30 fps) | 1–2 Hz metric updates sufficient for coaching; full 30 fps unnecessary and would exceed latency budget. |
-| Process tutor and student feeds separately; assign by stream/channel | Two distinct participants; no shared model; clear separation for metrics attribution. |
+| Process tutor and student feeds separately; local = tutor (or student), remote = other | WebRTC delivers both streams to analysis client; clear attribution for metrics. |
 
 
 **Participant model: 1:1 vs 1 tutor + N students**
@@ -149,14 +156,17 @@
 
 | Topic                | Finding                                                          |
 | -------------------- | ---------------------------------------------------------------- |
-| WebRTC vs WebSocket  | WebRTC: sub-500 ms, UDP; WebSocket: simpler, TCP, higher latency |
+| Fundamental requirement | System must analyze **live tutor–student interaction**; both video feeds required |
+| WebRTC vs WebSocket  | WebRTC: sub-500 ms, UDP; required for video call (remote participant's stream) |
+| Why WebRTC is needed | `getUserMedia` only captures local camera; cannot access remote participant's video without WebRTC/SFU |
 | Metric aggregation   | Client (browser) for lowest latency; server if centralized       |
 | Latency minimization | Browser-side CV; sample frames; avoid cloud round-trips          |
 
 | **Decision** | **Rationale** |
 | ------------ | ------------- |
-| WebSocket for MVP; WebRTC/LiveKit when video must reach server | Browser-first keeps video local; WebSocket sufficient for session state, config, post-session upload. Railway blocks UDP; WebRTC needs Fly.io. |
-| Client-side metric aggregation | Lowest latency; no server round-trip for metrics; aligns with browser-first. |
+| **WebRTC/LiveKit is required** for the video call | Tutor and student are typically remote; we need both feeds. WebRTC delivers remote stream to analysis client. Without it, we cannot analyze live tutor–student interaction (except same-room edge case). |
+| Use LiveKit Cloud or Fly.io; Railway unsuitable | Railway blocks inbound UDP; WebRTC TURN needs UDP. LiveKit Cloud is managed; Fly.io supports self-hosted LiveKit. |
+| Client-side metric aggregation | Lowest latency; no server round-trip for metrics; aligns with browser-first processing. |
 
 
 ### 5. Coaching system
@@ -208,12 +218,12 @@
 
 | Topic               | Finding                                                                   |
 | ------------------- | ------------------------------------------------------------------------- |
-| Video platform      | Standalone for MVP; WebRTC/LiveKit for future Zoom/Meet-style integration |
+| Video platform      | **SessionLens IS the video call**—tutor and student connect via WebRTC/LiveKit; we conduct the session |
 | Post-session format | JSON report; PDF export optional; API for downstream tools                |
 
 | **Decision** | **Rationale** |
 | ------------ | ------------- |
-| Standalone (getUserMedia) for MVP; defer Zoom/Meet integration | Fastest path to working demo; no SFU complexity; evaluator runs locally. |
+| Build video call with LiveKit (or equivalent); not standalone getUserMedia | Live tutor–student interaction requires both feeds; WebRTC/LiveKit delivers remote participant's video. We are the video platform for the session. |
 | JSON report as primary; PDF optional; API for downstream | JSON machine-readable; PDF for human sharing; API enables integrations. |
 
 
@@ -355,13 +365,13 @@ When LLM suggests "Alternative technique," draw from core tutoring techniques:
 
 | Topic       | Finding                                                                   |
 | ----------- | ------------------------------------------------------------------------- |
-| Target      | Fly.io (WebRTC) or Railway (browser-only); Docker Compose for one-command |
+| Target      | Fly.io or LiveKit Cloud (WebRTC required); Docker Compose for one-command |
 | One-command | `docker compose up` or `npm run dev` with README                          |
 | Monitoring  | Health check; latency percentiles; error rate                             |
 
 | **Decision** | **Rationale** |
 | ------------ | ------------- |
-| Railway for MVP (browser-only); Fly.io if WebRTC needed | Railway: no UDP; browser-first avoids video upload; one-command deploy. Fly.io when video must reach server. |
+| **Fly.io or LiveKit Cloud** for MVP; Railway unsuitable | WebRTC is required for tutor–student video call. Railway blocks UDP. LiveKit Cloud is managed; Fly.io supports self-hosted LiveKit. |
 | `docker compose up` or `npm run dev` with README | Evaluator-friendly; one-command run. |
 
 

@@ -9,6 +9,19 @@
 
 ## Phase 1 — System Understanding
 
+### Fundamental Requirement: Live Tutor–Student Interaction
+
+**The system must analyze live video interactions between a tutor and a student.** Both participants are typically in different locations (remote tutoring). Therefore:
+
+- We need **both video feeds**: tutor's face and student's face.
+- A single browser's `getUserMedia` only captures that device's camera—it cannot access the remote participant's video.
+- **WebRTC (or equivalent) is required** to conduct the video call and deliver the remote participant's stream to the analysis client.
+- The analysis client (e.g., tutor's browser) receives: **local stream** (tutor's camera) + **remote stream** (student's video via WebRTC). Both are then processed in-browser with MediaPipe.
+
+Without WebRTC/LiveKit/SFU, we cannot get both feeds into one place for analysis—except in the edge case of same-room (both faces in one camera), which is not the primary use case.
+
+---
+
 ### Project Summary (5–10 Bullets)
 
 - **Purpose:** Real-time engagement intelligence for live tutoring—analyze video/audio, measure eye contact, speaking time, interruptions, energy, attention drift; deliver non-intrusive coaching nudges and post-session analytics.
@@ -39,18 +52,20 @@
 
 ## Phase 2 — Architecture Exploration
 
-### Architecture A: Browser-First (Client-Side Processing)
+### Architecture A: Browser-First with WebRTC (Client-Side Processing)
 
 **High-Level Design**
 
-- Video/audio captured in browser via `getUserMedia`; MediaPipe Face Landmarker runs in-browser (WebAssembly).
+- **WebRTC/LiveKit** conducts the video call: tutor and student connect; each client receives local stream (own camera) + remote stream (other participant).
+- The analysis client (tutor's browser, or a shared "session view") has both streams; MediaPipe Face Landmarker runs in-browser on each feed.
 - Silero VAD + lightweight diarization (e.g., channel-based: tutor left, student right) or simple heuristics in Web Workers.
 - Metrics aggregated in main thread; coaching engine runs client-side; WebSocket to backend for session state, nudges config, and post-session upload.
 - Post-session: upload metrics + optional transcript to backend; LLM summarization server-side.
 
 **Key Components**
 
-- Frontend: React/Vue/Svelte + MediaPipe Tasks Vision (Face Landmarker), Web Audio API, Web Workers.
+- Frontend: React/Vue/Svelte + **LiveKit JS SDK (or WebRTC)** for video call + MediaPipe Tasks Vision (Face Landmarker), Web Audio API, Web Workers.
+- WebRTC infrastructure: LiveKit Cloud (managed) or self-hosted LiveKit/Fly.io for signaling + TURN.
 - Backend: Node.js/Python API for session CRUD, config, post-session LLM calls.
 - Database: PostgreSQL (sessions, metrics, config); Redis optional for real-time state.
 - Storage: S3 or equivalent for recordings/artifacts if needed.
@@ -58,9 +73,10 @@
 **Data Flow**
 
 ```
-User (webcam/mic) → Browser
-  → MediaPipe Face Landmarker (in-browser)
-  → Gaze/eye contact score
+Tutor + Student → WebRTC/LiveKit (video call)
+  → Analysis client receives: local stream (tutor) + remote stream (student)
+  → MediaPipe Face Landmarker (in-browser, per stream)
+  → Gaze/eye contact score (tutor + student)
   → Web Audio → Silero VAD (WASM/JS) → talk-time
   → Metrics aggregation (1–2 Hz)
   → Coaching engine (client)
@@ -71,13 +87,15 @@ User (webcam/mic) → Browser
 
 **Strengths**
 
-- Lowest latency (no server round-trip for CV).
-- No video/audio egress to server (privacy-friendly).
+- Lowest latency for CV (no server round-trip; processing in-browser).
+- No video/audio egress to server for analysis (privacy-friendly); WebRTC is peer/SFU only.
 - Scales with users (compute on client).
 - Bonus points for browser-based implementation.
+- **Enables live tutor–student interaction analysis** (both feeds available).
 
 **Weaknesses**
 
+- WebRTC requires UDP/TURN support; Railway blocks inbound UDP → use Fly.io or LiveKit Cloud.
 - Gaze accuracy may be lower than server-side models; limited to browser-supported models.
 - Diarization without clear channel separation is hard (two people on same mic).
 - Heavier client; older devices may struggle.
@@ -85,7 +103,7 @@ User (webcam/mic) → Browser
 
 **Best Use Case**
 
-- MVP and demos where latency is paramount; single-user or small-scale; privacy-sensitive; evaluator runs locally.
+- MVP and demos where latency is paramount; live tutor–student sessions; privacy-sensitive; deploy to Fly.io or LiveKit Cloud.
 
 ---
 
@@ -229,7 +247,7 @@ User → Browser
 | **B: WebSocket + MediaRecorder** | Chunked video/audio over WS | Higher | Medium | Works on Railway |
 | **C: LiveKit Cloud** | Managed WebRTC | Best | Low | Paid; no self-host UDP issues |
 
-**Recommendation:** **WebSocket + MediaRecorder** for MVP (Railway-friendly). For production with best latency: **Fly.io + LiveKit self-hosted** or **LiveKit Cloud**. WebRTC preferred when UDP is available.
+**Recommendation:** **WebRTC/LiveKit is required** for the video call—we must conduct a live tutor–student session and receive both video feeds. Use **LiveKit Cloud** (managed, no UDP hosting) or **Fly.io + LiveKit self-hosted** for deployment. Railway is unsuitable because it blocks inbound UDP; WebSocket + MediaRecorder cannot deliver the remote participant's video to the analysis client.
 
 ---
 
@@ -263,29 +281,37 @@ User → Browser
 |--------|-------------|--------|------|-------------|
 | **A: Railway** | Easy deploy; no inbound UDP | Limited | ~$5–20/mo | Yes |
 | **B: Fly.io** | Full UDP; global | Yes | ~$5–30/mo | Yes |
-| **C: Vercel + separate worker** | Serverless + persistent worker | No (worker elsewhere) | Variable | More complex |
+| **C: LiveKit Cloud** | Managed WebRTC; no self-host | Yes | Pay-per-use | Yes |
+| **D: Vercel + separate worker** | Serverless + persistent worker | No (worker elsewhere) | Variable | More complex |
 
-**Recommendation:** **Fly.io** for full WebRTC support and one-command Docker deploy. **Railway** if browser-based processing makes WebRTC unnecessary (video stays in browser).
+**Recommendation:** **Fly.io** or **LiveKit Cloud** for MVP. WebRTC is required for the tutor–student video call; Railway blocks UDP and cannot host TURN. LiveKit Cloud avoids self-hosting; Fly.io enables self-hosted LiveKit. Choose based on budget and control needs.
 
 ---
 
 ## Phase 4 — System Diagram
 
-### Recommended: Browser-First Architecture (MVP + Full)
+### Recommended: Browser-First with WebRTC (MVP + Full)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           Browser (Client)                               │
-│  ┌─────────────┐  ┌──────────────────┐  ┌─────────────┐  ┌────────────┐ │
-│  │ getUserMedia│  │ MediaPipe Face   │  │ Web Audio   │  │ Silero VAD │ │
-│  │ (video/audio)│→│ Landmarker      │→ │ API         │→ │ (WASM/JS)  │ │
-│  └─────────────┘  │ (gaze, landmarks)│  └─────────────┘  └─────┬──────┘ │
-│                   └──────────────────┘                           │       │
-│                            │                                    │       │
-│                            ▼                                    ▼       │
+│                    WebRTC / LiveKit (Video Call)                         │
+│  Tutor ──────────────────────────────────────────────► Student           │
+│  (local stream)                                    (remote stream)       │
+└───────────────────────────────────┬───────────────────────────────────┘
+                                    │ Both streams to analysis client
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     Browser (Analysis Client)                           │
+│  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────┐  ┌────────┐│
+│  │ Local + Remote   │  │ MediaPipe Face  │  │ Web Audio   │  │ Silero  ││
+│  │ (tutor + student)│→ │ Landmarker      │→ │ API         │→ │ VAD     ││
+│  │ via WebRTC       │  │ (gaze, per feed)│  └─────────────┘  └────┬───┘│
+│  └─────────────────┘  └──────────────────┘                         │    │
+│                              │                                      │    │
+│                              ▼                                      ▼    │
 │                   ┌─────────────────────────────────────────────────┐   │
 │                   │         Metrics Aggregator (1–2 Hz)              │   │
-│                   │  eye_contact, talk_time, interruptions, etc.  │   │
+│                   │  eye_contact, talk_time (tutor + student)        │   │
 │                   └─────────────────────────┬─────────────────────┘   │
 │                                             │                         │
 │                   ┌─────────────────────────▼─────────────────────┐   │
@@ -343,7 +369,7 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 
 1. **Gaze accuracy below 85%** on diverse webcams/lighting; may require calibration or fallback to server-side model.
 2. **Diarization with single mic** — tutor and student on same channel may not reach 95% talk-time accuracy without strong models.
-3. **Railway UDP block** — prevents native WebRTC TURN; forces WebSocket or browser-only processing.
+3. **WebRTC deployment** — Railway blocks UDP; must use Fly.io or LiveKit Cloud for the video call. LiveKit Cloud simplifies this.
 4. **Latency budget overflow** — frame capture (33 ms) + inference (50–100 ms) + aggregation (50 ms) + render (16 ms) can exceed 500 ms under load.
 5. **Browser compatibility** — MediaPipe, WebCodecs, Web Workers vary across Safari/Firefox/Chrome.
 6. **Notification fatigue** — poorly tuned thresholds could make nudges annoying; needs config and testing.
@@ -371,13 +397,14 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 
 ### What to Build First
 
-1. **Browser video pipeline:** `getUserMedia` → MediaPipe Face Landmarker → gaze score (simplified: head pose or iris direction).
-2. **Browser audio pipeline:** Web Audio → Silero VAD (or simple energy threshold) → talk-time per channel if stereo; else single-speaker VAD only for MVP.
+1. **WebRTC/LiveKit video call:** Tutor and student join a room; analysis client receives both streams (local + remote).
+2. **Browser video pipeline:** Per-stream frame extraction (1–2 fps) → MediaPipe Face Landmarker → gaze score (head pose or iris direction).
 3. **Metrics aggregator:** 1 Hz; output JSON with `eye_contact_score`, `talk_time_percent` for tutor/student.
-4. **Coaching engine:** 2 triggers — “student silent >3 min”, “low eye contact”; rule-based; config in memory.
-5. **Post-session:** Template-based summary (no LLM) or minimal LLM call.
-6. **UI:** Simple dashboard with live metrics + nudge toasts.
-7. **Backend:** Minimal — session create/finish, store metrics; optional WebSocket for config.
+4. **Browser audio pipeline:** Web Audio → Silero VAD (or simple energy threshold) → talk-time per channel if stereo; else single-speaker VAD only for MVP.
+5. **Coaching engine:** 2 triggers — “student silent >3 min”, “low eye contact”; rule-based; config in memory.
+6. **Post-session:** Template-based summary (no LLM) or minimal LLM call.
+7. **UI:** Simple dashboard with live metrics + nudge toasts; video call view (tutor + student).
+8. **Backend:** Minimal — session create/finish, store metrics; LiveKit token generation; optional WebSocket for config.
 
 ### What to Fake or Defer
 
@@ -385,7 +412,6 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 - **Interruptions:** Defer to post-MVP.
 - **Energy level, attention drift:** Defer.
 - **Full LLM post-session:** Start with template; add LLM when stable.
-- **WebRTC:** Use `getUserMedia` only; no SFU for MVP.
 
 ### What to Simplify
 
@@ -403,15 +429,16 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 ### Decisions (Confirmed)
 
 1. **Constraint priority:** Speed > Scale > Cost > Privacy
-2. **Architecture:** Browser-first
-3. **Deep dive completed:** Video pipeline → [`thoughts/research/video-pipeline-deep-dive.md`](video-pipeline-deep-dive.md)
+2. **Architecture:** Browser-first processing + WebRTC/LiveKit for the video call
+3. **Fundamental requirement:** Live tutor–student interaction; both video feeds required; WebRTC/LiveKit is necessary
+4. **Deep dive completed:** Video pipeline → [`thoughts/research/video-pipeline-deep-dive.md`](video-pipeline-deep-dive.md)
 
 ### Implications
 
-- **Speed:** Prioritize latency (browser-side CV, frame sampling, Web Worker if needed); avoid cloud round-trips.
-- **Scale:** Browser-first scales with users (client compute); backend stays lightweight.
-- **Cost:** Already minimized by browser processing; LLM only for post-session.
-- **Privacy:** Video/audio stays local; no server upload for analysis.
+- **Speed:** Prioritize latency (browser-side CV, frame sampling, Web Worker if needed); avoid cloud round-trips for analysis.
+- **Scale:** Browser-first processing scales with users (client compute); backend stays lightweight.
+- **Cost:** Browser processing minimizes inference cost; LiveKit Cloud or Fly.io for WebRTC; LLM only for post-session.
+- **Privacy:** Video/audio processed in-browser; no server upload for analysis; WebRTC streams flow peer-to-peer or via SFU.
 
 ### Remaining Deep Dives (Optional)
 

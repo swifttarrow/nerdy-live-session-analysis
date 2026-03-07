@@ -1,18 +1,20 @@
 # Video Pipeline Deep Dive
 
 **Subsystem:** Video ingestion, frame extraction, face detection, gaze estimation  
-**Architecture:** Browser-first (confirmed)  
+**Architecture:** Browser-first processing + WebRTC/LiveKit for video call (confirmed)  
 **Constraint priority:** Speed > Scale > Cost > Privacy
 
 ---
 
 ## 1. Pipeline Overview
 
+**Video source:** WebRTC/LiveKit delivers two streams to the analysis client: local (own camera) and remote (other participant). Each stream is attached to an `<video>` element.
+
 ```
-getUserMedia (720p @ 30fps)
+WebRTC/LiveKit: local stream + remote stream (720p @ 30fps)
     │
     ▼
-Frame sampling (1–2 fps for metrics)
+Frame sampling per stream (1–2 fps for metrics)
     │
     ▼
 MediaPipe Face Landmarker
@@ -76,7 +78,7 @@ const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
   outputFaceBlendshapes: true,
   outputFacialTransformationMatrix: true,
   outputFaceBoundingBox: true,
-  numFaces: 2,            // tutor + student if both in frame; else 1
+  numFaces: 1,            // one participant per stream (local or remote)
   runningMode: "VIDEO",
   minDetectionConfidence: 0.5,
   minTrackingConfidence: 0.5
@@ -150,22 +152,23 @@ Raw per-frame scores are noisy. Use:
 
 ## 6. Two Participants (Tutor + Student)
 
-### Scenario A: Separate video feeds
+### Scenario A: WebRTC/LiveKit (primary — remote tutor–student)
 
-- Each participant has own `getUserMedia` stream.
-- Process each stream independently; no assignment needed.
+- Analysis client receives **local stream** (own camera) + **remote stream** (other participant) via WebRTC.
+- Process each stream independently; `numFaces: 1` per stream.
+- Assignment: local = tutor (or student), remote = other; configurable by role.
 - Metrics: `tutor.eye_contact_score`, `student.eye_contact_score`.
 
-### Scenario B: Single feed (split screen or picture-in-picture)
+### Scenario B: Single feed (same room — both faces in one camera)
 
 - Use `numFaces: 2`; MediaPipe returns multiple faces.
 - Assignment: by position (e.g., left = tutor, right = student) or by size (larger = tutor).
-- Configurable; document assumption.
+- Configurable; document assumption. Edge case; WebRTC is primary.
 
 ### Scenario C: Single participant (self-view)
 
 - `numFaces: 1`; one score.
-- MVP can start with single participant (tutor view only).
+- For testing or demo when only one participant is present.
 
 ---
 
