@@ -1,17 +1,17 @@
 ---
-description: Research-Plan-Implement-Validate agent workflow (HumanLayer-inspired)
+description: Research-Plan-Implement-Validate agent workflow for greenfield projects (HumanLayer-inspired)
 alwaysApply: true
 ---
 
 # Agent Workflow
 
-This project uses a **Research → Plan → Implement → Validate** workflow for complex tasks. Inspired by [HumanLayer's Advanced Context Engineering](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents).
+This project uses a **Research → Plan → Implement → Validate** workflow for greenfield (new) projects. Inspired by [HumanLayer's Advanced Context Engineering](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents).
 
 ## Workflow Phases
 
-1. **Research** – Understand the codebase, find relevant files, document what exists (no code changes)
-2. **Plan** – Create a detailed implementation plan with phases and success criteria
-3. **Implement** – Execute the plan phase-by-phase, verifying each step
+1. **Research** – Clarify requirements, constraints, and tech choices; explore external APIs, libraries, or patterns; document decisions and rationale (no implementation yet)
+2. **Plan** – Design architecture and create a detailed implementation plan with phases, milestones, and success criteria
+3. **Implement** – Build from scratch phase-by-phase, verifying each step before moving on
 4. **Validate** – Review implementation against the plan, run checks, identify gaps
 
 ## Key Principles
@@ -29,9 +29,9 @@ This project uses a **Research → Plan → Implement → Validate** workflow fo
 
 ## When to Use
 
-- **Greenfield projects only** (new codebases)
-- Complex features or refactors
+- **Greenfield projects only** (new codebases, starting from scratch)
+- Complex features or multi-component builds
 - Multi-file implementations
 - When you need mental alignment across sessions
 
-For brownfield codebases or simple, single-file changes, use a different approach or skip directly to implementation.
+For brownfield codebases (existing code) or simple, single-file changes, skip this workflow and go directly to implementation.
