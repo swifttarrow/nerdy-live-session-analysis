@@ -1,6 +1,7 @@
 import { createVad } from "./vad";
 import { createTalkTimeAggregator, TalkTimeState } from "./talk-time";
 import type { ParticipantRole } from "./talk-time";
+import type { InterruptionTracker } from "./interruptions";
 
 export interface AudioPipelineOutput {
   talkTimePercent: number;
@@ -27,8 +28,12 @@ export interface AudioPipeline {
  *
  * With LiveKit, each participant has a separate audio track, enabling
  * accurate per-person speaking detection without stereo diarization.
+ *
+ * @param interruptionTracker - optional tracker; receives speech start/end events
  */
-export function createAudioPipeline(): AudioPipeline {
+export function createAudioPipeline(
+  interruptionTracker?: InterruptionTracker | null
+): AudioPipeline {
   const aggregator = createTalkTimeAggregator();
   const vadInstances: Array<{ destroy(): void }> = [];
 
@@ -37,16 +42,19 @@ export function createAudioPipeline(): AudioPipeline {
       void createVad(stream, {
         onSpeechStart: () => {
           aggregator.onSpeechStart(role);
+          interruptionTracker?.onSpeechStart(role);
           onUpdate(aggregator.getState(role));
         },
         onSpeechEnd: (_audio) => {
           aggregator.onSpeechEnd(role);
+          interruptionTracker?.onSpeechEnd(role);
           onUpdate(aggregator.getState(role));
         },
         onVADMisfire: () => {
           // Misfire: treat as silence
           if (aggregator.getState(role).speaking) {
             aggregator.onSpeechEnd(role);
+            interruptionTracker?.onSpeechEnd(role);
             onUpdate(aggregator.getState(role));
           }
         },
