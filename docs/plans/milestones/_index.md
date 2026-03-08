@@ -25,16 +25,16 @@
 | 8 | [08-interruptions-detection](./08-interruptions-detection/) | Pending |
 | 9 | [09-interruption-classification](./09-interruption-classification/) | Pending |
 | 10 | [10-third-coaching-triggers](./10-third-coaching-triggers/) | Pending |
-| 11 | [11-energy-level](./11-energy-level/) | Pending |
-| 12 | [12-attention-drift](./12-attention-drift/) | Pending |
+| 11 | [11-energy-level](./11-energy-level/) | Complete |
+| 12 | [12-attention-drift](./12-attention-drift/) | Complete |
 
 ### Post-MVP: Testing & Quality Assurance
 
 | # | Milestone | Status |
 |---|-----------|--------|
-| 13 | [13-test-suite-expansion](./13-test-suite-expansion/) | Pending |
-| 14 | [14-labeled-test-clips](./14-labeled-test-clips/) | Pending |
-| 15 | [15-latency-instrumentation](./15-latency-instrumentation/) | Pending |
+| 13 | [13-test-suite-expansion](./13-test-suite-expansion/) | Complete |
+| 14 | [14-labeled-test-clips](./14-labeled-test-clips/) | Complete |
+| 15 | [15-latency-instrumentation](./15-latency-instrumentation/) | Complete |
 
 ### Post-MVP: Documentation & Submission
 
