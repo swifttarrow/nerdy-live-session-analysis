@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const room = searchParams.get("room");
   const identity = searchParams.get("identity");
+  const role = searchParams.get("role") === "student" ? "student" : "teacher";
 
   if (!room || !identity) {
     return NextResponse.json(
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest) {
     const at = new AccessToken(apiKey, apiSecret, {
       identity,
       ttl: "4h",
+      metadata: JSON.stringify({ role }),
     });
     at.addGrant({
       roomJoin: true,
