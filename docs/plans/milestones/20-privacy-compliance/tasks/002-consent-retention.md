@@ -6,9 +6,9 @@ Document consent flow and data retention.
 
 ## Deliverables
 
-- [ ] Consent & disclosure: pre-session wording ("We analyze face position, gaze direction, and speech patterns for coaching. No raw video stored.")
-- [ ] Retention: configurable; 30–90 days default; deletion on request
-- [ ] Access control: tutor owns sessions; QA/admin role-based; aggregate anonymized
+- [x] Consent & disclosure: pre-session wording ("We analyze face position, gaze direction, and speech patterns for coaching. No raw video stored.")
+- [x] Retention: configurable; 30–90 days default; deletion on request
+- [x] Access control: tutor owns sessions; QA/admin role-based; aggregate anonymized
 
 ## Notes
 

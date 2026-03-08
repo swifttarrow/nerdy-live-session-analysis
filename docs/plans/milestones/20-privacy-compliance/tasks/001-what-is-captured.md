@@ -6,10 +6,10 @@ Document what data is captured and what is not.
 
 ## Deliverables
 
-- [ ] Face landmarks, gaze vectors (no raw video stored)
-- [ ] VAD/diarization features (no raw audio stored unless opted in)
-- [ ] No raw video/audio egress to server unless recording opted in
-- [ ] Browser-first: data stays local during session
+- [x] Face landmarks, gaze vectors (no raw video stored)
+- [x] VAD/diarization features (no raw audio stored unless opted in)
+- [x] No raw video/audio egress to server unless recording opted in
+- [x] Browser-first: data stays local during session
 
 ## Notes
 
