@@ -6,7 +6,8 @@ export type TriggerType =
   | "tutor_talk_dominant"
   | "low_eye_contact"
   | "interruptions_spike"   // M10: tutor→student interruptions spike
-  | "student_hesitating";   // M10: student slow to respond repeatedly
+  | "student_hesitating"    // M10: student slow to respond repeatedly
+  | "student_attention_drift"; // M12: student sustained gaze away
 
 export interface Trigger {
   type: TriggerType;
@@ -163,6 +164,14 @@ export const TRIGGERS: Trigger[] = [
     suggestion: "Consider giving more think time or rephrasing the question",
     evaluate(_metrics, state, config) {
       return state.recentHesitationTimes.length >= config.hesitationCountThreshold;
+    },
+  },
+  {
+    type: "student_attention_drift",
+    headline: "Student may be distracted",
+    suggestion: "Try engaging with a direct question or activity change",
+    evaluate(metrics, _state, _config) {
+      return metrics.metrics.student.attention_drift === true;
     },
   },
 ];

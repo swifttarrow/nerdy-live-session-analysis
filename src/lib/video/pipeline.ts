@@ -2,6 +2,7 @@ import type { FaceLandmarker } from "@mediapipe/tasks-vision";
 import { initFaceLandmarker, detectFace } from "./face-landmarker";
 import { deriveGazeScore } from "./gaze";
 import { createEmaSmoother, EmaSmoother } from "./smoothing";
+import { createPipelineLatencyTracker, PipelineLatencyTracker } from "@/lib/latency/timing";
 
 export type StreamRole = "tutor" | "student";
 
@@ -17,11 +18,14 @@ export interface VideoPipeline {
    */
   processFrame(role: StreamRole, imageData: ImageData, timestampMs: number): number | null;
   getLatestScores(): VideoPipelineOutput;
+  /** M15: access latency tracker for instrumentation data */
+  latency: PipelineLatencyTracker;
 }
 
 /**
  * Create the video analysis pipeline.
  * Lazily initializes MediaPipe Face Landmarker on first use.
+ * Instruments per-stage latency via PipelineLatencyTracker.
  */
 export function createVideoPipeline(): VideoPipeline {
   let landmarker: FaceLandmarker | null = null;
@@ -37,12 +41,16 @@ export function createVideoPipeline(): VideoPipeline {
     student: 0,
   };
 
+  const latencyTracker = createPipelineLatencyTracker();
+
   // Kick off initialization immediately
   void initFaceLandmarker().then((l) => {
     landmarker = l;
   });
 
   return {
+    latency: latencyTracker,
+
     processFrame(role: StreamRole, imageData: ImageData, timestampMs: number): number | null {
       if (!landmarker) {
         if (!initInProgress) {
@@ -54,16 +62,35 @@ export function createVideoPipeline(): VideoPipeline {
         return null; // not ready yet
       }
 
-      const t0 = performance.now();
+      // --- Stage: frame_capture (represents start of processing this frame) ---
+      const endCapture = latencyTracker.startStage("frame_capture");
+      endCapture(); // frame is already in memory; just mark the timestamp boundary
 
+      // --- Stage: mediapipe (face detection) ---
+      const endMediapipe = latencyTracker.startStage("mediapipe");
       const result = detectFace(landmarker, imageData, timestampMs);
+      endMediapipe();
+
+      // --- Stage: gaze (score derivation) ---
+      const endGaze = latencyTracker.startStage("gaze");
       const rawScore = result ? deriveGazeScore(result) : null;
+      endGaze();
+
+      // --- Stage: smoothing ---
+      const endSmoothing = latencyTracker.startStage("smoothing");
       const smoothed = smoothers[role].update(rawScore);
       scores[role] = smoothed;
+      endSmoothing();
 
-      const latency = performance.now() - t0;
+      // --- Stage: metrics_emit (marks frame complete) ---
+      const endEmit = latencyTracker.startStage("metrics_emit");
+      endEmit();
+
       if (process.env.NEXT_PUBLIC_DEBUG === "true") {
-        console.debug(`[video-pipeline] ${role} latency=${latency.toFixed(1)}ms score=${smoothed.toFixed(2)}`);
+        const gazeStat = latencyTracker.getStageStats("mediapipe");
+        console.debug(
+          `[video-pipeline] ${role} mediapipe p50=${gazeStat.p50.toFixed(1)}ms score=${smoothed.toFixed(2)}`
+        );
       }
 
       return smoothed;

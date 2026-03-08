@@ -4,6 +4,10 @@ export const ParticipantMetricsSchema = z.object({
   eye_contact_score: z.number().min(0).max(1),
   talk_time_percent: z.number().min(0).max(1),
   current_speaking: z.boolean(),
+  /** M11: combined voice + expression energy level [0, 1] */
+  energy_level: z.number().min(0).max(1).optional(),
+  /** M12: sustained attention drift (looking away > threshold) */
+  attention_drift: z.boolean().optional(),
 });
 
 export const SessionMetricsSchema = z.object({
