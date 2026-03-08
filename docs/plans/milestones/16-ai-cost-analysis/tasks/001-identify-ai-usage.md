@@ -6,9 +6,9 @@ Identify all AI/LLM usage in the system.
 
 ## Deliverables
 
-- [ ] List: MediaPipe (browser, no cost), Silero VAD (browser, no cost)
-- [ ] List: any LLM calls (e.g. post-session recommendations)
-- [ ] Token estimates per session if LLM used
+- [x] List: MediaPipe (browser, no cost), Silero VAD (browser, no cost)
+- [x] List: any LLM calls (e.g. post-session recommendations)
+- [x] Token estimates per session if LLM used
 
 ## Notes
 

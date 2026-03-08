@@ -6,10 +6,10 @@ Create AI Cost Analysis document for submission.
 
 ## Deliverables
 
-- [ ] Document: AI Cost Analysis (1–2 pages)
-- [ ] Per-session cost estimate
-- [ ] Breakdown: model, tokens, $/session
-- [ ] Format per PRD/submission requirements
+- [x] Document: AI Cost Analysis (1–2 pages)
+- [x] Per-session cost estimate
+- [x] Breakdown: model, tokens, $/session
+- [x] Format per PRD/submission requirements
 
 ## Notes
 
