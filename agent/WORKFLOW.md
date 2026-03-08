@@ -198,6 +198,26 @@ In a new session: "Read docs/handoffs/[file].md and continue from the Action Ite
 | Implement | **Claude Code** | `claude` → `/implement [milestone]` |
 | Validate | Cursor | `@agent/prompts/validate.md` + plan + "Validate..." |
 | Handoff | Cursor | `@agent/prompts/handoff.md` + "Create handoff" |
+| Takeaways | Cursor | `@agent/prompts/takeaways.md` + "Create takeaways from milestones" |
+
+---
+
+## Takeaways (Post-Implementation)
+
+**Goal**: Produce a high-level TAKEAWAYS.md summarizing each milestone/task and notable technical challenges.
+
+### When to Run
+
+- After implementing or validating one or more milestones
+- When wrapping up a session and you want a compact summary
+
+### How to Run (Cursor)
+
+Attach `@agent/prompts/takeaways.md`, then: "Create takeaways from the milestones" (or specify milestone range)
+
+### Output
+
+- **Artifact**: `docs/TAKEAWAYS.md` — per-milestone takeaways, per-task bullets, technical challenges
 
 ---
 
@@ -218,3 +238,4 @@ In a new session: "Read docs/handoffs/[file].md and continue from the Action Ite
 | Plans | `docs/plans/` |
 | Milestones & Tasks | `docs/plans/milestones/` |
 | Handoffs | `docs/handoffs/` |
+| Takeaways | `docs/TAKEAWAYS.md` |
