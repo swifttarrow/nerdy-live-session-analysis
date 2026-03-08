@@ -2,7 +2,7 @@
 
 *Building real-time engagement intelligence for live tutoring with computer vision and coaching systems*
 
-**Engagement model:** See [ONE_PAGER.md](../ONE_PAGER.md) for the conceptual foundation—four engagement dimensions, six measurable signals, and the distinction between basic metrics and engagement-quality signals.
+**Engagement model:** See [one-pager.md](one-pager.md) for the conceptual foundation—four engagement dimensions, six measurable signals, and the distinction between basic metrics and engagement-quality signals.
 
 ---
 
@@ -73,7 +73,7 @@ Hard gate. All items required to pass:
 
 ### Feature: Engagement Metrics Engine
 
-*Basic metrics (what happened) and engagement-quality signals (whether learning is likely). See ONE_PAGER.md.*
+*Basic metrics (what happened) and engagement-quality signals (whether learning is likely). See one-pager.md.*
 
 | Feature              | Category   | Requirements                                                                 |
 |----------------------|------------|-------------------------------------------------------------------------------|
@@ -166,7 +166,7 @@ We will test:
 
 ### Coaching Nudge Triggers (Implement at least 3)
 
-*Aligned with SessionLens engagement model. See ONE_PAGER.md for rationale.*
+*Aligned with SessionLens engagement model. See one-pager.md for rationale.*
 
 | Trigger                      | Message                         | Timing       |
 |------------------------------|---------------------------------|--------------|
