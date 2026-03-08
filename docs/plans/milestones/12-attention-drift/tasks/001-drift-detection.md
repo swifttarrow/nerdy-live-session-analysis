@@ -6,10 +6,10 @@ Detect attention drift / distraction from gaze patterns.
 
 ## Deliverables
 
-- [ ] Use eye contact score + head pose from gaze pipeline
-- [ ] Looking away = low eye contact + head turn
-- [ ] Output: drift boolean or score (0–1)
-- [ ] Per participant
+- [x] Use eye contact score + head pose from gaze pipeline
+- [x] Looking away = low eye contact + head turn
+- [x] Output: drift boolean or score (0–1)
+- [x] Per participant
 
 ## Notes
 

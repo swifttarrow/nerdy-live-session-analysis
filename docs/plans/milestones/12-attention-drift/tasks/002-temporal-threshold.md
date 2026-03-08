@@ -6,10 +6,10 @@ Apply temporal threshold to distinguish sustained drift from brief glances.
 
 ## Deliverables
 
-- [ ] Sustained low gaze (e.g. >5 s) → drift
-- [ ] Brief glance (<2 s) → not flagged
-- [ ] Configurable threshold
-- [ ] Smoothing to avoid flicker
+- [x] Sustained low gaze (e.g. >5 s) → drift
+- [x] Brief glance (<2 s) → not flagged
+- [x] Configurable threshold
+- [x] Smoothing to avoid flicker
 
 ## Notes
 

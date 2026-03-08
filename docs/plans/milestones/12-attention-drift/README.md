@@ -22,8 +22,8 @@ Add attention drift / distraction detection. PRD optional for MVP; included in p
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: synthetic gaze → drift detection correct
+- [x] `npm run build` succeeds
+- [x] Unit test: synthetic gaze → drift detection correct
 
 ### Manual Verification
 
