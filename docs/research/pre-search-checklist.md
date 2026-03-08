@@ -98,7 +98,7 @@
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Source of video feeds        | WebRTC/LiveKit: local stream (own camera) + remote stream (other participant); analysis client receives both                  |
 | MediaPipe vs OpenCV vs cloud | MediaPipe: ~2–10 ms inference, 468 landmarks, gaze-capable; OpenCV: lower-level; cloud: $1–1.50/1K images, 200–500 ms latency |
-| Frame rate for 1–2 Hz        | 1–2 fps analysis sufficient; sample every 15–30 frames at 30 fps                                                              |
+| Frame rate for 1–2 Hz        | 1–2ss fps analysis sufficient; sample every 15–30 frames at 30 fps                                                            |
 | Multiple participants        | Two feeds (tutor, student) from WebRTC; process each stream separately; assign by local vs remote                             |
 
 
@@ -188,10 +188,10 @@
 ### 5. Coaching system
 
 
-| Topic                | Finding                                                                     |
-| -------------------- | --------------------------------------------------------------------------- |
-| Notification fatigue | Cooldowns per trigger type; configurable thresholds; max nudges per session |
-| Thresholds           | Store in DB; editable without deploy; session-type presets                  |
+| Topic                | Finding                                                                                                                       |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Notification fatigue | Cooldowns per trigger type; configurable thresholds; max nudges per session                                                   |
+| Thresholds           | Store in DB; editable without deploy; session-type presets                                                                    |
 | Configurability      | JSON config: `{ "student_silent_sec": 45, "tutor_talk_threshold": 0.85, "eye_contact_threshold": 0.5 }` (ONE_PAGER: 45s, 85%) |
 
 
@@ -283,12 +283,13 @@ Core principle: **maximize student thinking time** (target ~30% tutor / 70% stud
 
 *ONE_PAGER post-session analytics: engagement score, moments of confusion/frustration, tutor talk balance, persistence patterns.*
 
-| Topic               | Finding                                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Timestamped moments | Flag specific moments for review (e.g., "12:05 – Student confused about base case; tutor explained 3 min; missed opportunity: ask student to explain") |
+
+| Topic               | Finding                                                                                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Timestamped moments | Flag specific moments for review (e.g., "12:05 – Student confused about base case; tutor explained 3 min; missed opportunity: ask student to explain")   |
 | Key metrics         | Student talk time (primary engagement-quality signal); tutor talk balance; moments of confusion/frustration; persistence patterns; avoid metric overload |
-| LLM summarization   | Use transcript + metrics to generate Observation → Impact → Alternative; cite timestamps                                                               |
-| Debrief structure   | Optional: tutor self-reflection (2 min) + coach observation (3 min) + improvement focus (2 min)                                                        |
+| LLM summarization   | Use transcript + metrics to generate Observation → Impact → Alternative; cite timestamps                                                                 |
+| Debrief structure   | Optional: tutor self-reflection (2 min) + coach observation (3 min) + improvement focus (2 min)                                                          |
 
 
 **Flagged segment playback**

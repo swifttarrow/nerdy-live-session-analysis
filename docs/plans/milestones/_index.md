@@ -40,11 +40,11 @@
 
 | # | Milestone | Status |
 |---|-----------|--------|
-| 16 | [16-ai-cost-analysis](./16-ai-cost-analysis/) | Pending |
-| 17 | [17-architecture-document](./17-architecture-document/) | Pending |
-| 18 | [18-development-log](./18-development-log/) | Pending |
-| 19 | [19-demo-video](./19-demo-video/) | Pending |
-| 20 | [20-privacy-compliance](./20-privacy-compliance/) | Pending |
+| 16 | [16-ai-cost-analysis](./16-ai-cost-analysis/) | Complete |
+| 17 | [17-architecture-document](./17-architecture-document/) | Complete |
+| 18 | [18-development-log](./18-development-log/) | Complete |
+| 19 | [19-demo-video](./19-demo-video/) | Needs Recording |
+| 20 | [20-privacy-compliance](./20-privacy-compliance/) | Complete |
 
 ### Post-MVP: Engagement Quality Extensions
 
@@ -69,6 +69,6 @@
 
 - [MVP Plan](../2025-03-06-sessionlens-mvp.md)
 - [Post-MVP Plan](../2025-03-07-sessionlens-post-mvp-draft.md)
-- [PRD](../../PRD.md)
-- [ONE_PAGER](../../../ONE_PAGER.md)
+- [PRD](../../prd.md)
+- [one-pager](../../one-pager.md)
 - [Research](../../research/)

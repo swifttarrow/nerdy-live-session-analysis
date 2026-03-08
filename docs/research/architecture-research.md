@@ -2,7 +2,7 @@
 
 **Pre-Search / Architecture Discovery for Real-Time Engagement Intelligence**
 
-*Source: PRD (docs/PRD.md), Requirements (docs/REQUIREMENTS.md)*  
+*Source: PRD (docs/prd.md), Requirements (docs/requirements.md)*  
 *Scope: Full feature set (not MVP-only)*
 
 ---
