@@ -6,7 +6,7 @@ Record demo showing full SessionLens flow.
 
 ## Deliverables
 
-- [ ] Record: consent → join room → video call
+- [ ] Record: consent → join room → video call  ← manual step; see docs/demo-video-script.md
 - [ ] Show metrics updating for both participants
 - [ ] Trigger at least one nudge (or simulate)
 - [ ] End session → report display
