@@ -23,8 +23,8 @@ Add energy level signal — voice tone + facial expression. PRD optional for MVP
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: synthetic inputs → energy score in expected range
+- [x] `npm run build` succeeds
+- [x] Unit test: synthetic inputs → energy score in expected range
 
 ### Manual Verification
 

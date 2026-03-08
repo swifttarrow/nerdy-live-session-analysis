@@ -6,9 +6,9 @@ Extract facial expression cues from MediaPipe face landmarks for energy level.
 
 ## Deliverables
 
-- [ ] Use mouth openness, brow position from face landmarks
-- [ ] Output: expression energy score (0–1)
-- [ ] Map to engagement/energy (e.g. animated vs. flat)
+- [x] Use mouth openness, brow position from face landmarks
+- [x] Output: expression energy score (0–1)
+- [x] Map to engagement/energy (e.g. animated vs. flat)
 
 ## Notes
 

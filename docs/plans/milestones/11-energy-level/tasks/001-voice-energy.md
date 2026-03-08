@@ -6,9 +6,9 @@ Extract voice energy/pitch from audio for energy level signal.
 
 ## Deliverables
 
-- [ ] Compute RMS or spectral features from audio stream
-- [ ] Output: voice energy score (0–1 or normalized)
-- [ ] Use Web Audio API; run alongside VAD
+- [x] Compute RMS or spectral features from audio stream
+- [x] Output: voice energy score (0–1 or normalized)
+- [x] Use Web Audio API; run alongside VAD
 
 ## Notes
 

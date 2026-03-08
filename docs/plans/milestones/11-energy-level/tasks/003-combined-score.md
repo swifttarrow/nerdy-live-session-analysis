@@ -6,9 +6,9 @@ Combine voice and facial expression into unified energy level score.
 
 ## Deliverables
 
-- [ ] Combine voice + expression (weighted or simple average)
-- [ ] Output: energy level (0–1 or low/medium/high)
-- [ ] Per participant (tutor, student)
+- [x] Combine voice + expression (weighted or simple average)
+- [x] Output: energy level (0–1 or low/medium/high)
+- [x] Per participant (tutor, student)
 
 ## Notes
 
