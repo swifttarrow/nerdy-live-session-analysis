@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Room } from "livekit-client";
 import { connectToRoom, disconnectRoom } from "@/lib/livekit/room";
 import { createFrameSampler } from "@/lib/video/frame-sampler";
-import { createVideoPipeline, VideoPipelineOutput } from "@/lib/video/pipeline";
+import { createVideoPipeline } from "@/lib/video/pipeline";
 import { createAudioPipeline, AudioPipelineOutput } from "@/lib/audio/pipeline";
 import { createMetricsAggregator } from "@/lib/metrics/aggregator";
 import { createCoachingEngine } from "@/lib/coaching/engine";
@@ -16,15 +16,22 @@ import { generateReport } from "@/lib/post-session/report";
 import type { SessionMetrics } from "@/lib/session/metrics-schema";
 import type { NudgeEvent } from "@/lib/coaching/engine";
 import type { InterruptionTracker } from "@/lib/audio/interruptions";
+import type { ParticipantRole } from "@/lib/livekit/room";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
 import ConsentBanner from "@/components/ConsentBanner";
+
+type SessionRole = "teacher" | "student";
 
 function SessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomName = searchParams.get("room") ?? "sessionlens-demo";
   const identity = searchParams.get("identity") ?? `user-${Date.now()}`;
+  const role = (searchParams.get("role") === "student" ? "student" : "teacher") as SessionRole;
+
+  const localRole: ParticipantRole = role === "teacher" ? "tutor" : "student";
+  const remoteRole: ParticipantRole = role === "teacher" ? "student" : "tutor";
 
   const [consented, setConsented] = useState(false);
   const [status, setStatus] = useState<"idle" | "connecting" | "connected" | "error">("idle");
@@ -47,7 +54,7 @@ function SessionContent() {
 
       // Fetch token
       const res = await fetch(
-        `/api/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}`
+        `/api/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=${role}`
       );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -61,7 +68,8 @@ function SessionContent() {
         setNudges((prev) => [...prev.slice(-4), nudge]);
       });
       const interruptionTracker = createInterruptionTracker({
-        onTutorInterruption: () => coachingEngine.recordTutorInterruption(),
+        onTutorInterruption: () =>
+          coachingEngine.recordTutorInterruption(),
       });
       interruptionTrackerRef.current = interruptionTracker;
       const audioPipeline = createAudioPipeline(interruptionTracker);
@@ -80,10 +88,9 @@ function SessionContent() {
           el.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
           localVideoRef.current?.appendChild(el);
 
-          // Start frame sampler for tutor
           const sampler = createFrameSampler(el, (imageData, ts) => {
-            const score = videoPipeline.processFrame("tutor", imageData, ts);
-            if (score !== null) aggregator.updateEyeContact("tutor", score);
+            const score = videoPipeline.processFrame(localRole, imageData, ts);
+            if (score !== null) aggregator.updateEyeContact(localRole, score);
           });
           sampler.start();
         },
@@ -91,21 +98,20 @@ function SessionContent() {
           el.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
           remoteVideoRef.current?.appendChild(el);
 
-          // Start frame sampler for student
           const sampler = createFrameSampler(el, (imageData, ts) => {
-            const score = videoPipeline.processFrame("student", imageData, ts);
-            if (score !== null) aggregator.updateEyeContact("student", score);
+            const score = videoPipeline.processFrame(remoteRole, imageData, ts);
+            if (score !== null) aggregator.updateEyeContact(remoteRole, score);
           });
           sampler.start();
         },
         onLocalAudioTrack: (stream) => {
-          audioPipeline.addTrack("tutor", stream, (talkTime) => {
-            aggregator.updateTalkTime("tutor", talkTime.talkTimePercent, talkTime.speaking);
+          audioPipeline.addTrack(localRole, stream, (talkTime) => {
+            aggregator.updateTalkTime(localRole, talkTime.talkTimePercent, talkTime.speaking);
           });
         },
         onRemoteAudioTrack: (stream) => {
-          audioPipeline.addTrack("student", stream, (talkTime) => {
-            aggregator.updateTalkTime("student", talkTime.talkTimePercent, talkTime.speaking);
+          audioPipeline.addTrack(remoteRole, stream, (talkTime) => {
+            aggregator.updateTalkTime(remoteRole, talkTime.talkTimePercent, talkTime.speaking);
           });
         },
         onRemoteDisconnect: () => {
@@ -124,7 +130,7 @@ function SessionContent() {
       setErrorMsg(err instanceof Error ? err.message : "Unknown error");
       setStatus("error");
     }
-  }, [roomName, identity]);
+  }, [roomName, identity, localRole, remoteRole]);
 
   async function endSession() {
     if (roomRef.current) {
@@ -165,9 +171,18 @@ function SessionContent() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800">
-        <div>
+        <div className="flex items-center gap-3">
           <span className="font-semibold text-white">SessionLens</span>
-          <span className="text-gray-400 text-sm ml-2">Room: {roomName}</span>
+          <span className="text-gray-400 text-sm">Room: {roomName}</span>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              role === "teacher"
+                ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+            }`}
+          >
+            You're the {role === "teacher" ? "Teacher" : "Student"}
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <span className={`text-xs px-2 py-1 rounded-full ${
@@ -191,8 +206,20 @@ function SessionContent() {
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4">
         {/* Video feeds */}
         <div className="flex-1 grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-xs text-gray-400 mb-1">You (tutor)</p>
+          <div
+            className={`rounded-xl overflow-hidden ${
+              role === "teacher"
+                ? "ring-2 ring-amber-500/50 ring-offset-2 ring-offset-gray-950"
+                : "ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-gray-950"
+            }`}
+          >
+            <p
+              className={`text-sm font-medium mb-2 px-1 ${
+                role === "teacher" ? "text-amber-400" : "text-emerald-400"
+              }`}
+            >
+              You — {role === "teacher" ? "Teacher" : "Student"}
+            </p>
             <div
               ref={localVideoRef}
               className="bg-gray-800 rounded-lg overflow-hidden aspect-video flex items-center justify-center"
@@ -204,14 +231,28 @@ function SessionContent() {
               )}
             </div>
           </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-1">Student</p>
+          <div
+            className={`rounded-xl overflow-hidden ${
+              role === "teacher"
+                ? "ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-gray-950"
+                : "ring-2 ring-amber-500/30 ring-offset-2 ring-offset-gray-950"
+            }`}
+          >
+            <p
+              className={`text-sm font-medium mb-2 px-1 ${
+                role === "teacher" ? "text-emerald-400" : "text-amber-400"
+              }`}
+            >
+              {remoteRole === "tutor" ? "Teacher" : "Student"}
+            </p>
             <div
               ref={remoteVideoRef}
               className="bg-gray-800 rounded-lg overflow-hidden aspect-video flex items-center justify-center"
             >
               {status === "connected" && (
-                <span className="text-gray-500 text-sm">Waiting for student...</span>
+                <span className="text-gray-500 text-sm">
+                  Waiting for {remoteRole === "tutor" ? "teacher" : "student"}…
+                </span>
               )}
             </div>
           </div>
