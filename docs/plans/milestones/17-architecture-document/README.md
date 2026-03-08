@@ -23,7 +23,7 @@ Create Architecture Document (1–2 pages). PRD: "Required" for submission.
 
 ### Automated Verification
 
-- [ ] Document exists
+- [x] Document exists
 
 ### Manual Verification
 

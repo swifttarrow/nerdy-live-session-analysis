@@ -6,9 +6,9 @@ Write architecture overview: components, tech stack, high-level flow.
 
 ## Deliverables
 
-- [ ] System components: LiveKit, MediaPipe, Silero, coaching engine, report
-- [ ] Tech stack: Vite/React, browser-first processing
-- [ ] 1–2 pages total
+- [x] System components: LiveKit, MediaPipe, Silero, coaching engine, report
+- [x] Tech stack: Vite/React, browser-first processing
+- [x] 1–2 pages total
 
 ## Notes
 

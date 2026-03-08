@@ -6,11 +6,11 @@ Document data flow: video/audio → analysis → metrics → coaching → report
 
 ## Deliverables
 
-- [ ] Data flow diagram or description
-- [ ] Video: frame sampler → MediaPipe → gaze → smoothing → metrics
-- [ ] Audio: VAD → talk-time → metrics
-- [ ] Metrics → coaching engine → nudges
-- [ ] Session end → report generation
+- [x] Data flow diagram or description
+- [x] Video: frame sampler → MediaPipe → gaze → smoothing → metrics
+- [x] Audio: VAD → talk-time → metrics
+- [x] Metrics → coaching engine → nudges
+- [x] Session end → report generation
 
 ## Notes
 
