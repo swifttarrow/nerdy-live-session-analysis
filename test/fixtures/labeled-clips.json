@@ -1,0 +1,173 @@
+{
+  "_comment": "Labeled test clip metadata for metric validation (M14). Each entry describes a synthetic scenario with known expected metric values. Tolerance: eye_contact ±0.15, talk_time ±0.1. Labels were determined by constructing synthetic VAD/gaze inputs with known ground-truth properties.",
+  "clips": [
+    {
+      "id": "clip-01",
+      "description": "High tutor eye contact, balanced talk time",
+      "durationSec": 30,
+      "setup": "Tutor maintains direct camera gaze throughout; both speak ~50% each",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.85,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.50,
+          "talk_tolerance": 0.10
+        },
+        "student": {
+          "expected_eye_contact": 0.75,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.50,
+          "talk_tolerance": 0.10
+        }
+      }
+    },
+    {
+      "id": "clip-02",
+      "description": "Low student eye contact, tutor dominant talk",
+      "durationSec": 30,
+      "setup": "Student looks away most of the time; tutor speaks 80%",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.80,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.80,
+          "talk_tolerance": 0.10
+        },
+        "student": {
+          "expected_eye_contact": 0.20,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.20,
+          "talk_tolerance": 0.10
+        }
+      }
+    },
+    {
+      "id": "clip-03",
+      "description": "Student talk dominant session",
+      "durationSec": 30,
+      "setup": "Student explains concept; speaks ~70% of the time",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.80,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.30,
+          "talk_tolerance": 0.10
+        },
+        "student": {
+          "expected_eye_contact": 0.70,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.70,
+          "talk_tolerance": 0.10
+        }
+      }
+    },
+    {
+      "id": "clip-04",
+      "description": "Both participants silent (thinking pause)",
+      "durationSec": 10,
+      "setup": "No speech detected for 10 seconds; gaze maintained",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.75,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.00,
+          "talk_tolerance": 0.05
+        },
+        "student": {
+          "expected_eye_contact": 0.65,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.00,
+          "talk_tolerance": 0.05
+        }
+      }
+    },
+    {
+      "id": "clip-05",
+      "description": "Maximum eye contact, equal talk time",
+      "durationSec": 30,
+      "setup": "Both look directly at camera; equal speaking time",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.95,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.50,
+          "talk_tolerance": 0.10
+        },
+        "student": {
+          "expected_eye_contact": 0.90,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.50,
+          "talk_tolerance": 0.10
+        }
+      }
+    },
+    {
+      "id": "clip-06",
+      "description": "Student attention drift scenario",
+      "durationSec": 30,
+      "setup": "Student looks away for >5s stretches repeatedly; tutor speaks most",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.80,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.75,
+          "talk_tolerance": 0.10
+        },
+        "student": {
+          "expected_eye_contact": 0.25,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.25,
+          "talk_tolerance": 0.10
+        }
+      },
+      "expected_drift": {
+        "student_drifting": true,
+        "drift_events_min": 1
+      }
+    },
+    {
+      "id": "clip-07",
+      "description": "High energy both participants",
+      "durationSec": 30,
+      "setup": "Animated expressions, loud speech; high engagement",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.85,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.50,
+          "talk_tolerance": 0.10,
+          "expected_energy_level_min": 0.6
+        },
+        "student": {
+          "expected_eye_contact": 0.80,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.50,
+          "talk_tolerance": 0.10,
+          "expected_energy_level_min": 0.6
+        }
+      }
+    },
+    {
+      "id": "clip-08",
+      "description": "Low energy, flat session",
+      "durationSec": 30,
+      "setup": "Monotone speech, minimal facial animation; both parties fatigued",
+      "labels": {
+        "tutor": {
+          "expected_eye_contact": 0.70,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.55,
+          "talk_tolerance": 0.10,
+          "expected_energy_level_max": 0.4
+        },
+        "student": {
+          "expected_eye_contact": 0.60,
+          "tolerance": 0.15,
+          "expected_talk_time": 0.45,
+          "talk_tolerance": 0.10,
+          "expected_energy_level_max": 0.4
+        }
+      }
+    }
+  ]
+}

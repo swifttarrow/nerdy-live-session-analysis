@@ -23,9 +23,9 @@ Create labeled test clips for metric validation (gaze, talk-time). 5–10 clips 
 
 ### Automated Verification
 
-- [ ] Pipeline runs on labeled clips
-- [ ] Output within tolerance of labels (if automated)
-- [ ] Or: manual validation checklist
+- [x] Pipeline runs on labeled clips
+- [x] Output within tolerance of labels (if automated)
+- [x] Or: manual validation checklist
 
 ### Manual Verification
 
