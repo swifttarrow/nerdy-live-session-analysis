@@ -123,10 +123,10 @@ From Cursor's terminal:
 
 ```
 claude
-/implement_plan thoughts/plans/[file].md
+/implement [milestone-id]
 ```
 
-Have the plan file path ready. Claude Code will read the plan and execute phase-by-phase.
+Example: `/implement 01-project-setup-webrtc`. Claude Code reads from `thoughts/plans/milestones/` and executes all tasks in the milestone.
 
 ### Output
 
@@ -195,7 +195,7 @@ In a new session: "Read thoughts/handoffs/[file].md and continue from the Action
 | Research | Cursor | `@agent/prompts/research.md` + "Research: [question]" |
 | Plan | Cursor | `@agent/prompts/plan.md` + research + "Create plan for [task]" |
 | **Milestones** | Cursor | `@agent/prompts/milestones-from-plan.md` + plan + "Generate milestones and tasks" |
-| Implement | **Claude Code** | `claude` → `/implement_plan thoughts/plans/[file].md` |
+| Implement | **Claude Code** | `claude` → `/implement [milestone]` |
 | Validate | Cursor | `@agent/prompts/validate.md` + plan + "Validate..." |
 | Handoff | Cursor | `@agent/prompts/handoff.md` + "Create handoff" |
 
