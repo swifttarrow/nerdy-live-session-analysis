@@ -1,4 +1,6 @@
 import type { SessionMetrics } from "@/lib/session/metrics-schema";
+import type { InterruptionStats } from "@/lib/audio/interruptions";
+import type { InterruptionClassification } from "@/lib/audio/interruption-classification";
 
 export interface SessionSummary {
   sessionId: string;
@@ -10,6 +12,7 @@ export interface SessionSummary {
   studentTalkRatio: number; // primary engagement-quality signal (ONE_PAGER)
   engagementScore: number; // composite 0–1
   sampleCount: number;
+  interruptions?: InterruptionStats & { classification: InterruptionClassification };
 }
 
 /**
@@ -17,7 +20,8 @@ export interface SessionSummary {
  */
 export function aggregateSessionSummary(
   sessionId: string,
-  metricsHistory: SessionMetrics[]
+  metricsHistory: SessionMetrics[],
+  interruptionData?: (InterruptionStats & { classification: InterruptionClassification }) | null
 ): SessionSummary {
   const n = metricsHistory.length;
 
@@ -75,5 +79,6 @@ export function aggregateSessionSummary(
     studentTalkRatio,
     engagementScore,
     sampleCount: n,
+    ...(interruptionData ? { interruptions: interruptionData } : {}),
   };
 }

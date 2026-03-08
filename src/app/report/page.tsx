@@ -136,6 +136,38 @@ export default function ReportPage() {
           ))}
         </div>
 
+        {/* Interruptions */}
+        {summary.interruptions && (
+          <div className="bg-gray-900 rounded-2xl p-6 mb-4 space-y-3">
+            <h2 className="text-lg font-semibold">Interruptions</h2>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-green-950/40 rounded-xl p-3">
+                <p className="text-2xl font-bold text-green-400">
+                  {summary.interruptions.classification.productive}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Productive</p>
+                <p className="text-xs text-gray-500">student → tutor</p>
+              </div>
+              <div className="bg-gray-800/60 rounded-xl p-3">
+                <p className="text-2xl font-bold text-gray-300">
+                  {summary.interruptions.classification.neutral}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Neutral</p>
+              </div>
+              <div className="bg-red-950/40 rounded-xl p-3">
+                <p className="text-2xl font-bold text-red-400">
+                  {summary.interruptions.classification.unproductive}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Unproductive</p>
+                <p className="text-xs text-gray-500">tutor → student</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 text-center">
+              Total overlaps: {summary.interruptions.totalOverlaps}
+            </p>
+          </div>
+        )}
+
         {/* Actions */}
         <button
           onClick={() => router.push("/")}
