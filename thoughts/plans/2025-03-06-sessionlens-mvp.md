@@ -1,8 +1,10 @@
 # SessionLens MVP Implementation Plan
 
+**Engagement model:** See [ONE_PAGER.md](../../ONE_PAGER.md) — basic metrics (eye contact, speaking time) describe what happened; engagement-quality signals (student talk ratio, response latency) infer whether learning is likely.
+
 ## Overview
 
-Build SessionLens—a browser-first, real-time engagement intelligence system for **live tutor–student tutoring sessions**. The system must analyze video interactions between both participants. The MVP delivers a video call (WebRTC/LiveKit), video/audio analysis, eye contact and speaking-time metrics, non-intrusive coaching nudges, and a post-session summary within the 24-hour gate requirements.
+Build SessionLens—a browser-first, real-time engagement intelligence system for **live tutor–student tutoring sessions**. The system must analyze video interactions between both participants. The MVP delivers a video call (WebRTC/LiveKit), video/audio analysis, eye contact and speaking-time metrics (student talk ratio as primary engagement-quality signal), non-intrusive coaching nudges, and a post-session summary within the 24-hour gate requirements.
 
 **Architecture:** WebRTC/LiveKit for the video call (tutor + student); browser-side processing (MediaPipe Face Landmarker, Silero VAD) on both streams; backend for session CRUD, LiveKit tokens, and post-session LLM.
 
@@ -192,7 +194,7 @@ Integrate Silero VAD for voice activity; compute talk-time (channel-based if ste
 
 ### Overview
 
-Aggregate video + audio outputs at 1 Hz; emit JSON metrics payload; implement rule-based coaching engine with ≥2 triggers (e.g. "student silent >3 min", "low eye contact"); state machine with cooldowns.
+Aggregate video + audio outputs at 1 Hz; emit JSON metrics payload; implement rule-based coaching engine with ≥2 triggers (e.g. "student silent >45 s", "tutor talk >85%", "low eye contact"); state machine with cooldowns. Aligned with ONE_PAGER.
 
 ### Changes Required
 
@@ -200,7 +202,7 @@ Aggregate video + audio outputs at 1 Hz; emit JSON metrics payload; implement ru
 - `src/lib/metrics/aggregator.ts` — combine eye contact + talk-time; emit at 1 Hz
 - `src/lib/coaching/engine.ts` — rule-based triggers, state machine, cooldowns
 - `src/lib/coaching/triggers.ts` — trigger definitions (student_silent, low_eye_contact, tutor_talk_dominant)
-- `src/lib/coaching/config.ts` — thresholds (in-memory for MVP): `student_silent_min: 3`, `eye_contact_threshold: 0.5`, etc.
+- `src/lib/coaching/config.ts` — thresholds (in-memory for MVP): `student_silent_sec: 45`, `tutor_talk_threshold: 0.85`, `eye_contact_threshold: 0.5`, etc. (ONE_PAGER)
 - `src/lib/session/metrics-schema.ts` — Zod schema for metrics payload (optional but recommended)
 
 **Metrics payload (from PRD):**
@@ -215,10 +217,11 @@ Aggregate video + audio outputs at 1 Hz; emit JSON metrics payload; implement ru
 }
 ```
 
-**Triggers (≥2 for MVP):**
-1. Student silent >3 min → "Check for understanding"
-2. Low eye contact (<0.5 for 30s) → "Student may be distracted" or "Try making more eye contact"
-3. (Optional) Tutor talk >80% for 5 min → "Try asking a question"
+**Triggers (≥2 for MVP; ONE_PAGER-aligned):**
+1. Student silent >45 s → "Student has been silent for 45 seconds" / "Check for understanding"
+2. Tutor talk >85% → "Tutor speaking 85% of time" / "Try asking a question"
+3. Low eye contact (<0.5 for 30s) → "Student may be distracted" or "Try making more eye contact"
+4. (Optional, post-MVP) Student hesitating repeatedly → "Student hesitating repeatedly" (response latency)
 
 **Delivery:** Subtle visual (corner badge, icon pulse, toast); non-intrusive.
 
@@ -231,7 +234,7 @@ Aggregate video + audio outputs at 1 Hz; emit JSON metrics payload; implement ru
 
 #### Manual Verification
 - [ ] Metrics update at 1 Hz in UI
-- [ ] Nudge fires when student silent 3+ min (or simulated)
+- [ ] Nudge fires when student silent 45+ s (or simulated)
 - [ ] Nudge fires when eye contact low for 30s
 - [ ] Nudges are subtle (no modal)
 - [ ] Cooldown prevents spam
@@ -250,12 +253,12 @@ Generate post-session summary with key metrics and ≥1 improvement recommendati
 
 **Files:**
 - `src/lib/post-session/summary.ts` — aggregate session metrics, generate summary
-- `src/lib/post-session/recommendations.ts` — template-based recommendations (e.g. "Increase student talk time" when tutor >80%)
+- `src/lib/post-session/recommendations.ts` — template-based recommendations (e.g. "Increase student talk time" when tutor >85%)
 - `src/lib/post-session/report.ts` — combine summary + recommendations; output JSON or structured object
 - `src/pages/report.tsx` or similar — display report
 
-**Template structure:**
-- Key metrics: eye contact avg, talk-time ratio, session duration
+**Template structure (ONE_PAGER post-session analytics):**
+- Key metrics: engagement score, eye contact avg, tutor talk balance (student talk ratio), moments of confusion/frustration, persistence patterns, session duration
 - At least one recommendation: e.g. "Student spoke 20% of the time. Consider asking more open-ended questions to increase engagement."
 - Optional: LLM call with metrics + brief context for richer text
 
@@ -358,6 +361,7 @@ One-command setup and run; clear README; deploy to **Fly.io or LiveKit Cloud** (
 
 ## References
 
+- Engagement model: `ONE_PAGER.md`
 - Research: `thoughts/research/architecture-research.md`
 - Pre-Search: `thoughts/research/pre-search-checklist.md`
 - Video Pipeline: `thoughts/research/video-pipeline-deep-dive.md`
