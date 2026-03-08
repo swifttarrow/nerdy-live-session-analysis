@@ -1,6 +1,6 @@
 # Generate Milestones & Tasks from Plan
 
-Takes an implementation plan and generates a structured milestone/task breakdown under `thoughts/plans/milestones/`.
+Takes an implementation plan and generates a structured milestone/task breakdown under `docs/plans/milestones/`.
 
 ---
 
@@ -16,7 +16,7 @@ Takes an implementation plan and generates a structured milestone/task breakdown
 
 You will receive:
 
-1. **Plan path** — e.g. `thoughts/plans/2025-03-06-sessionlens-mvp.md`
+1. **Plan path** — e.g. `docs/plans/2025-03-06-sessionlens-mvp.md`
 2. Optional: custom milestone naming, task granularity preferences
 
 Read the plan completely before generating.
@@ -26,7 +26,7 @@ Read the plan completely before generating.
 ## Output Structure
 
 ```
-thoughts/plans/milestones/
+docs/plans/milestones/
 ├── 01-milestone-slug/
 │   ├── README.md          # Milestone overview, success criteria, dependencies
 │   └── tasks/
@@ -58,13 +58,13 @@ thoughts/plans/milestones/
 
 For each phase in the plan:
 
-- Create `thoughts/plans/milestones/NN-slug/` where:
+- Create `docs/plans/milestones/NN-slug/` where:
   - `NN` = zero-padded phase number (01, 02, …)
   - `slug` = kebab-case from phase title (e.g. `project-setup-webrtc`)
 
 ### Step 3: Write Milestone README
 
-Each `thoughts/plans/milestones/NN-slug/README.md` must include:
+Each `docs/plans/milestones/NN-slug/README.md` must include:
 
 ```markdown
 # Milestone N: [Phase Title]
@@ -100,7 +100,7 @@ Break each phase into **concrete, implementable tasks**. Each task should:
 - Have a clear deliverable (file created, test passing, etc.)
 - Be ordered so dependencies are respected
 
-**Task file format** — `thoughts/plans/milestones/NN-slug/tasks/MMM-task-slug.md`:
+**Task file format** — `docs/plans/milestones/NN-slug/tasks/MMM-task-slug.md`:
 
 ```markdown
 # Task MMM: [Short Title]
@@ -123,7 +123,7 @@ Use `MMM` = zero-padded task number (001, 002, …) within each milestone.
 
 ### Step 5: Create Master Index
 
-Create `thoughts/plans/milestones/_index.md`:
+Create `docs/plans/milestones/_index.md`:
 
 ```markdown
 # Milestones: [Plan Title]
@@ -171,7 +171,7 @@ Create `thoughts/plans/milestones/_index.md`:
 
 Attach this prompt and the plan, then:
 
-> Generate milestones and tasks from @thoughts/plans/[plan-file].md
+> Generate milestones and tasks from @docs/plans/[plan-file].md
 
 Or:
 

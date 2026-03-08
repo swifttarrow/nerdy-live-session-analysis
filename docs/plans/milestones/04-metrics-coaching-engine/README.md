@@ -23,9 +23,9 @@ Aggregate video + audio outputs at 1 Hz; emit JSON metrics payload; implement ru
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit tests: synthetic metric streams → triggers fire at expected times; cooldowns respected
-- [ ] `npm test` passes
+- [x] `npm run build` succeeds
+- [x] Unit tests: synthetic metric streams → triggers fire at expected times; cooldowns respected
+- [x] `npm test` passes
 
 ### Manual Verification
 

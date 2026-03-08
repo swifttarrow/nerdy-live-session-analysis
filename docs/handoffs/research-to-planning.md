@@ -10,8 +10,8 @@
 
 | Artifact | Location | Purpose |
 |----------|----------|---------|
-| Architecture Research | `thoughts/research/architecture-research.md` | Full 7-phase analysis: system understanding, architecture options, technical decisions, diagrams, risks, MVP architecture |
-| Pre-Search Checklist | `thoughts/research/pre-search-checklist.md` | Direct answers to PRD Appendix checklist |
+| Architecture Research | `docs/research/architecture-research.md` | Full 7-phase analysis: system understanding, architecture options, technical decisions, diagrams, risks, MVP architecture |
+| Pre-Search Checklist | `docs/research/pre-search-checklist.md` | Direct answers to PRD Appendix checklist |
 
 ---
 
@@ -34,7 +34,7 @@ Speed > Scale > Cost > Privacy
 
 ## Video Pipeline Deep Dive
 
-See `thoughts/research/video-pipeline-deep-dive.md` for:
+See `docs/research/video-pipeline-deep-dive.md` for:
 - Frame capture: `requestVideoFrameCallback` + 1–2 fps sampling
 - MediaPipe Face Landmarker config and outputs
 - Gaze derivation from iris landmarks (no direct API)

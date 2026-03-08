@@ -23,8 +23,8 @@ Integrate MediaPipe Face Landmarker; process each stream (tutor + student) separ
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: mock landmarks → gaze derivation returns expected score range
+- [x] `npm run build` succeeds
+- [x] Unit test: mock landmarks → gaze derivation returns expected score range
 - [ ] Latency: instrument pipeline; assert p95 < 500 ms (or document if exceeded)
 
 ### Manual Verification

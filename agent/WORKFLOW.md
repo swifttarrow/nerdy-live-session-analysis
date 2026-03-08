@@ -36,8 +36,8 @@ Attach `@agent/prompts/research.md`, then: "Research the codebase to answer: [yo
 
 ### Output
 
-- **Artifact**: `thoughts/research/YYYY-MM-DD-description.md`
-- **Rules applied**: `10-codebase-research.mdc` (when working in `thoughts/research/`)
+- **Artifact**: `docs/research/YYYY-MM-DD-description.md`
+- **Rules applied**: `10-codebase-research.mdc` (when working in `docs/research/`)
 
 ### Key Rules
 
@@ -63,12 +63,12 @@ Review the research doc before planning. A bad research doc → thousands of bad
 
 ### How to Run (Cursor)
 
-Attach `@agent/prompts/plan.md` and `@thoughts/research/[your-research].md`, then: "Create an implementation plan for [task]"
+Attach `@agent/prompts/plan.md` and `@docs/research/[your-research].md`, then: "Create an implementation plan for [task]"
 
 ### Output
 
-- **Artifact**: `thoughts/plans/YYYY-MM-DD-description.md`
-- **Rules applied**: `20-planning.mdc` (when working in `thoughts/plans/`)
+- **Artifact**: `docs/plans/YYYY-MM-DD-description.md`
+- **Rules applied**: `20-planning.mdc` (when working in `docs/plans/`)
 
 ### Plan Structure
 
@@ -94,11 +94,11 @@ After plan approval, when you want granular task tracking or coordination across
 
 ### How to Run (Cursor)
 
-Attach `@agent/prompts/milestones-from-plan.md` and `@thoughts/plans/[your-plan].md`, then: "Generate milestones and tasks from [plan path]"
+Attach `@agent/prompts/milestones-from-plan.md` and `@docs/plans/[your-plan].md`, then: "Generate milestones and tasks from [plan path]"
 
 ### Output
 
-- **Artifact**: `thoughts/plans/milestones/` with:
+- **Artifact**: `docs/plans/milestones/` with:
   - `_index.md` — master index
   - `NN-milestone-slug/README.md` — per-milestone overview
   - `NN-milestone-slug/tasks/MMM-task-slug.md` — individual tasks
@@ -115,7 +115,7 @@ Review task granularity; adjust if tasks are too coarse or too fine.
 
 ### Prerequisites
 
-- Approved plan in `thoughts/plans/`
+- Approved plan in `docs/plans/`
 
 ### How to Run (Claude Code)
 
@@ -126,7 +126,7 @@ claude
 /implement [milestone-id]
 ```
 
-Example: `/implement 01-project-setup-webrtc`. Claude Code reads from `thoughts/plans/milestones/` and executes all tasks in the milestone.
+Example: `/implement 01-project-setup-webrtc`. Claude Code reads from `docs/plans/milestones/` and executes all tasks in the milestone.
 
 ### Output
 
@@ -157,11 +157,11 @@ After implementation is complete (ideally after commit, before PR).
 
 ### How to Run (Cursor)
 
-Attach `@agent/prompts/validate.md` and `@thoughts/plans/[your-plan].md`, then: "Validate the implementation against thoughts/plans/[file].md"
+Attach `@agent/prompts/validate.md` and `@docs/plans/[your-plan].md`, then: "Validate the implementation against docs/plans/[file].md"
 
 ### Output
 
-- Validation report (in chat or `thoughts/handoffs/`)
+- Validation report (in chat or `docs/handoffs/`)
 - Pass/fail for automated verification
 - Manual testing checklist
 - Deviations and recommendations
@@ -180,11 +180,11 @@ When switching between Cursor and Claude Code, or to a new session:
 
 ### Output
 
-- **Artifact**: `thoughts/handoffs/YYYY-MM-DD_HH-MM-SS_description.md`
+- **Artifact**: `docs/handoffs/YYYY-MM-DD_HH-MM-SS_description.md`
 
 ### Resume
 
-In a new session: "Read thoughts/handoffs/[file].md and continue from the Action Items."
+In a new session: "Read docs/handoffs/[file].md and continue from the Action Items."
 
 ---
 
@@ -204,7 +204,7 @@ In a new session: "Read thoughts/handoffs/[file].md and continue from the Action
 ## Context Management (HumanLayer Principle)
 
 - **Target**: Keep context utilization in 40–60%
-- **Compaction**: Distill findings into `thoughts/` artifacts between phases
+- **Compaction**: Distill findings into `docs/` artifacts between phases
 - **Human leverage**: Review research and plans—highest ROI
 - **Specs as source of truth**: Plans and research guide implementation
 
@@ -214,7 +214,7 @@ In a new session: "Read thoughts/handoffs/[file].md and continue from the Action
 
 | Type | Path |
 |------|------|
-| Research | `thoughts/research/` |
-| Plans | `thoughts/plans/` |
-| Milestones & Tasks | `thoughts/plans/milestones/` |
-| Handoffs | `thoughts/handoffs/` |
+| Research | `docs/research/` |
+| Plans | `docs/plans/` |
+| Milestones & Tasks | `docs/plans/milestones/` |
+| Handoffs | `docs/handoffs/` |

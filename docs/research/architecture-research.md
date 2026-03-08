@@ -2,7 +2,7 @@
 
 **Pre-Search / Architecture Discovery for Real-Time Engagement Intelligence**
 
-*Source: PRD (thoughts/PRD.md), Requirements (thoughts/REQUIREMENTS.md)*  
+*Source: PRD (docs/PRD.md), Requirements (docs/REQUIREMENTS.md)*  
 *Scope: Full feature set (not MVP-only)*
 
 ---
@@ -431,7 +431,7 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 1. **Constraint priority:** Speed > Scale > Cost > Privacy
 2. **Architecture:** Browser-first processing + WebRTC/LiveKit for the video call
 3. **Fundamental requirement:** Live tutor–student interaction; both video feeds required; WebRTC/LiveKit is necessary
-4. **Deep dive completed:** Video pipeline → [`thoughts/research/video-pipeline-deep-dive.md`](video-pipeline-deep-dive.md)
+4. **Deep dive completed:** Video pipeline → [`docs/research/video-pipeline-deep-dive.md`](video-pipeline-deep-dive.md)
 
 ### Implications
 

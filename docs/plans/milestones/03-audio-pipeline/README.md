@@ -22,8 +22,8 @@ Integrate Silero VAD for voice activity; compute talk-time (channel-based if ste
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: synthetic VAD segments → talk-time % in expected range
+- [x] `npm run build` succeeds
+- [x] Unit test: synthetic VAD segments → talk-time % in expected range
 
 ### Manual Verification
 

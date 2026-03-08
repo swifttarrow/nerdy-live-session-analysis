@@ -32,7 +32,7 @@ Propose phase structure and get feedback before writing details.
 
 ### Step 4: Write the Plan
 
-Save to `thoughts/plans/YYYY-MM-DD-description.md`:
+Save to `docs/plans/YYYY-MM-DD-description.md`:
 
 ```markdown
 # [Feature] Implementation Plan
@@ -74,7 +74,7 @@ Save to `thoughts/plans/YYYY-MM-DD-description.md`:
 [Same structure...]
 
 ## References
-- Research: `thoughts/research/[relevant].md`
+- Research: `docs/research/[relevant].md`
 - Ticket: [reference]
 ```
 

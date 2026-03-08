@@ -27,9 +27,9 @@ Establish project structure, build tooling, and WebRTC/LiveKit video call so tut
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
+- [x] `npm run build` succeeds
 - [ ] `npm run lint` passes (if configured)
-- [ ] No TypeScript errors
+- [x] No TypeScript errors
 
 ### Manual Verification
 

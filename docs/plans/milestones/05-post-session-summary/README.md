@@ -21,8 +21,8 @@ Generate post-session summary with key metrics and ≥1 improvement recommendati
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: mock session data → report contains expected fields and ≥1 recommendation
+- [x] `npm run build` succeeds
+- [x] Unit test: mock session data → report contains expected fields and ≥1 recommendation
 
 ### Manual Verification
 

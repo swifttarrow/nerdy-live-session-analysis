@@ -6,7 +6,7 @@ Write a handoff document to transfer work to another agent in a new session. Be 
 
 ### 1. Filepath & Metadata
 
-Create under `thoughts/handoffs/YYYY-MM-DD_HH-MM-SS_description.md`:
+Create under `docs/handoffs/YYYY-MM-DD_HH-MM-SS_description.md`:
 - YYYY-MM-DD: today's date
 - HH-MM-SS: current time (24h, e.g. 13-00-00)
 - description: brief kebab-case description
@@ -52,7 +52,7 @@ type: handoff
 ### 3. Response to User
 
 ```
-Handoff created at: `thoughts/handoffs/YYYY-MM-DD_HH-MM-SS_description.md`
+Handoff created at: `docs/handoffs/YYYY-MM-DD_HH-MM-SS_description.md`
 
 Resume in a new session by reading this file and continuing from the Action Items.
 ```

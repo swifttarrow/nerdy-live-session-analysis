@@ -1,6 +1,6 @@
 # Implement Plan
 
-Implement an approved technical plan from `thoughts/plans/`. Execute phase-by-phase with verification.
+Implement an approved technical plan from `docs/plans/`. Execute phase-by-phase with verification.
 
 ## Getting Started
 

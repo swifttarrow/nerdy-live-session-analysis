@@ -362,9 +362,9 @@ One-command setup and run; clear README; deploy to **Fly.io or LiveKit Cloud** (
 ## References
 
 - Engagement model: `ONE_PAGER.md`
-- Research: `thoughts/research/architecture-research.md`
-- Pre-Search: `thoughts/research/pre-search-checklist.md`
-- Video Pipeline: `thoughts/research/video-pipeline-deep-dive.md`
-- Handoff: `thoughts/handoffs/research-to-planning.md`
-- PRD: `thoughts/PRD.md`
-- Requirements: `thoughts/REQUIREMENTS.md`
+- Research: `docs/research/architecture-research.md`
+- Pre-Search: `docs/research/pre-search-checklist.md`
+- Video Pipeline: `docs/research/video-pipeline-deep-dive.md`
+- Handoff: `docs/handoffs/research-to-planning.md`
+- PRD: `docs/PRD.md`
+- Requirements: `docs/REQUIREMENTS.md`
