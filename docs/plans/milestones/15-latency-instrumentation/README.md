@@ -22,9 +22,9 @@ Instrument pipeline for latency; assert per-stage budget; E2E test with mock clo
 
 ### Automated Verification
 
-- [ ] Latency instrumentation in place
-- [ ] E2E test with mock clock passes
-- [ ] Per-stage budget asserted or documented
+- [x] Latency instrumentation in place
+- [x] E2E test with mock clock passes
+- [x] Per-stage budget asserted or documented
 
 ### Manual Verification
 
