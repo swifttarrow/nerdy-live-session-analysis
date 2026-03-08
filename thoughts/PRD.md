@@ -2,6 +2,8 @@
 
 *Building real-time engagement intelligence for live tutoring with computer vision and coaching systems*
 
+**Engagement model:** See [ONE_PAGER.md](../ONE_PAGER.md) for the conceptual foundation—four engagement dimensions, six measurable signals, and the distinction between basic metrics and engagement-quality signals.
+
 ---
 
 ## Before You Start: Pre-Search (1–2 hours)
@@ -12,9 +14,11 @@ Complete the Pre-Search appendix before writing code. Pre-Search output is part 
 
 ## Background
 
-Live tutoring sessions are the core value proposition of platforms like Varsity Tutors, Wyzant, and Khan Academy's tutoring programs. Yet tutors rarely get real-time feedback on teaching effectiveness. Engagement metrics—eye contact, speaking time balance, and interaction patterns—strongly predict session quality but remain invisible during the session.
+Live tutoring sessions are the core value proposition of platforms like Varsity Tutors, Wyzant, and Khan Academy's tutoring programs. Yet tutors rarely get real-time feedback on teaching effectiveness. Education research shows that **engagement is the strongest predictor of learning outcomes**, and engagement spans four dimensions: cognitive, behavioral, agentic, and emotional.
 
-You must build a live, AI-powered system that analyzes active video calls, measures engagement metrics, and delivers real-time suggestions or flags to help tutors improve session quality. The core technical challenge is low-latency video/audio processing combined with accurate metric extraction and non-intrusive coaching.
+**Basic interaction metrics** (eye contact, speaking time, interruptions, energy, attention) describe *what happened* in the session. **Engagement-quality signals** (response latency, explanation length, student talk ratio, number of attempts, question asking, tone/sentiment) infer *whether learning is likely happening*—they connect raw behavior to factors that predict outcomes. The engagement-quality signals matter more because they give tutors actionable insight into learning, not just session activity.
+
+You must build a live, AI-powered system that analyzes active video calls, measures these metrics, and delivers real-time suggestions or flags to help tutors improve session quality. The core technical challenge is low-latency video/audio processing combined with accurate metric extraction and non-intrusive coaching.
 
 ---
 
@@ -69,13 +73,16 @@ Hard gate. All items required to pass:
 
 ### Feature: Engagement Metrics Engine
 
-| Feature              | Requirements                                                                 |
-|----------------------|-------------------------------------------------------------------------------|
-| Eye contact          | Percentage of time participants look at camera/screen; target accuracy ≥85%   |
-| Speaking time         | Balance between tutor and student talk time; target accuracy ≥95%             |
-| Interruptions        | Detection and counting of speaking overlaps                                   |
-| Energy level         | Voice tone and facial expression analysis (optional for MVP)                  |
-| Attention drift      | Detection of distraction or disengagement (optional for MVP)                  |
+*Basic metrics (what happened) and engagement-quality signals (whether learning is likely). See ONE_PAGER.md.*
+
+| Feature              | Category   | Requirements                                                                 |
+|----------------------|------------|-------------------------------------------------------------------------------|
+| Eye contact          | Basic      | Percentage of time participants look at camera/screen; target accuracy ≥85%   |
+| Speaking time / Student talk ratio | Behavioral | Balance between tutor and student talk time; target accuracy ≥95%; primary engagement-quality signal |
+| Interruptions        | Basic      | Detection and counting of speaking overlaps                                   |
+| Response latency     | Cognitive  | Time between tutor stops speaking and student starts; hesitation vs. confidence (optional for MVP) |
+| Energy / Tone        | Emotional  | Voice tone, prosody, facial expression (optional for MVP)                     |
+| Attention drift      | Basic      | Detection of distraction or disengagement (optional for MVP)                 |
 
 ### Feature: Coaching System
 
@@ -83,8 +90,8 @@ Hard gate. All items required to pass:
 |----------------------|-------------------------------------------------------------------------------|
 | Nudge triggers       | Contextually appropriate timing; configurable sensitivity                    |
 | Delivery             | Subtle visual indicators; non-disruptive to session flow                     |
-| Examples             | "Student hasn't spoken in 5 minutes"; "Try making more eye contact"          |
-| Post-session         | Summary, trend analysis, flagged moments, personalized recommendations       |
+| Examples             | "Student has been silent for 45 seconds"; "Tutor speaking 85% of time"; "Student hesitating repeatedly" |
+| Post-session         | Engagement score, moments of confusion/frustration, tutor talk balance, persistence patterns; personalized recommendations (ONE_PAGER) |
 
 ### Testing Scenarios
 
@@ -159,13 +166,16 @@ We will test:
 
 ### Coaching Nudge Triggers (Implement at least 3)
 
-| Trigger                 | Message                     | Timing      |
-|-------------------------|-----------------------------|-------------|
-| Student silent >3 min   | "Check for understanding"   | After 3 min |
-| Low eye contact         | "Student may be distracted" | After 30 s  |
-| Tutor talk >80%         | "Try asking a question"     | After 5 min |
-| Energy drop             | "Consider a short break"     | After drop  |
-| Interruptions spike     | "Give more wait time"       | After 3+    |
+*Aligned with SessionLens engagement model. See ONE_PAGER.md for rationale.*
+
+| Trigger                      | Message                         | Timing       |
+|------------------------------|---------------------------------|--------------|
+| Student silent >45 s         | "Student has been silent for 45 seconds" | After 45 s   |
+| Tutor talk >85%              | "Tutor speaking 85% of time" / "Try asking a question" | After threshold |
+| Student hesitating repeatedly| "Student hesitating repeatedly" / "Check for understanding" | When detected |
+| Low eye contact              | "Student may be distracted"      | After 30 s   |
+| Energy drop / tone shift     | "Consider a short break"         | After drop   |
+| Interruptions spike          | "Give more wait time"           | After 3+     |
 
 ### Evaluation Criteria
 
