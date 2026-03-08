@@ -9,6 +9,12 @@ const TEST_CONFIG: CoachingConfig = {
   eyeContactThreshold: 0.5,
   eyeContactDurationSec: 3,   // 3s for test speed
   cooldownSec: 60,
+  // M10
+  interruptionSpikeThreshold: 3,
+  interruptionSpikeWindowMs: 120_000,
+  hesitationThresholdMs: 5_000,
+  hesitationCountThreshold: 3,
+  hesitationWindowMs: 120_000,
 };
 
 function makeMetrics(overrides: {
@@ -116,6 +122,88 @@ describe("createCoachingEngine", () => {
       for (let i = 0; i < 20; i++) e2.evaluate(m);
       const count = nudges.filter((n) => n.type === "tutor_talk_dominant").length;
       expect(count).toBe(1); // fired exactly once due to cooldown
+    });
+  });
+
+  describe("interruptions_spike trigger", () => {
+    it("fires after recordTutorInterruption is called threshold times", () => {
+      const m = makeMetrics();
+      // Record enough interruptions to hit threshold (3 in TEST_CONFIG)
+      for (let i = 0; i < 3; i++) {
+        engine.recordTutorInterruption();
+      }
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "interruptions_spike")).toBe(true);
+    });
+
+    it("does not fire below interruption threshold", () => {
+      const m = makeMetrics();
+      engine.recordTutorInterruption();
+      engine.recordTutorInterruption();
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "interruptions_spike")).toBe(false);
+    });
+
+    it("respects cooldown after firing", () => {
+      const m = makeMetrics();
+      for (let i = 0; i < 3; i++) engine.recordTutorInterruption();
+      engine.evaluate(m);
+      // Record more interruptions — should not fire again due to cooldown
+      for (let i = 0; i < 3; i++) engine.recordTutorInterruption();
+      engine.evaluate(m);
+      const count = nudges.filter((n) => n.type === "interruptions_spike").length;
+      expect(count).toBe(1);
+    });
+  });
+
+  describe("student_hesitating trigger", () => {
+    it("fires after student hesitates multiple times within window", () => {
+      // Simulate: tutor speaks then stops, student eventually starts (long latency)
+      const tutorSpeaking = makeMetrics({ studentSpeaking: false });
+      const tutorStopped = makeMetrics({ studentSpeaking: false });
+      // Override tutor speaking state
+      tutorSpeaking.metrics.tutor.current_speaking = true;
+      tutorStopped.metrics.tutor.current_speaking = false;
+
+      const hesitationConfig: CoachingConfig = {
+        ...TEST_CONFIG,
+        hesitationThresholdMs: 0, // treat any latency as hesitation for test speed
+        hesitationCountThreshold: 3,
+      };
+      const hesEngine = createCoachingEngine((n) => nudges.push(n), hesitationConfig);
+
+      // Simulate 3 hesitations: tutor stops → student speaks after a delay
+      for (let round = 0; round < 3; round++) {
+        // tutor speaking
+        const tSpeaking = makeMetrics({ studentSpeaking: false });
+        tSpeaking.metrics.tutor.current_speaking = true;
+        hesEngine.evaluate(tSpeaking);
+
+        // tutor stops (trigger tutorStoppedAtMs)
+        const tStopped = makeMetrics({ studentSpeaking: false });
+        tStopped.metrics.tutor.current_speaking = false;
+        hesEngine.evaluate(tStopped);
+
+        // student starts (latency ≥ 0 ms qualifies)
+        const sStarts = makeMetrics({ studentSpeaking: true });
+        sStarts.metrics.tutor.current_speaking = false;
+        hesEngine.evaluate(sStarts);
+      }
+
+      expect(nudges.some((n) => n.type === "student_hesitating")).toBe(true);
+    });
+
+    it("does not fire when student responds quickly", () => {
+      // With high threshold, normal responses won't count
+      const quickConfig: CoachingConfig = {
+        ...TEST_CONFIG,
+        hesitationThresholdMs: 60_000, // 60s — impossible in test
+        hesitationCountThreshold: 3,
+      };
+      const quickEngine = createCoachingEngine((n) => nudges.push(n), quickConfig);
+      const m = makeMetrics({ studentSpeaking: true });
+      for (let i = 0; i < 20; i++) quickEngine.evaluate(m);
+      expect(nudges.some((n) => n.type === "student_hesitating")).toBe(false);
     });
   });
 

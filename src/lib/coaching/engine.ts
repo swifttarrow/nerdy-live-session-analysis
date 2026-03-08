@@ -17,6 +17,8 @@ export interface NudgeEvent {
 
 export interface CoachingEngine {
   evaluate(metrics: SessionMetrics): void;
+  /** Record a tutor→student interruption for the spike trigger (M10) */
+  recordTutorInterruption(): void;
 }
 
 /**
@@ -57,7 +59,7 @@ export function createCoachingEngine(
       const now = Date.now();
 
       // Update accumulated state (called at 1 Hz)
-      triggerState = updateTriggerState(triggerState, metrics, config);
+      triggerState = updateTriggerState(triggerState, metrics, config, now);
 
       for (const trigger of TRIGGERS) {
         if (inCooldown(trigger.type, now)) continue;
@@ -65,6 +67,16 @@ export function createCoachingEngine(
           fire(trigger, now);
         }
       }
+    },
+
+    recordTutorInterruption() {
+      triggerState = {
+        ...triggerState,
+        recentTutorInterruptionTimes: [
+          ...triggerState.recentTutorInterruptionTimes,
+          Date.now(),
+        ],
+      };
     },
   };
 }

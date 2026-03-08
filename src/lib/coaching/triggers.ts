@@ -4,7 +4,9 @@ import type { CoachingConfig } from "./config";
 export type TriggerType =
   | "student_silent"
   | "tutor_talk_dominant"
-  | "low_eye_contact";
+  | "low_eye_contact"
+  | "interruptions_spike"   // M10: tutor→student interruptions spike
+  | "student_hesitating";   // M10: student slow to respond repeatedly
 
 export interface Trigger {
   type: TriggerType;
@@ -22,19 +24,34 @@ export interface Trigger {
 }
 
 /**
- * Per-trigger accumulated state (durations, counters).
+ * Per-trigger accumulated state (durations, counters, timestamps).
  */
 export interface TriggerState {
   /** How many consecutive seconds the student has been silent */
   studentSilentSec: number;
   /** How many consecutive seconds eye contact has been below threshold */
   lowEyeContactSec: number;
+  // M10: response latency / hesitation tracking
+  prevTutorSpeaking: boolean;
+  prevStudentSpeaking: boolean;
+  /** Timestamp (ms) when tutor last stopped speaking */
+  tutorStoppedAtMs: number | null;
+  /** Timestamps (ms) of recent long hesitations */
+  recentHesitationTimes: number[];
+  // M10: interruption spike tracking
+  /** Timestamps (ms) of recent tutor→student interruptions */
+  recentTutorInterruptionTimes: number[];
 }
 
 export function createInitialTriggerState(): TriggerState {
   return {
     studentSilentSec: 0,
     lowEyeContactSec: 0,
+    prevTutorSpeaking: false,
+    prevStudentSpeaking: false,
+    tutorStoppedAtMs: null,
+    recentHesitationTimes: [],
+    recentTutorInterruptionTimes: [],
   };
 }
 
@@ -45,19 +62,59 @@ export function createInitialTriggerState(): TriggerState {
 export function updateTriggerState(
   state: TriggerState,
   metrics: SessionMetrics,
-  config: CoachingConfig
+  config: CoachingConfig,
+  nowMs: number = Date.now()
 ): TriggerState {
   const student = metrics.metrics.student;
   const tutor = metrics.metrics.tutor;
 
+  // --- Student silent counter ---
+  const studentSilentSec = student.current_speaking
+    ? 0
+    : state.studentSilentSec + 1;
+
+  // --- Low eye contact counter ---
+  const lowEyeContactSec =
+    tutor.eye_contact_score < config.eyeContactThreshold
+      ? state.lowEyeContactSec + 1
+      : 0;
+
+  // --- Response latency / hesitation tracking ---
+  let { tutorStoppedAtMs, recentHesitationTimes } = state;
+
+  const tutorJustStopped = state.prevTutorSpeaking && !tutor.current_speaking;
+  const studentJustStarted = !state.prevStudentSpeaking && student.current_speaking;
+
+  if (tutorJustStopped) {
+    tutorStoppedAtMs = nowMs;
+  }
+
+  if (studentJustStarted && tutorStoppedAtMs !== null) {
+    const latencyMs = nowMs - tutorStoppedAtMs;
+    if (latencyMs >= config.hesitationThresholdMs) {
+      recentHesitationTimes = [...recentHesitationTimes, nowMs];
+    }
+    tutorStoppedAtMs = null;
+  }
+
+  // Evict hesitations outside the window
+  recentHesitationTimes = recentHesitationTimes.filter(
+    (t) => nowMs - t <= config.hesitationWindowMs
+  );
+
+  // --- Interruption spike: evict old events ---
+  const recentTutorInterruptionTimes = state.recentTutorInterruptionTimes.filter(
+    (t) => nowMs - t <= config.interruptionSpikeWindowMs
+  );
+
   return {
-    studentSilentSec: student.current_speaking
-      ? 0
-      : state.studentSilentSec + 1,
-    lowEyeContactSec:
-      tutor.eye_contact_score < config.eyeContactThreshold
-        ? state.lowEyeContactSec + 1
-        : 0,
+    studentSilentSec,
+    lowEyeContactSec,
+    prevTutorSpeaking: tutor.current_speaking,
+    prevStudentSpeaking: student.current_speaking,
+    tutorStoppedAtMs,
+    recentHesitationTimes,
+    recentTutorInterruptionTimes,
   };
 }
 
@@ -69,7 +126,7 @@ export const TRIGGERS: Trigger[] = [
     type: "student_silent",
     headline: "Student has been silent",
     suggestion: "Try asking a comprehension check question",
-    evaluate(metrics, state, config) {
+    evaluate(_metrics, state, config) {
       return state.studentSilentSec >= config.studentSilentSec;
     },
   },
@@ -85,8 +142,27 @@ export const TRIGGERS: Trigger[] = [
     type: "low_eye_contact",
     headline: "Low eye contact detected",
     suggestion: "Engage the student to regain their attention",
-    evaluate(metrics, state, config) {
+    evaluate(_metrics, state, config) {
       return state.lowEyeContactSec >= config.eyeContactDurationSec;
+    },
+  },
+  {
+    type: "interruptions_spike",
+    headline: "Tutor interrupting frequently",
+    suggestion: "Consider letting the student finish their thought",
+    evaluate(_metrics, state, config) {
+      return (
+        state.recentTutorInterruptionTimes.length >=
+        config.interruptionSpikeThreshold
+      );
+    },
+  },
+  {
+    type: "student_hesitating",
+    headline: "Student hesitating repeatedly",
+    suggestion: "Consider giving more think time or rephrasing the question",
+    evaluate(_metrics, state, config) {
+      return state.recentHesitationTimes.length >= config.hesitationCountThreshold;
     },
   },
 ];
