@@ -1,8 +1,8 @@
 # SessionLens Post-MVP Plan
 
 **Builds on:** [2025-03-06-sessionlens-mvp.md](./2025-03-06-sessionlens-mvp.md)  
-**Source:** [docs/PRD.md](../PRD.md)  
-**Engagement model:** [ONE_PAGER.md](../../ONE_PAGER.md) — engagement-quality signals (response latency, student talk ratio, etc.) matter more than basic metrics for actionable learning insight.
+**Source:** [docs/prd.md](../prd.md)  
+**Engagement model:** [one-pager.md](../../one-pager.md) — engagement-quality signals (response latency, student talk ratio, etc.) matter more than basic metrics for actionable learning insight.
 
 ---
 

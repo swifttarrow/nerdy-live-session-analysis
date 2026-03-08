@@ -1,6 +1,6 @@
 # SessionLens MVP Implementation Plan
 
-**Engagement model:** See [ONE_PAGER.md](../../ONE_PAGER.md) — basic metrics (eye contact, speaking time) describe what happened; engagement-quality signals (student talk ratio, response latency) infer whether learning is likely.
+**Engagement model:** See [one-pager.md](../../one-pager.md) — basic metrics (eye contact, speaking time) describe what happened; engagement-quality signals (student talk ratio, response latency) infer whether learning is likely.
 
 ## Overview
 
@@ -361,10 +361,10 @@ One-command setup and run; clear README; deploy to **Fly.io or LiveKit Cloud** (
 
 ## References
 
-- Engagement model: `ONE_PAGER.md`
+- Engagement model: `one-pager.md`
 - Research: `docs/research/architecture-research.md`
 - Pre-Search: `docs/research/pre-search-checklist.md`
 - Video Pipeline: `docs/research/video-pipeline-deep-dive.md`
 - Handoff: `docs/handoffs/research-to-planning.md`
-- PRD: `docs/PRD.md`
-- Requirements: `docs/REQUIREMENTS.md`
+- PRD: `docs/prd.md`
+- Requirements: `docs/requirements.md`
