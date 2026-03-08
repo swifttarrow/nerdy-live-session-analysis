@@ -43,7 +43,7 @@ Without WebRTC/LiveKit/SFU, we cannot get both feeds into one place for analysis
 | 2 | **Eye contact accuracy ≥85%** | Webcam quality, lighting, head pose, camera angle vary; MediaPipe/gaze models trained on different conditions; calibration for “looking at camera” is non-trivial. |
 | 3 | **Speaker diarization (tutor vs student)** | Two-speaker diarization is easier than N-speaker but still needs robust VAD + labeling; local (Vosk/Whisper) vs cloud latency/cost; overlap detection adds complexity. |
 | 4 | **Talk-time accuracy ≥95%** | Depends on diarization quality; VAD false positives/negatives; segment boundaries; real-time vs batch processing tradeoffs. |
-| 5 | **Coaching nudge timing** | Avoid fatigue; configurable thresholds; contextual triggers (e.g., “student silent 3 min” vs “low eye contact 30 s”); non-disruptive delivery. |
+| 5 | **Coaching nudge timing** | Avoid fatigue; configurable thresholds; contextual triggers (e.g., “student silent 45 s” vs “low eye contact 30 s”); non-disruptive delivery. |
 | 6 | **Graceful degradation** | Poor video (low res, dropped frames), poor audio, connectivity issues; system must not crash and should degrade metrics gracefully. |
 | 7 | **Deployment & one-command run** | WebRTC needs UDP/TURN; Railway blocks inbound UDP; Fly.io more flexible; Docker/Compose for evaluators; persistent processes for stateful connections. |
 | 8 | **Privacy & consent** | What is captured, retained, who can access; retention policies; compliance (e.g., FERPA, COPPA for minors). |
@@ -255,7 +255,7 @@ User → Browser
 
 | Option | Description | Flexibility | Latency | Fatigue Risk |
 |--------|-------------|-------------|---------|--------------|
-| **A: Rule-based thresholds** | Configurable thresholds (e.g., silent >3 min, eye contact <0.5) | High | Minimal | Medium (tuning) |
+| **A: Rule-based thresholds** | Configurable thresholds (e.g., silent >45 s, eye contact <0.5) | High | Minimal | Medium (tuning) |
 | **B: Time-windowed state machine** | States per trigger type; cooldowns | High | Minimal | Low |
 | **C: LLM-based (real-time)** | LLM decides when to nudge | Medium | High | Low (context-aware) |
 
@@ -401,7 +401,7 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 2. **Browser video pipeline:** Per-stream frame extraction (1–2 fps) → MediaPipe Face Landmarker → gaze score (head pose or iris direction).
 3. **Metrics aggregator:** 1 Hz; output JSON with `eye_contact_score`, `talk_time_percent` for tutor/student.
 4. **Browser audio pipeline:** Web Audio → Silero VAD (or simple energy threshold) → talk-time per channel if stereo; else single-speaker VAD only for MVP.
-5. **Coaching engine:** 2 triggers — “student silent >3 min”, “low eye contact”; rule-based; config in memory.
+5. **Coaching engine:** 2 triggers — “student silent >45 s”, “low eye contact”; rule-based; config in memory. (ONE_PAGER: 45s, 85% tutor talk)
 6. **Post-session:** Template-based summary (no LLM) or minimal LLM call.
 7. **UI:** Simple dashboard with live metrics + nudge toasts; video call view (tutor + student).
 8. **Backend:** Minimal — session create/finish, store metrics; LiveKit token generation; optional WebSocket for config.

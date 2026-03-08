@@ -490,9 +490,9 @@ Coaching Nudges
 
 | Trigger               | Message                     | Timing      |
 | --------------------- | --------------------------- | ----------- |
-| Student silent >3 min | "Check for understanding"   | After 3 min |
-| Low eye contact       | "Student may be distracted" | After 30s   |
-| Tutor talk >80%       | "Try asking a question"     | After 5 min |
+| Student silent >45 s | "Student has been silent for 45 seconds" / "Check for understanding" | After 45 s |
+| Low eye contact      | "Student may be distracted" | After 30s   |
+| Tutor talk >85%      | "Tutor speaking 85% of time" / "Try asking a question" | After threshold |
 | Energy drop           | "Consider a short break"    | After drop  |
 | Interruptions spike   | "Give more wait time"       | After 3+    |
 
