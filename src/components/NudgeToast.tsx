@@ -12,6 +12,8 @@ const ICON: Record<string, string> = {
   student_silent: "🤔",
   tutor_talk_dominant: "💬",
   low_eye_contact: "👁️",
+  interruptions_spike: "✋",
+  student_hesitating: "⏳",
 };
 
 export default function NudgeToast({ nudge, onDismiss }: Props) {

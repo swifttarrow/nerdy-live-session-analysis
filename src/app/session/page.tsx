@@ -10,9 +10,12 @@ import { createVideoPipeline, VideoPipelineOutput } from "@/lib/video/pipeline";
 import { createAudioPipeline, AudioPipelineOutput } from "@/lib/audio/pipeline";
 import { createMetricsAggregator } from "@/lib/metrics/aggregator";
 import { createCoachingEngine } from "@/lib/coaching/engine";
+import { createInterruptionTracker } from "@/lib/audio/interruptions";
+import { classifyInterruptions } from "@/lib/audio/interruption-classification";
 import { generateReport } from "@/lib/post-session/report";
 import type { SessionMetrics } from "@/lib/session/metrics-schema";
 import type { NudgeEvent } from "@/lib/coaching/engine";
+import type { InterruptionTracker } from "@/lib/audio/interruptions";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
 import ConsentBanner from "@/components/ConsentBanner";
@@ -33,6 +36,7 @@ function SessionContent() {
   const remoteVideoRef = useRef<HTMLDivElement>(null);
   const roomRef = useRef<Room | null>(null);
   const sessionMetricsHistory = useRef<SessionMetrics[]>([]);
+  const interruptionTrackerRef = useRef<InterruptionTracker | null>(null);
 
   const startSession = useCallback(async () => {
     setStatus("connecting");
@@ -53,10 +57,14 @@ function SessionContent() {
 
       // Create pipelines
       const videoPipeline = createVideoPipeline();
-      const audioPipeline = createAudioPipeline();
       const coachingEngine = createCoachingEngine((nudge) => {
         setNudges((prev) => [...prev.slice(-4), nudge]);
       });
+      const interruptionTracker = createInterruptionTracker({
+        onTutorInterruption: () => coachingEngine.recordTutorInterruption(),
+      });
+      interruptionTrackerRef.current = interruptionTracker;
+      const audioPipeline = createAudioPipeline(interruptionTracker);
       const aggregator = createMetricsAggregator(
         roomName,
         (m) => {
@@ -124,8 +132,15 @@ function SessionContent() {
       roomRef.current = null;
     }
 
+    // Collect interruption data if tracker was active
+    let interruptionData = null;
+    if (interruptionTrackerRef.current) {
+      const stats = interruptionTrackerRef.current.getStats();
+      interruptionData = { ...stats, classification: classifyInterruptions(stats) };
+    }
+
     // Generate report and navigate
-    const report = generateReport(roomName, sessionMetricsHistory.current);
+    const report = generateReport(roomName, sessionMetricsHistory.current, interruptionData);
     sessionStorage.setItem("sessionlens-report", JSON.stringify(report));
     router.push("/report");
   }
