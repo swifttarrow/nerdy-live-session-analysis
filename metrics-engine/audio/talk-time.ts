@@ -38,7 +38,10 @@ export function createTalkTimeAggregator(): TalkTimeAggregator {
   };
 
   function totalMs(): number {
-    return totalTalkMs.tutor + totalTalkMs.student || 1; // avoid div/0
+    const inProgressTutor = speakingStart.tutor !== null ? Date.now() - speakingStart.tutor! : 0;
+    const inProgressStudent = speakingStart.student !== null ? Date.now() - speakingStart.student! : 0;
+    const total = totalTalkMs.tutor + totalTalkMs.student + inProgressTutor + inProgressStudent;
+    return total || 1; // avoid div/0 when no speech at all
   }
 
   return {
