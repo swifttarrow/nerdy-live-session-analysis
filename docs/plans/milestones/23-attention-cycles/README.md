@@ -24,13 +24,13 @@ Add attention cycles — gaze patterns over time. "Attention drifted in middle s
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: synthetic gaze over time → segment scores correct
+- [x] `npm run build` succeeds
+- [x] Unit test: synthetic gaze over time → segment scores correct
 
 ### Manual Verification
 
-- [ ] Report shows attention by segment
-- [ ] "Drifted in middle" pattern detectable
+- [x] Report shows attention by segment
+- [x] "Drifted in middle" pattern detectable
 
 ## Tasks
 

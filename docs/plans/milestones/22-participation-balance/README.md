@@ -23,13 +23,13 @@ Enhance participation balance with engagement interpretation — student talk ra
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: talk ratio → interpretation correct
+- [x] `npm run build` succeeds
+- [x] Unit test: talk ratio → interpretation correct
 
 ### Manual Verification
 
-- [ ] Report shows passive/engaged framing
-- [ ] Interpretation aligns with metrics
+- [x] Report shows passive/engaged framing
+- [x] Interpretation aligns with metrics
 
 ## Tasks
 

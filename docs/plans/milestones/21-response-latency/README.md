@@ -24,14 +24,14 @@ Implement response latency — time between tutor stops speaking and student sta
 
 ### Automated Verification
 
-- [ ] `npm run build` succeeds
-- [ ] Unit test: synthetic VAD → latency computed correctly
+- [x] `npm run build` succeeds
+- [x] Unit test: synthetic VAD → latency computed correctly
 
 ### Manual Verification
 
-- [ ] Response latency updates in real time
-- [ ] Nudge fires when hesitation pattern detected
-- [ ] Report shows latency stats
+- [x] Response latency updates in real time
+- [x] Nudge fires when hesitation pattern detected
+- [x] Report shows latency stats
 
 ## Tasks
 

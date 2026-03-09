@@ -23,9 +23,9 @@ Add session-type presets: Lecture, Practice, Socratic. MVP has General only. Str
 
 ### Manual Verification
 
-- [ ] User can select preset
-- [ ] Coaching behavior differs by preset
-- [ ] Report reflects preset context
+- [x] User can select preset
+- [x] Coaching behavior differs by preset
+- [x] Report reflects preset context
 
 ## Tasks
 

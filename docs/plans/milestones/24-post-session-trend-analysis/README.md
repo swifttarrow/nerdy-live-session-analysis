@@ -23,8 +23,8 @@ Add post-session trend analysis across sessions. Stretch goal.
 
 ### Manual Verification
 
-- [ ] Trend analysis visible when multiple sessions exist
-- [ ] Comparison to prior sessions
+- [x] Trend analysis visible when multiple sessions exist
+- [x] Comparison to prior sessions
 
 ## Tasks
 

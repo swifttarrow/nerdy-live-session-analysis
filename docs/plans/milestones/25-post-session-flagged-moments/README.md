@@ -23,8 +23,8 @@ Add post-session flagged moments for review. Stretch goal.
 
 ### Manual Verification
 
-- [ ] Report shows flagged moments
-- [ ] Timestamps and reasons clear
+- [x] Report shows flagged moments
+- [x] Timestamps and reasons clear
 
 ## Tasks
 

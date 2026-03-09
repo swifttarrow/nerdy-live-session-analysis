@@ -23,9 +23,9 @@ Add UI controls for configurable nudge sensitivity. Stretch: MVP has in-memory c
 
 ### Manual Verification
 
-- [ ] User can adjust sensitivity
-- [ ] Nudges fire at different rates for different settings
-- [ ] Preference persists across sessions (if implemented)
+- [x] User can adjust sensitivity
+- [x] Nudges fire at different rates for different settings
+- [x] Preference persists across sessions (if implemented)
 
 ## Tasks
 

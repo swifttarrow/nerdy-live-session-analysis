@@ -24,9 +24,9 @@ Add LLM-powered personalized recommendations for post-session report. Stretch: "
 
 ### Manual Verification
 
-- [ ] Report shows personalized recommendation when LLM used
-- [ ] Fallback to template works
-- [ ] Cost documented
+- [x] Report shows personalized recommendation when LLM used
+- [x] Fallback to template works
+- [x] Cost documented
 
 ## Tasks
 

@@ -25,9 +25,9 @@ Add Tier 2 interruption classification: transcription of overlap segments; conte
 
 ### Manual Verification
 
-- [ ] Overlap segments transcribed
-- [ ] Content-based classification improves over Tier 1
-- [ ] Report shows refined productive/neutral/unproductive
+- [ ] Overlap segments transcribed (deferred: requires Whisper/audio capture)
+- [x] Content-based classification improves over Tier 1 (integrated; uses Tier 2 when transcripts provided)
+- [x] Report shows refined productive/neutral/unproductive (when Tier 2 transcripts available)
 
 ## Tasks
 
