@@ -93,6 +93,22 @@ export default function MetricsDisplay({ metrics, videoQuality }: Props) {
         </div>
         <ScoreBar label="Eye Contact" value={student.eye_contact_score} />
         <ScoreBar label="Talk Time" value={student.talk_time_percent} />
+        {student.emotional_state && student.emotional_state !== "neutral" && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-gray-400">Emotional state:</span>
+            <span
+              className={
+                student.emotional_state === "tired"
+                  ? "text-amber-400"
+                  : student.emotional_state === "frustrated"
+                    ? "text-orange-400"
+                    : "text-rose-400"
+              }
+            >
+              {student.emotional_state}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Student talk ratio highlight */}

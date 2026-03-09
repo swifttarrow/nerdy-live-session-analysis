@@ -149,6 +149,9 @@ export function useSessionRoom() {
           const sampler = createFrameSampler(el, (imageData, ts) => {
             const score = videoPipeline.processFrame(localRole, imageData, ts);
             if (score !== null) aggregator.updateEyeContact(localRole, score);
+            if (localRole === "student") {
+              aggregator.updateEmotionalState("student", videoPipeline.getStudentEmotionalState());
+            }
           });
           sampler.start();
         },
@@ -161,6 +164,9 @@ export function useSessionRoom() {
           const sampler = createFrameSampler(el, (imageData, ts) => {
             const score = videoPipeline.processFrame(remoteRole, imageData, ts);
             if (score !== null) aggregator.updateEyeContact(remoteRole, score);
+            if (remoteRole === "student") {
+              aggregator.updateEmotionalState("student", videoPipeline.getStudentEmotionalState());
+            }
           });
           sampler.start();
         },
