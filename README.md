@@ -10,18 +10,10 @@ Real-time engagement intelligence for live tutor–student sessions. Analyzes ey
 ## Setup
 
 ```bash
-# 1. Install dependencies and copy WASM files
 make setup
-# or: npm install && node scripts/copy-wasm.js
-
-# 2. Configure environment
-cp .env.example .env.local
-# Edit .env.local with your LiveKit credentials
-
-# 3. Download MediaPipe face model
-curl -L "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" \
-  -o public/face_landmarker.task
 ```
+
+This single command installs dependencies, copies WASM files, creates `.env.local` from `.env.example` (if missing), and downloads the MediaPipe face model. Then edit `.env.local` with your LiveKit credentials.
 
 ## Running
 

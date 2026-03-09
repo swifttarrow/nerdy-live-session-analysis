@@ -13,4 +13,4 @@ lint:
 	npm run lint
 
 setup:
-	npm install && node scripts/copy-wasm.js
+	./scripts/setup.sh
