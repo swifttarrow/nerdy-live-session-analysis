@@ -11,8 +11,25 @@ import { createAudioPipeline, AudioPipelineOutput } from "@/lib/audio/pipeline";
 import { createMetricsAggregator } from "@/lib/metrics/aggregator";
 import { createCoachingEngine } from "@/lib/coaching/engine";
 import { createInterruptionTracker } from "@/lib/audio/interruptions";
-import { classifyInterruptions } from "@/lib/audio/interruption-classification";
+import { classifyInterruptionsWithContent } from "@/lib/audio/interruption-classification";
+import { createResponseLatencyTracker, ResponseLatencyTracker } from "@/lib/audio/response-latency";
 import { generateReport } from "@/lib/post-session/report";
+import { DEFAULT_CONFIG } from "@/lib/coaching/config";
+import {
+  applySensitivity,
+  loadSensitivity,
+  saveSensitivity,
+  type SensitivityLevel,
+} from "@/lib/coaching/sensitivity";
+import {
+  applyPreset,
+  loadPreset,
+  savePreset,
+  type SessionPreset,
+} from "@/lib/coaching/presets";
+import { saveSession } from "@/lib/session/session-store";
+import { loadHistory } from "@/lib/session/session-store";
+import { computeTrends } from "@/lib/post-session/trends";
 import type { SessionMetrics } from "@/lib/session/metrics-schema";
 import type { NudgeEvent } from "@/lib/coaching/engine";
 import type { InterruptionTracker } from "@/lib/audio/interruptions";
@@ -20,6 +37,8 @@ import type { ParticipantRole } from "@/lib/livekit/room";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
 import ConsentBanner from "@/components/ConsentBanner";
+import SensitivitySelector from "@/components/SensitivitySelector";
+import SessionTypeSelector from "@/components/SessionTypeSelector";
 
 type SessionRole = "teacher" | "student";
 
@@ -39,11 +58,38 @@ function SessionContent() {
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
 
+  // M27: sensitivity level
+  const [sensitivityLevel, setSensitivityLevel] = useState<SensitivityLevel>("medium");
+  // M28: session preset
+  const [sessionPreset, setSessionPreset] = useState<SessionPreset>("general");
+
   const localVideoRef = useRef<HTMLDivElement>(null);
   const remoteVideoRef = useRef<HTMLDivElement>(null);
   const roomRef = useRef<Room | null>(null);
   const sessionMetricsHistory = useRef<SessionMetrics[]>([]);
   const interruptionTrackerRef = useRef<InterruptionTracker | null>(null);
+  // M21: response latency tracker
+  const responseLatencyTrackerRef = useRef<ResponseLatencyTracker | null>(null);
+  // Track all nudges (not just last-5 displayed) for flagged moments
+  const allNudgesRef = useRef<NudgeEvent[]>([]);
+  // Track session start time for flagged moment offsets
+  const sessionStartMsRef = useRef<number | null>(null);
+
+  // Load persisted settings from localStorage on mount
+  useEffect(() => {
+    setSensitivityLevel(loadSensitivity());
+    setSessionPreset(loadPreset());
+  }, []);
+
+  function handleSensitivityChange(level: SensitivityLevel) {
+    setSensitivityLevel(level);
+    saveSensitivity(level);
+  }
+
+  function handlePresetChange(preset: SessionPreset) {
+    setSessionPreset(preset);
+    savePreset(preset);
+  }
 
   const startSession = useCallback(async () => {
     setStatus("connecting");
@@ -62,17 +108,30 @@ function SessionContent() {
       }
       const { token } = await res.json();
 
+      // M27 + M28: Apply sensitivity and preset to config
+      const config = applyPreset(applySensitivity(DEFAULT_CONFIG, sensitivityLevel), sessionPreset);
+
+      // Reset nudge history for new session
+      allNudgesRef.current = [];
+      sessionStartMsRef.current = Date.now();
+
       // Create pipelines
       const videoPipeline = createVideoPipeline();
       const coachingEngine = createCoachingEngine((nudge) => {
         setNudges((prev) => [...prev.slice(-4), nudge]);
-      });
+        allNudgesRef.current.push(nudge);
+      }, config);
       const interruptionTracker = createInterruptionTracker({
         onTutorInterruption: () =>
           coachingEngine.recordTutorInterruption(),
       });
       interruptionTrackerRef.current = interruptionTracker;
-      const audioPipeline = createAudioPipeline(interruptionTracker);
+
+      // M21: Create response latency tracker
+      const latencyTracker = createResponseLatencyTracker();
+      responseLatencyTrackerRef.current = latencyTracker;
+
+      const audioPipeline = createAudioPipeline(interruptionTracker, latencyTracker);
       const aggregator = createMetricsAggregator(
         roomName,
         (m) => {
@@ -130,7 +189,7 @@ function SessionContent() {
       setErrorMsg(err instanceof Error ? err.message : "Unknown error");
       setStatus("error");
     }
-  }, [roomName, identity, localRole, remoteRole]);
+  }, [roomName, identity, localRole, remoteRole, sensitivityLevel, sessionPreset]);
 
   async function endSession() {
     if (roomRef.current) {
@@ -142,11 +201,53 @@ function SessionContent() {
     let interruptionData = null;
     if (interruptionTrackerRef.current) {
       const stats = interruptionTrackerRef.current.getStats();
-      interruptionData = { ...stats, classification: classifyInterruptions(stats) };
+      interruptionData = { ...stats, classification: classifyInterruptionsWithContent(stats) };
     }
 
-    // Generate report and navigate
-    const report = generateReport(roomName, sessionMetricsHistory.current, interruptionData);
+    // M21: Collect latency stats
+    const latencyStats = responseLatencyTrackerRef.current?.getStats();
+
+    // M24: Load history and compute trends
+    const sessionId = roomName + "-" + Date.now();
+    const history = loadHistory();
+
+    // Generate report with M25 flagged moments and M24 trends placeholder
+    const report = generateReport(
+      roomName,
+      sessionMetricsHistory.current,
+      interruptionData,
+      {
+        nudgeEvents: allNudgesRef.current,
+        sessionStartMs: sessionStartMsRef.current ?? Date.now(),
+      }
+    );
+
+    // Attach M21 latency stats to summary
+    if (latencyStats && latencyStats.turnCount > 0) {
+      report.summary.avgResponseLatencyMs = latencyStats.avgResponseLatencyMs;
+      report.summary.hesitationCount = latencyStats.hesitationCount;
+    }
+
+    // M24: Build stored summary and compute trends
+    const storedSummary = {
+      sessionId,
+      storedAt: new Date().toISOString(),
+      durationSec: report.summary.durationSec,
+      avgTutorEyeContact: report.summary.avgTutorEyeContact,
+      avgStudentEyeContact: report.summary.avgStudentEyeContact,
+      avgTutorTalkPercent: report.summary.avgTutorTalkPercent,
+      avgStudentTalkPercent: report.summary.avgStudentTalkPercent,
+      studentTalkRatio: report.summary.studentTalkRatio,
+      engagementScore: report.summary.engagementScore,
+    };
+
+    const trends = computeTrends(storedSummary, history);
+    if (trends) {
+      report.summary.trends = trends;
+    }
+
+    saveSession(storedSummary);
+
     sessionStorage.setItem("sessionlens-report", JSON.stringify(report));
     router.push("/report");
   }
@@ -185,6 +286,10 @@ function SessionContent() {
           </span>
         </div>
         <div className="flex items-center gap-4">
+          {/* M28: Session type selector */}
+          <SessionTypeSelector value={sessionPreset} onChange={handlePresetChange} />
+          {/* M27: Nudge sensitivity selector */}
+          <SensitivitySelector value={sensitivityLevel} onChange={handleSensitivityChange} />
           <span className={`text-xs px-2 py-1 rounded-full ${
             status === "connected" ? "bg-green-900 text-green-300" :
             status === "connecting" ? "bg-yellow-900 text-yellow-300" :

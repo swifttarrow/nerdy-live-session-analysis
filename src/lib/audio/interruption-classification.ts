@@ -6,9 +6,12 @@
  * - student_to_tutor → productive (student engagement signal)
  * - tutor_to_student, count > threshold → unproductive
  * - tutor_to_student, count ≤ threshold → neutral
+ *
+ * M29: Tier 2 content-based classification when overlap transcripts are available.
  */
 
 import type { InterruptionStats } from "./interruptions";
+import { classifyOverlapContent } from "./interruption-transcription";
 
 export interface InterruptionClassification {
   productive: number;
@@ -44,4 +47,45 @@ export function classifyInterruptions(
   }
 
   return { productive, unproductive, neutral };
+}
+
+/**
+ * M29: Classify interruptions with optional Tier 2 content-based analysis.
+ * When overlapTranscripts is provided (aligned with stats.events), uses
+ * classifyOverlapContent for each overlap. Otherwise falls back to Tier 1.
+ */
+export function classifyInterruptionsWithContent(
+  stats: InterruptionStats,
+  overlapTranscripts?: string[],
+  config: ClassificationConfig = DEFAULT_CLASSIFICATION_CONFIG
+): InterruptionClassification {
+  const useTier2 =
+    overlapTranscripts &&
+    overlapTranscripts.length === stats.events.length;
+
+  if (!useTier2) {
+    return classifyInterruptions(stats, config);
+  }
+
+  let productive = 0;
+  let neutral = 0;
+  let unproductive = 0;
+
+  for (let i = 0; i < stats.events.length; i++) {
+    const event = stats.events[i];
+    const transcript = overlapTranscripts[i] ?? "";
+    const tier2 = classifyOverlapContent(transcript, event.direction);
+    switch (tier2.productivity) {
+      case "productive":
+        productive++;
+        break;
+      case "unproductive":
+        unproductive++;
+        break;
+      default:
+        neutral++;
+    }
+  }
+
+  return { productive, neutral, unproductive };
 }

@@ -4,7 +4,10 @@ import {
   detectOverlaps,
   type VadSegment,
 } from "@/lib/audio/interruptions";
-import { classifyInterruptions } from "@/lib/audio/interruption-classification";
+import {
+  classifyInterruptions,
+  classifyInterruptionsWithContent,
+} from "@/lib/audio/interruption-classification";
 
 // ---------------------------------------------------------------------------
 // createInterruptionTracker — real-time tracker
@@ -199,5 +202,67 @@ describe("classifyInterruptions", () => {
     const stats = { totalOverlaps: 0, studentToTutor: 0, tutorToStudent: 0, events: [] };
     const result = classifyInterruptions(stats);
     expect(result).toEqual({ productive: 0, unproductive: 0, neutral: 0 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// classifyInterruptionsWithContent (M29 Tier 2 integration)
+// ---------------------------------------------------------------------------
+
+describe("classifyInterruptionsWithContent", () => {
+  it("falls back to Tier 1 when no transcripts provided", () => {
+    const stats = {
+      totalOverlaps: 4,
+      studentToTutor: 4,
+      tutorToStudent: 0,
+      events: [
+        { timestamp: 1000, direction: "student_to_tutor" as const },
+        { timestamp: 2000, direction: "student_to_tutor" as const },
+        { timestamp: 3000, direction: "student_to_tutor" as const },
+        { timestamp: 4000, direction: "student_to_tutor" as const },
+      ],
+    };
+    const result = classifyInterruptionsWithContent(stats);
+    expect(result.productive).toBe(4);
+    expect(result.neutral).toBe(0);
+    expect(result.unproductive).toBe(0);
+  });
+
+  it("uses Tier 2 when transcripts provided and length matches events", () => {
+    const stats = {
+      totalOverlaps: 3,
+      studentToTutor: 2,
+      tutorToStudent: 1,
+      events: [
+        { timestamp: 1000, direction: "student_to_tutor" as const },
+        { timestamp: 2000, direction: "student_to_tutor" as const },
+        { timestamp: 3000, direction: "tutor_to_student" as const },
+      ],
+    };
+    // "why does this work?" → clarifying, student_to_tutor → productive
+    // "what do you mean?" → clarifying, student_to_tutor → productive
+    // "by the way, did you see the game?" → off_topic → unproductive
+    const transcripts = ["why does this work?", "what do you mean?", "by the way, did you see the game?"];
+    const result = classifyInterruptionsWithContent(stats, transcripts);
+    expect(result.productive).toBe(2);
+    expect(result.unproductive).toBe(1);
+    expect(result.neutral).toBe(0);
+  });
+
+  it("falls back to Tier 1 when transcript length does not match events", () => {
+    const stats = {
+      totalOverlaps: 2,
+      studentToTutor: 2,
+      tutorToStudent: 0,
+      events: [
+        { timestamp: 1000, direction: "student_to_tutor" as const },
+        { timestamp: 2000, direction: "student_to_tutor" as const },
+      ],
+    };
+    const transcripts = ["only one transcript"];
+    const result = classifyInterruptionsWithContent(stats, transcripts);
+    expect(result.productive).toBe(2);
+    expect(result.neutral).toBe(0);
+    expect(result.unproductive).toBe(0);
   });
 });
