@@ -2,13 +2,14 @@ import type { FaceLandmarker } from "@mediapipe/tasks-vision";
 import { initFaceLandmarker, detectFace } from "./face-landmarker";
 import { deriveGazeScore } from "./gaze";
 import { createEmaSmoother, EmaSmoother } from "./smoothing";
+import { detectEmotion, type EmotionalState } from "./emotion-detection";
 import { createPipelineLatencyTracker, PipelineLatencyTracker } from "@/lib/latency/timing";
 
 export type StreamRole = "tutor" | "student";
 
 export interface VideoPipelineOutput {
   tutor: { eyeContactScore: number };
-  student: { eyeContactScore: number };
+  student: { eyeContactScore: number; emotionalState?: EmotionalState };
 }
 
 export type VideoQualityStatus = "good" | "low";
@@ -25,6 +26,8 @@ export interface VideoPipeline {
    */
   processFrame(role: StreamRole, imageData: ImageData, timestampMs: number): number | null;
   getLatestScores(): VideoPipelineOutput;
+  /** Student's current emotional state (tired, frustrated, defeated, neutral) */
+  getStudentEmotionalState(): EmotionalState;
   /** Face detection success rate over rolling window; surfaces poor video quality */
   getQualityStatus(): VideoQualityState;
   /** M15: access latency tracker for instrumentation data */
@@ -49,6 +52,8 @@ export function createVideoPipeline(): VideoPipeline {
     tutor: 0,
     student: 0,
   };
+
+  let studentEmotionalState: EmotionalState = "neutral";
 
   const FACE_DETECT_WINDOW = 30; // ~6 s at 5 FPS
   const LOW_QUALITY_THRESHOLD = 0.5; // <50% face detection → low
@@ -103,6 +108,11 @@ export function createVideoPipeline(): VideoPipeline {
       scores[role] = smoothed;
       endSmoothing();
 
+      // --- Emotion detection (student only) ---
+      if (role === "student" && result) {
+        studentEmotionalState = detectEmotion(result);
+      }
+
       // --- Stage: metrics_emit (marks frame complete) ---
       const endEmit = latencyTracker.startStage("metrics_emit");
       endEmit();
@@ -120,8 +130,12 @@ export function createVideoPipeline(): VideoPipeline {
     getLatestScores(): VideoPipelineOutput {
       return {
         tutor: { eyeContactScore: scores.tutor },
-        student: { eyeContactScore: scores.student },
+        student: { eyeContactScore: scores.student, emotionalState: studentEmotionalState },
       };
+    },
+
+    getStudentEmotionalState(): EmotionalState {
+      return studentEmotionalState;
     },
 
     getQualityStatus(): VideoQualityState {

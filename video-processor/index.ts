@@ -11,6 +11,7 @@ export { createEmaSmoother } from "./smoothing";
 export { createFrameSampler } from "./frame-sampler";
 export { createDriftDetector } from "./attention-drift";
 export { computeExpressionEnergy } from "./facial-expression";
+export { detectEmotion, computeEmotionScores } from "./emotion-detection";
 
 export type {
   VideoPipeline,
@@ -22,3 +23,4 @@ export type {
 export type { FrameSampler, FrameCallback } from "./frame-sampler";
 export type { DriftDetector, DriftDetectorOptions, DriftDetectorState } from "./attention-drift";
 export type { EmaSmoother, EmaSmootherOptions } from "./smoothing";
+export type { EmotionalState, EmotionScores } from "./emotion-detection";
