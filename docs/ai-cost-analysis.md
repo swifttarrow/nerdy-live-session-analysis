@@ -20,7 +20,7 @@ Both models run locally in the user's browser. No video or audio is sent to any 
 | Component | What it does | Cost |
 |-----------|-------------|------|
 | **LiveKit SFU** (LiveKit Cloud) | WebRTC Selective Forwarding Unit; routes audio/video between participants | Varies by plan; see below |
-| **Claude Haiku** (M26) | Post-session LLM recommendations; optional "Get AI-Personalized Recommendations" button | **~$0.0004/session** when used; template fallback when unavailable |
+| **GPT-4o** (M26) | Post-session LLM recommendations; optional "Get AI-Personalized Recommendations" button | **~$0.003/session** when used; template fallback when unavailable |
 
 ---
 
@@ -37,7 +37,7 @@ Both models run locally in the user's browser. No video or audio is sent to any 
 |-----------|-----------------|-------|
 | MediaPipe (gaze + landmarks) | **$0.00** | Browser-side WASM/WebGL |
 | Silero VAD | **$0.00** | Browser-side ONNX |
-| LLM recommendations (M26) | **$0** or ~**$0.0004** | Optional; only when user clicks "Get AI-Personalized Recommendations" |
+| LLM recommendations (M26) | **$0** or ~**$0.003** | Optional; only when user clicks "Get AI-Personalized Recommendations" |
 | LiveKit Cloud SFU | ~**$0.003–$0.006** | ~$0.006/participant-minute on Hobby plan; 30 min × 2 participants = $0.006–$0.012 per session |
 | Storage (metrics JSON) | ~**$0.000001** | ~10 KB of JSON per session; S3/R2 at $0.023/GB |
 | **Total per session** | **~$0.01** | Dominated by LiveKit egress; LLM adds <$0.001 when used |
@@ -51,7 +51,7 @@ Both models run locally in the user's browser. No video or audio is sent to any 
 - 2 participants per session
 - LiveKit Cloud: ~$0.006/participant-minute (Hobby/Growth plan estimate)
 - Storage: $0.023/GB (Cloudflare R2 or AWS S3); 10 KB metrics JSON per session
-- LLM: $0 or ~$0.0004/session when user requests AI recommendations (M26)
+- LLM: $0 or ~$0.003/session when user requests AI recommendations (M26)
 
 | Sessions/day | LiveKit (SFU) | Storage | LLM | Total/day | Total/month |
 |-------------|--------------|---------|-----|-----------|-------------|
@@ -77,16 +77,16 @@ Both models run locally in the user's browser. No video or audio is sent to any 
 
 ## Addendum: LLM Recommendations (M26) — Implemented
 
-Post-session recommendations support optional LLM-generated suggestions via "Get AI-Personalized Recommendations" button. Uses `claude-haiku-4-5-20251001`:
+Post-session recommendations support optional LLM-generated suggestions via "Get AI-Personalized Recommendations" button. Uses `gpt-4o`:
 
 | Component | Per-session estimate |
 |-----------|---------------------|
 | Input tokens (session summary) | ~500 tokens |
 | Output tokens (recommendations) | ~200 tokens |
-| Model: claude-haiku-4-5 at $0.25/$1.25 per M tokens | ~$0.000125 + $0.00025 = **~$0.0004/session** when used |
-| At 1,000 sessions/day (assuming 50% use LLM) | **~$0.20/day** (~$6/month) |
+| Model: gpt-4o at $2.50/$10 per M tokens | ~$0.00125 + $0.002 = **~$0.003/session** when used |
+| At 1,000 sessions/day (assuming 50% use LLM) | **~$1.50/day** (~$45/month) |
 
-Template fallback when `ANTHROPIC_API_KEY` is unset or request fails. LLM cost remains negligible relative to SFU infrastructure.
+Template fallback when `OPENAI_API_KEY` is unset or request fails. LLM cost remains negligible relative to SFU infrastructure.
 
 ---
 
@@ -94,5 +94,5 @@ Template fallback when `ANTHROPIC_API_KEY` is unset or request fails. LLM cost r
 
 1. **The dominant cost is LiveKit SFU egress** — not AI inference.
 2. **All vision and audio AI runs in the browser at zero marginal cost** — this is a deliberate architecture decision for latency, privacy, and cost.
-3. **Rule-based coaching is free** — LLM is an optional post-MVP enhancement that adds <$0.001/session.
+3. **Rule-based coaching is free** — LLM is an optional post-MVP enhancement that adds ~$0.003/session when used.
 4. **Scaling from 100 → 100K sessions/day increases cost linearly** — approximately $10/month per 1,000 daily sessions.
