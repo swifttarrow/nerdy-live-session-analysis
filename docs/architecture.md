@@ -27,6 +27,20 @@ SessionLens is a browser-first, real-time engagement analysis system for live tu
 
 ---
 
+## Spec-to-Code Mapping
+
+The requirements specify a modular structure. Our implementation maps as follows:
+
+| Spec folder | Implementation |
+|-------------|----------------|
+| `video-processor/` | `src/lib/video/` — pipeline, face-landmarker, gaze, frame-sampler, smoothing, attention-drift |
+| `metrics-engine/` | `src/lib/metrics/` (aggregator) + `src/lib/audio/` (talk-time, interruptions) + `src/lib/energy/` |
+| `coaching-system/` | `src/lib/coaching/` — engine, triggers, config, sensitivity, presets |
+| `analytics-dashboard/` | `src/app/report/` + `src/lib/post-session/` (summary, trends, flagged-moments, recommendations) |
+| `docs/` | `docs/` — architecture, latency, privacy-compliance, development-log |
+
+---
+
 ## Component Map
 
 ```
