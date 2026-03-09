@@ -1,6 +1,13 @@
 import type { SessionMetrics } from "@/lib/session/metrics-schema";
 import type { InterruptionStats } from "@/lib/audio/interruptions";
 import type { InterruptionClassification } from "@/lib/audio/interruption-classification";
+import {
+  classifyParticipation,
+  participationDescription,
+  type ParticipationLabel,
+} from "./participation";
+import { segmentAttention, type AttentionCycles } from "./attention-cycles";
+import type { SessionTrends } from "./trends";
 
 export interface SessionSummary {
   sessionId: string;
@@ -13,6 +20,17 @@ export interface SessionSummary {
   engagementScore: number; // composite 0–1
   sampleCount: number;
   interruptions?: InterruptionStats & { classification: InterruptionClassification };
+  /** M21: average response latency in ms */
+  avgResponseLatencyMs?: number;
+  /** M21: number of hesitation-length turns */
+  hesitationCount?: number;
+  /** M22: participation label */
+  participationLabel?: ParticipationLabel;
+  participationDescription?: string;
+  /** M23: attention cycles by time segment */
+  attentionCycles?: AttentionCycles;
+  /** M24: trends vs prior sessions (added externally after report generation) */
+  trends?: SessionTrends;
 }
 
 /**
@@ -36,6 +54,9 @@ export function aggregateSessionSummary(
       studentTalkRatio: 0,
       engagementScore: 0,
       sampleCount: 0,
+      participationLabel: classifyParticipation(0),
+      participationDescription: participationDescription(classifyParticipation(0)),
+      attentionCycles: { segments: [], pattern: null },
     };
   }
 
@@ -69,6 +90,13 @@ export function aggregateSessionSummary(
     0.2 * avgTutorEyeContact +
     0.4 * avgStudentEyeContact;
 
+  // M22: participation label
+  const pLabel = classifyParticipation(studentTalkRatio);
+  const pDesc = participationDescription(pLabel);
+
+  // M23: attention cycles
+  const attentionCycles = segmentAttention(metricsHistory);
+
   return {
     sessionId,
     durationSec: n, // 1 sample per second
@@ -79,6 +107,9 @@ export function aggregateSessionSummary(
     studentTalkRatio,
     engagementScore,
     sampleCount: n,
+    participationLabel: pLabel,
+    participationDescription: pDesc,
+    attentionCycles,
     ...(interruptionData ? { interruptions: interruptionData } : {}),
   };
 }

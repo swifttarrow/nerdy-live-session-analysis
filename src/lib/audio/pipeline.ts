@@ -2,6 +2,7 @@ import { createVad } from "./vad";
 import { createTalkTimeAggregator, TalkTimeState } from "./talk-time";
 import type { ParticipantRole } from "./talk-time";
 import type { InterruptionTracker } from "./interruptions";
+import type { ResponseLatencyTracker } from "./response-latency";
 
 export interface AudioPipelineOutput {
   talkTimePercent: number;
@@ -30,9 +31,11 @@ export interface AudioPipeline {
  * accurate per-person speaking detection without stereo diarization.
  *
  * @param interruptionTracker - optional tracker; receives speech start/end events
+ * @param responseLatencyTracker - optional M21 tracker; receives speech start/end events
  */
 export function createAudioPipeline(
-  interruptionTracker?: InterruptionTracker | null
+  interruptionTracker?: InterruptionTracker | null,
+  responseLatencyTracker?: ResponseLatencyTracker | null
 ): AudioPipeline {
   const aggregator = createTalkTimeAggregator();
   const vadInstances: Array<{ destroy(): void }> = [];
@@ -43,11 +46,13 @@ export function createAudioPipeline(
         onSpeechStart: () => {
           aggregator.onSpeechStart(role);
           interruptionTracker?.onSpeechStart(role);
+          responseLatencyTracker?.onSpeechStart(role);
           onUpdate(aggregator.getState(role));
         },
         onSpeechEnd: (_audio) => {
           aggregator.onSpeechEnd(role);
           interruptionTracker?.onSpeechEnd(role);
+          responseLatencyTracker?.onSpeechEnd(role);
           onUpdate(aggregator.getState(role));
         },
         onVADMisfire: () => {
@@ -55,6 +60,7 @@ export function createAudioPipeline(
           if (aggregator.getState(role).speaking) {
             aggregator.onSpeechEnd(role);
             interruptionTracker?.onSpeechEnd(role);
+            responseLatencyTracker?.onSpeechEnd(role);
             onUpdate(aggregator.getState(role));
           }
         },
