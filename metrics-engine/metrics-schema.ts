@@ -1,7 +1,23 @@
 import { z } from "zod";
 
-/** Student emotional states from face analysis */
-export const EmotionalStateSchema = z.enum(["neutral", "tired", "frustrated", "defeated"]);
+/** Student emotional states from face analysis (15 states) */
+export const EmotionalStateSchema = z.enum([
+  "engaged",
+  "attentive",
+  "curious",
+  "confident",
+  "understanding",
+  "excited",
+  "focused",
+  "neutral",
+  "thinking",
+  "confused",
+  "frustrated",
+  "tired",
+  "defeated",
+  "bored",
+  "anxious",
+]);
 export type EmotionalState = z.infer<typeof EmotionalStateSchema>;
 
 export const ParticipantMetricsSchema = z.object({

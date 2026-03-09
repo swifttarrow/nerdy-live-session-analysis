@@ -120,10 +120,12 @@ export function updateTriggerState(
 
   // --- Student emotion: consecutive seconds ---
   const emotionalState = student.emotional_state ?? "neutral";
-  const consecutiveTiredSec =
-    emotionalState === "tired" ? state.consecutiveTiredSec + 1 : 0;
-  const consecutiveFrustratedSec =
-    emotionalState === "frustrated" ? state.consecutiveFrustratedSec + 1 : 0;
+  const tiredLike = ["tired", "bored"].includes(emotionalState);
+  const frustratedLike = ["frustrated", "confused", "anxious"].includes(emotionalState);
+  const consecutiveTiredSec = tiredLike ? state.consecutiveTiredSec + 1 : 0;
+  const consecutiveFrustratedSec = frustratedLike
+    ? state.consecutiveFrustratedSec + 1
+    : 0;
   const consecutiveDefeatedSec =
     emotionalState === "defeated" ? state.consecutiveDefeatedSec + 1 : 0;
 

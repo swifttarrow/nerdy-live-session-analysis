@@ -2,6 +2,7 @@
 
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import type { VideoQualityState } from "@video-processor/pipeline";
+import EmotionIcon, { EMOTION_COLORS } from "@/components/EmotionIcon";
 
 interface Props {
   metrics: SessionMetrics | null;
@@ -93,22 +94,22 @@ export default function MetricsDisplay({ metrics, videoQuality }: Props) {
         </div>
         <ScoreBar label="Eye Contact" value={student.eye_contact_score} />
         <ScoreBar label="Talk Time" value={student.talk_time_percent} />
-        {student.emotional_state && student.emotional_state !== "neutral" && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-gray-400">Emotional state:</span>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-gray-400">Emotional state:</span>
+          <span className="flex items-center gap-1.5">
+            <EmotionIcon state={student.emotional_state} size="sm" />
             <span
               className={
-                student.emotional_state === "tired"
-                  ? "text-amber-400"
-                  : student.emotional_state === "frustrated"
-                    ? "text-orange-400"
-                    : "text-rose-400"
+                EMOTION_COLORS[student.emotional_state ?? "neutral"] ??
+                "text-gray-400"
               }
             >
-              {student.emotional_state}
+              {(student.emotional_state ?? "neutral").replace(/^./, (c) =>
+                c.toUpperCase()
+              )}
             </span>
-          </div>
-        )}
+          </span>
+        </div>
       </div>
 
       {/* Student talk ratio highlight */}

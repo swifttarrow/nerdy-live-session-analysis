@@ -2,7 +2,13 @@ import type { FaceLandmarker } from "@mediapipe/tasks-vision";
 import { initFaceLandmarker, detectFace } from "./face-landmarker";
 import { deriveGazeScore } from "./gaze";
 import { createEmaSmoother, EmaSmoother } from "./smoothing";
-import { detectEmotion, type EmotionalState } from "./emotion-detection";
+import {
+  detectEmotion,
+  computeEmotionScores,
+  ZERO_EMOTION_SCORES,
+  type EmotionalState,
+  type EmotionScores,
+} from "./emotion-detection";
 import { createPipelineLatencyTracker, PipelineLatencyTracker } from "@/lib/latency/timing";
 
 export type StreamRole = "tutor" | "student";
@@ -28,6 +34,8 @@ export interface VideoPipeline {
   getLatestScores(): VideoPipelineOutput;
   /** Student's current emotional state (tired, frustrated, defeated, neutral) */
   getStudentEmotionalState(): EmotionalState;
+  /** Raw emotion scores [0,1] contributing to emotional state (for debug) */
+  getStudentEmotionScores(): EmotionScores;
   /** Face detection success rate over rolling window; surfaces poor video quality */
   getQualityStatus(): VideoQualityState;
   /** M15: access latency tracker for instrumentation data */
@@ -54,6 +62,7 @@ export function createVideoPipeline(): VideoPipeline {
   };
 
   let studentEmotionalState: EmotionalState = "neutral";
+  let studentEmotionScores: EmotionScores = { ...ZERO_EMOTION_SCORES };
 
   const FACE_DETECT_WINDOW = 30; // ~6 s at 5 FPS
   const LOW_QUALITY_THRESHOLD = 0.5; // <50% face detection → low
@@ -109,7 +118,9 @@ export function createVideoPipeline(): VideoPipeline {
       endSmoothing();
 
       // --- Emotion detection (student only) ---
-      if (role === "student" && result) {
+      const landmarks = result?.faceLandmarks?.[0];
+      if (role === "student" && result && landmarks && landmarks.length >= 478) {
+        studentEmotionScores = computeEmotionScores(landmarks);
         studentEmotionalState = detectEmotion(result);
       }
 
@@ -136,6 +147,10 @@ export function createVideoPipeline(): VideoPipeline {
 
     getStudentEmotionalState(): EmotionalState {
       return studentEmotionalState;
+    },
+
+    getStudentEmotionScores(): EmotionScores {
+      return { ...studentEmotionScores };
     },
 
     getQualityStatus(): VideoQualityState {

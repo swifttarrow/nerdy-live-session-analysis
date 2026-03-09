@@ -31,14 +31,22 @@ describe("emotion-detection", () => {
     expect(scores.frustrated).toBeLessThanOrEqual(1);
     expect(scores.defeated).toBeGreaterThanOrEqual(0);
     expect(scores.defeated).toBeLessThanOrEqual(1);
+    expect(scores.engaged).toBeGreaterThanOrEqual(0);
+    expect(scores.engaged).toBeLessThanOrEqual(1);
   });
+
+  const VALID_STATES = [
+    "engaged", "attentive", "curious", "confident", "understanding",
+    "excited", "focused", "neutral", "thinking", "confused",
+    "frustrated", "tired", "defeated", "bored", "anxious",
+  ];
 
   it("detectEmotion returns valid EmotionalState", () => {
     const lm = mockLandmarks();
     const result = detectEmotion({
       faceLandmarks: [lm],
     } as any);
-    expect(["neutral", "tired", "frustrated", "defeated"]).toContain(result);
+    expect(VALID_STATES).toContain(result);
   });
 
   it("tired: low eye openness increases tired score", () => {
