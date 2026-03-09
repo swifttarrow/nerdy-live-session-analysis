@@ -1,9 +1,11 @@
 "use client";
 
 import type { SessionMetrics } from "@/lib/session/metrics-schema";
+import type { VideoQualityState } from "@/lib/video/pipeline";
 
 interface Props {
   metrics: SessionMetrics | null;
+  videoQuality?: VideoQualityState | null;
 }
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
@@ -37,7 +39,21 @@ function SpeakingIndicator({ speaking }: { speaking: boolean }) {
   );
 }
 
-export default function MetricsDisplay({ metrics }: Props) {
+function VideoQualityIndicator({ videoQuality }: { videoQuality: VideoQualityState }) {
+  const lowRoles = [
+    ...(videoQuality.tutor === "low" ? ["Teacher"] : []),
+    ...(videoQuality.student === "low" ? ["Student"] : []),
+  ];
+  if (lowRoles.length === 0) return null;
+  return (
+    <div className="flex items-center gap-1.5 text-amber-500 text-xs">
+      <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+      <span>Video quality low: {lowRoles.join(", ")}</span>
+    </div>
+  );
+}
+
+export default function MetricsDisplay({ metrics, videoQuality }: Props) {
   if (!metrics) {
     return (
       <div className="bg-gray-900 rounded-2xl p-4 text-gray-500 text-sm">
@@ -50,9 +66,12 @@ export default function MetricsDisplay({ metrics }: Props) {
 
   return (
     <div className="bg-gray-900 rounded-2xl p-4 space-y-5">
-      <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
-        Live Metrics
-      </h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+          Live Metrics
+        </h2>
+        {videoQuality && <VideoQualityIndicator videoQuality={videoQuality} />}
+      </div>
 
       {/* Tutor */}
       <div className="space-y-2">

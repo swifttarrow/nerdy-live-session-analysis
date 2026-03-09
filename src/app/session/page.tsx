@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Room } from "livekit-client";
 import { connectToRoom, disconnectRoom } from "@/lib/livekit/room";
 import { createFrameSampler } from "@/lib/video/frame-sampler";
-import { createVideoPipeline } from "@/lib/video/pipeline";
+import { createVideoPipeline, type VideoPipeline, type VideoQualityState } from "@/lib/video/pipeline";
 import { createAudioPipeline, AudioPipelineOutput } from "@/lib/audio/pipeline";
 import { createMetricsAggregator } from "@/lib/metrics/aggregator";
 import { createCoachingEngine } from "@/lib/coaching/engine";
@@ -56,6 +56,7 @@ function SessionContent() {
   const [status, setStatus] = useState<"idle" | "connecting" | "connected" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
+  const [videoQuality, setVideoQuality] = useState<VideoQualityState | null>(null);
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
 
   // M27: sensitivity level
@@ -66,6 +67,7 @@ function SessionContent() {
   const localVideoRef = useRef<HTMLDivElement>(null);
   const remoteVideoRef = useRef<HTMLDivElement>(null);
   const roomRef = useRef<Room | null>(null);
+  const videoPipelineRef = useRef<VideoPipeline | null>(null);
   const sessionMetricsHistory = useRef<SessionMetrics[]>([]);
   const interruptionTrackerRef = useRef<InterruptionTracker | null>(null);
   // M21: response latency tracker
@@ -117,6 +119,7 @@ function SessionContent() {
 
       // Create pipelines
       const videoPipeline = createVideoPipeline();
+      videoPipelineRef.current = videoPipeline;
       const coachingEngine = createCoachingEngine((nudge) => {
         setNudges((prev) => [...prev.slice(-4), nudge]);
         allNudgesRef.current.push(nudge);
@@ -137,6 +140,7 @@ function SessionContent() {
         (m) => {
           setMetrics(m);
           sessionMetricsHistory.current.push(m);
+          setVideoQuality(videoPipelineRef.current?.getQualityStatus() ?? null);
           coachingEngine.evaluate(m);
         }
       );
@@ -192,6 +196,8 @@ function SessionContent() {
   }, [roomName, identity, localRole, remoteRole, sensitivityLevel, sessionPreset]);
 
   async function endSession() {
+    videoPipelineRef.current = null;
+    setVideoQuality(null);
     if (roomRef.current) {
       await disconnectRoom(roomRef.current);
       roomRef.current = null;
@@ -365,7 +371,7 @@ function SessionContent() {
 
         {/* Metrics panel */}
         <div className="w-full lg:w-72 flex-shrink-0">
-          <MetricsDisplay metrics={metrics} />
+          <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
         </div>
       </div>
 

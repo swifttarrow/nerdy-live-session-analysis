@@ -11,6 +11,13 @@ export interface VideoPipelineOutput {
   student: { eyeContactScore: number };
 }
 
+export type VideoQualityStatus = "good" | "low";
+
+export interface VideoQualityState {
+  tutor: VideoQualityStatus;
+  student: VideoQualityStatus;
+}
+
 export interface VideoPipeline {
   /**
    * Process one frame for a given stream role.
@@ -18,6 +25,8 @@ export interface VideoPipeline {
    */
   processFrame(role: StreamRole, imageData: ImageData, timestampMs: number): number | null;
   getLatestScores(): VideoPipelineOutput;
+  /** Face detection success rate over rolling window; surfaces poor video quality */
+  getQualityStatus(): VideoQualityState;
   /** M15: access latency tracker for instrumentation data */
   latency: PipelineLatencyTracker;
 }
@@ -39,6 +48,13 @@ export function createVideoPipeline(): VideoPipeline {
   const scores: Record<StreamRole, number> = {
     tutor: 0,
     student: 0,
+  };
+
+  const FACE_DETECT_WINDOW = 30; // ~6 s at 5 FPS
+  const LOW_QUALITY_THRESHOLD = 0.5; // <50% face detection → low
+  const faceDetectRecent: Record<StreamRole, boolean[]> = {
+    tutor: [],
+    student: [],
   };
 
   const latencyTracker = createPipelineLatencyTracker();
@@ -71,6 +87,11 @@ export function createVideoPipeline(): VideoPipeline {
       const result = detectFace(landmarker, imageData, timestampMs);
       endMediapipe();
 
+      // Track face detection success for video quality indicator
+      const arr = faceDetectRecent[role];
+      arr.push(result !== null);
+      if (arr.length > FACE_DETECT_WINDOW) arr.shift();
+
       // --- Stage: gaze (score derivation) ---
       const endGaze = latencyTracker.startStage("gaze");
       const rawScore = result ? deriveGazeScore(result) : null;
@@ -101,6 +122,16 @@ export function createVideoPipeline(): VideoPipeline {
         tutor: { eyeContactScore: scores.tutor },
         student: { eyeContactScore: scores.student },
       };
+    },
+
+    getQualityStatus(): VideoQualityState {
+      const status = (r: StreamRole): VideoQualityStatus => {
+        const arr = faceDetectRecent[r];
+        if (arr.length < 10) return "good"; // not enough samples
+        const rate = arr.filter(Boolean).length / arr.length;
+        return rate >= LOW_QUALITY_THRESHOLD ? "good" : "low";
+      };
+      return { tutor: status("tutor"), student: status("student") };
     },
   };
 }
