@@ -15,6 +15,8 @@ interface SessionHeaderProps {
   onPresetChange: (preset: SessionPreset) => void;
   onSensitivityChange: (level: SensitivityLevel) => void;
   onEndSession: () => void;
+  /** If false, mode controls (preset, sensitivity) are hidden (student view) */
+  showModeControls?: boolean;
 }
 
 export function SessionHeader({
@@ -26,6 +28,7 @@ export function SessionHeader({
   onPresetChange,
   onSensitivityChange,
   onEndSession,
+  showModeControls = true,
 }: SessionHeaderProps) {
   const statusClass =
     status === "connected"
@@ -51,9 +54,13 @@ export function SessionHeader({
           You're the {role === "teacher" ? "Teacher" : "Student"}
         </span>
       </div>
-      <div className="flex items-center gap-4">
-        <SessionTypeSelector value={sessionPreset} onChange={onPresetChange} />
-        <SensitivitySelector value={sensitivityLevel} onChange={onSensitivityChange} />
+      <div className="flex items-center gap-4 ml-auto">
+        {showModeControls && (
+          <>
+            <SessionTypeSelector value={sessionPreset} onChange={onPresetChange} />
+            <SensitivitySelector value={sensitivityLevel} onChange={onSensitivityChange} />
+          </>
+        )}
         <span className={`text-xs px-2 py-1 rounded-full ${statusClass}`}>
           {status}
         </span>
