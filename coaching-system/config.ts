@@ -24,6 +24,13 @@ export interface CoachingConfig {
   hesitationCountThreshold: number;
   /** Time window (ms) for hesitation counting */
   hesitationWindowMs: number;
+  // Student emotion triggers
+  /** Seconds student must appear tired before nudge */
+  studentTiredSec: number;
+  /** Seconds student must appear frustrated before nudge */
+  studentFrustratedSec: number;
+  /** Seconds student must appear defeated before nudge */
+  studentDefeatedSec: number;
 }
 
 export const DEFAULT_CONFIG: CoachingConfig = {
@@ -38,4 +45,8 @@ export const DEFAULT_CONFIG: CoachingConfig = {
   hesitationThresholdMs: 5_000,       // 5 s response latency = hesitation
   hesitationCountThreshold: 3,        // 3 long pauses in window
   hesitationWindowMs: 120_000,        // 2 min
+  // Student emotion
+  studentTiredSec: 15,
+  studentFrustratedSec: 12,
+  studentDefeatedSec: 12,
 };

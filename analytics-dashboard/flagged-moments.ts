@@ -30,9 +30,12 @@ function severityForType(type: string): FlaggedMoment["severity"] {
     case "student_silent":
     case "tutor_talk_dominant":
     case "interruptions_spike":
+    case "student_frustrated":
+    case "student_defeated":
       return "warning";
     case "low_eye_contact":
     case "student_attention_drift":
+    case "student_tired":
       return "info";
     case "student_hesitating":
       return "alert";

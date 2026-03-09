@@ -11,6 +11,9 @@ export const SENSITIVITY_CONFIGS: Record<SensitivityLevel, Partial<CoachingConfi
     cooldownSec: 180,
     hesitationThresholdMs: 8_000,
     hesitationCountThreshold: 4,
+    studentTiredSec: 25,
+    studentFrustratedSec: 20,
+    studentDefeatedSec: 20,
   },
   medium: {}, // uses DEFAULT_CONFIG as-is
   high: {
@@ -21,6 +24,9 @@ export const SENSITIVITY_CONFIGS: Record<SensitivityLevel, Partial<CoachingConfi
     cooldownSec: 90,
     hesitationThresholdMs: 3_000,
     hesitationCountThreshold: 2,
+    studentTiredSec: 10,
+    studentFrustratedSec: 8,
+    studentDefeatedSec: 8,
   },
 };
 

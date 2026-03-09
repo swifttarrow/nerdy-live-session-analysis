@@ -7,7 +7,10 @@ export type TriggerType =
   | "low_eye_contact"
   | "interruptions_spike"   // M10: tutor→student interruptions spike
   | "student_hesitating"    // M10: student slow to respond repeatedly
-  | "student_attention_drift"; // M12: student sustained gaze away
+  | "student_attention_drift" // M12: student sustained gaze away
+  | "student_tired"         // Student appears tired for threshold
+  | "student_frustrated"   // Student appears frustrated for threshold
+  | "student_defeated";    // Student appears defeated for threshold
 
 export interface Trigger {
   type: TriggerType;
@@ -42,6 +45,10 @@ export interface TriggerState {
   // M10: interruption spike tracking
   /** Timestamps (ms) of recent tutor→student interruptions */
   recentTutorInterruptionTimes: number[];
+  // Student emotion tracking
+  consecutiveTiredSec: number;
+  consecutiveFrustratedSec: number;
+  consecutiveDefeatedSec: number;
 }
 
 export function createInitialTriggerState(): TriggerState {
@@ -53,6 +60,9 @@ export function createInitialTriggerState(): TriggerState {
     tutorStoppedAtMs: null,
     recentHesitationTimes: [],
     recentTutorInterruptionTimes: [],
+    consecutiveTiredSec: 0,
+    consecutiveFrustratedSec: 0,
+    consecutiveDefeatedSec: 0,
   };
 }
 
@@ -108,6 +118,15 @@ export function updateTriggerState(
     (t) => nowMs - t <= config.interruptionSpikeWindowMs
   );
 
+  // --- Student emotion: consecutive seconds ---
+  const emotionalState = student.emotional_state ?? "neutral";
+  const consecutiveTiredSec =
+    emotionalState === "tired" ? state.consecutiveTiredSec + 1 : 0;
+  const consecutiveFrustratedSec =
+    emotionalState === "frustrated" ? state.consecutiveFrustratedSec + 1 : 0;
+  const consecutiveDefeatedSec =
+    emotionalState === "defeated" ? state.consecutiveDefeatedSec + 1 : 0;
+
   return {
     studentSilentSec,
     lowEyeContactSec,
@@ -116,6 +135,9 @@ export function updateTriggerState(
     tutorStoppedAtMs,
     recentHesitationTimes,
     recentTutorInterruptionTimes,
+    consecutiveTiredSec,
+    consecutiveFrustratedSec,
+    consecutiveDefeatedSec,
   };
 }
 
@@ -172,6 +194,30 @@ export const TRIGGERS: Trigger[] = [
     suggestion: "Try engaging with a direct question or activity change",
     evaluate(metrics, _state, _config) {
       return metrics.metrics.student.attention_drift === true;
+    },
+  },
+  {
+    type: "student_tired",
+    headline: "Student appears tired",
+    suggestion: "Consider a short break or switching to a different activity",
+    evaluate(_metrics, state, config) {
+      return state.consecutiveTiredSec >= config.studentTiredSec;
+    },
+  },
+  {
+    type: "student_frustrated",
+    headline: "Student appears frustrated",
+    suggestion: "Try rephrasing the problem or offering a hint to reduce friction",
+    evaluate(_metrics, state, config) {
+      return state.consecutiveFrustratedSec >= config.studentFrustratedSec;
+    },
+  },
+  {
+    type: "student_defeated",
+    headline: "Student may feel defeated",
+    suggestion: "Acknowledge the difficulty and try a simpler problem or different approach",
+    evaluate(_metrics, state, config) {
+      return state.consecutiveDefeatedSec >= config.studentDefeatedSec;
     },
   },
 ];
