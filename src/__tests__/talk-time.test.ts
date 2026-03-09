@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { createTalkTimeAggregator } from "@/lib/audio/talk-time";
+import { createTalkTimeAggregator } from "@metrics-engine/audio/talk-time";
 
 describe("createTalkTimeAggregator", () => {
   let agg: ReturnType<typeof createTalkTimeAggregator>;

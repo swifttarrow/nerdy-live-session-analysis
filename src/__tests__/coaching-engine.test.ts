@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createCoachingEngine, NudgeEvent } from "@/lib/coaching/engine";
-import { validateMetrics, SessionMetrics } from "@/lib/session/metrics-schema";
-import type { CoachingConfig } from "@/lib/coaching/config";
+import { createCoachingEngine, NudgeEvent } from "@coaching-system/engine";
+import { validateMetrics, type SessionMetrics } from "@metrics-engine/metrics-schema";
+import type { CoachingConfig } from "@coaching-system/config";
 
 const TEST_CONFIG: CoachingConfig = {
   studentSilentSec: 5,        // 5s for test speed

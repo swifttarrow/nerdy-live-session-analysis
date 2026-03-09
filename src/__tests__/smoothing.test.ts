@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createEmaSmoother } from "@/lib/video/smoothing";
+import { createEmaSmoother } from "@video-processor/smoothing";
 
 describe("createEmaSmoother", () => {
   it("initializes with first value on first update", () => {

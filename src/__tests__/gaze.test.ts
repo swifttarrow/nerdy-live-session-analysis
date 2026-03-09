@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveGazeScore } from "@/lib/video/gaze";
+import { deriveGazeScore } from "@video-processor/gaze";
 import type { FaceLandmarkerResult, NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 /** Build a 478-landmark array with a default value, then override specific indices */

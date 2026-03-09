@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { computeRmsEnergy } from "@/lib/audio/voice-energy";
-import { computeExpressionEnergy } from "@/lib/video/facial-expression";
-import { combineEnergyScores, classifyEnergyLevel } from "@/lib/energy/energy-level";
+import { computeRmsEnergy } from "@metrics-engine/audio/voice-energy";
+import { computeExpressionEnergy } from "@video-processor/facial-expression";
+import { combineEnergyScores, classifyEnergyLevel } from "@metrics-engine/energy/energy-level";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 // ---------------------------------------------------------------------------

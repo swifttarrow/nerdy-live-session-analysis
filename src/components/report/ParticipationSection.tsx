@@ -1,5 +1,5 @@
-import { participationDescription } from "@/lib/post-session/participation";
-import type { SessionSummary } from "@/lib/post-session/summary";
+import { participationDescription } from "@analytics-dashboard/participation";
+import type { SessionSummary } from "@analytics-dashboard/summary";
 
 interface ParticipationSectionProps {
   summary: SessionSummary;

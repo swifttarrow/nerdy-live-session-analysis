@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { SessionReport } from "@/lib/post-session/report";
-import type { Recommendation } from "@/lib/post-session/recommendations";
+import type { SessionReport } from "@analytics-dashboard/report";
+import type { Recommendation } from "@analytics-dashboard/recommendations";
 
 export function useReportData() {
   const [report, setReport] = useState<SessionReport | null>(null);

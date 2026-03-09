@@ -3,7 +3,7 @@ import {
   classifyOverlapContent,
   summarizeTier2Classifications,
   type Tier2Classification,
-} from "@/lib/audio/interruption-transcription";
+} from "@metrics-engine/audio/interruption-transcription";
 
 describe("classifyOverlapContent", () => {
   it("classifies 'why does this work?' student→tutor as clarifying and productive", () => {

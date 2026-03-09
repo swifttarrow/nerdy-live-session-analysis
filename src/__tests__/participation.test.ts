@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { classifyParticipation, participationDescription } from "@/lib/post-session/participation";
+import { classifyParticipation, participationDescription } from "@analytics-dashboard/participation";
 
 describe("classifyParticipation", () => {
   it("returns 'passive' when ratio is below passiveBelow threshold", () => {

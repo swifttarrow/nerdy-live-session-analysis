@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { segmentAttention, detectDriftPattern } from "@/lib/post-session/attention-cycles";
-import type { SessionMetrics } from "@/lib/session/metrics-schema";
+import { segmentAttention, detectDriftPattern } from "@analytics-dashboard/attention-cycles";
+import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 
 function makeMetrics(tutorEye: number, studentEye: number): SessionMetrics {
   return {

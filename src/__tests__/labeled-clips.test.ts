@@ -11,10 +11,10 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { aggregateSessionSummary } from "@/lib/post-session/summary";
-import { createDriftDetector } from "@/lib/video/attention-drift";
-import { combineEnergyScores } from "@/lib/energy/energy-level";
-import type { SessionMetrics } from "@/lib/session/metrics-schema";
+import { aggregateSessionSummary } from "@analytics-dashboard/summary";
+import { createDriftDetector } from "@video-processor/attention-drift";
+import { combineEnergyScores } from "@metrics-engine/energy/energy-level";
+import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 
 // Load labeled clip metadata
 const clipsPath = join(process.cwd(), "test/fixtures/labeled-clips.json");

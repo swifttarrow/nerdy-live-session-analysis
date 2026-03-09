@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeTrends } from "@/lib/post-session/trends";
+import { computeTrends } from "@analytics-dashboard/trends";
 import type { StoredSessionSummary } from "@/lib/session/session-store";
 
 function makeSession(overrides: Partial<StoredSessionSummary> = {}): StoredSessionSummary {

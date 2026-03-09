@@ -4,41 +4,35 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Room } from "livekit-client";
 import { connectToRoom, disconnectRoom } from "@/lib/livekit/room";
-import { createFrameSampler } from "@/lib/video/frame-sampler";
+import { createFrameSampler } from "@video-processor/frame-sampler";
 import {
   createVideoPipeline,
   type VideoPipeline,
   type VideoQualityState,
-} from "@/lib/video/pipeline";
-import { createAudioPipeline } from "@/lib/audio/pipeline";
-import { createMetricsAggregator } from "@/lib/metrics/aggregator";
-import { createCoachingEngine } from "@/lib/coaching/engine";
-import { createInterruptionTracker } from "@/lib/audio/interruptions";
-import { classifyInterruptionsWithContent } from "@/lib/audio/interruption-classification";
+} from "@video-processor/pipeline";
 import {
+  createAudioPipeline,
+  createMetricsAggregator,
+  createInterruptionTracker,
+  classifyInterruptionsWithContent,
   createResponseLatencyTracker,
-  type ResponseLatencyTracker,
-} from "@/lib/audio/response-latency";
-import { generateReport } from "@/lib/post-session/report";
-import { DEFAULT_CONFIG } from "@/lib/coaching/config";
+} from "@metrics-engine/index";
+import type { ResponseLatencyTracker, InterruptionTracker } from "@metrics-engine/index";
+import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import {
+  createCoachingEngine,
+  DEFAULT_CONFIG,
   applySensitivity,
   loadSensitivityPercent,
   saveSensitivityPercent,
   percentToLevel,
-} from "@/lib/coaching/sensitivity";
-import {
   applyPreset,
   loadPreset,
   savePreset,
-  type SessionPreset,
-} from "@/lib/coaching/presets";
-import { saveSession } from "@/lib/session/session-store";
-import { loadHistory } from "@/lib/session/session-store";
-import { computeTrends } from "@/lib/post-session/trends";
-import type { SessionMetrics } from "@/lib/session/metrics-schema";
-import type { NudgeEvent } from "@/lib/coaching/engine";
-import type { InterruptionTracker } from "@/lib/audio/interruptions";
+} from "@coaching-system/index";
+import type { NudgeEvent, SessionPreset } from "@coaching-system/index";
+import { saveSession, loadHistory } from "@/lib/session/session-store";
+import { generateReport, computeTrends } from "@analytics-dashboard/index";
 import type { ParticipantRole } from "@/lib/livekit/room";
 
 export type SessionRole = "teacher" | "student";

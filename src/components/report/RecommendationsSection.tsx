@@ -1,4 +1,4 @@
-import type { Recommendation } from "@/lib/post-session/recommendations";
+import type { Recommendation } from "@analytics-dashboard/recommendations";
 
 interface RecommendationsSectionProps {
   recommendations: Recommendation[];

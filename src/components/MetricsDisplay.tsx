@@ -1,7 +1,7 @@
 "use client";
 
-import type { SessionMetrics } from "@/lib/session/metrics-schema";
-import type { VideoQualityState } from "@/lib/video/pipeline";
+import type { SessionMetrics } from "@metrics-engine/metrics-schema";
+import type { VideoQualityState } from "@video-processor/pipeline";
 
 interface Props {
   metrics: SessionMetrics | null;

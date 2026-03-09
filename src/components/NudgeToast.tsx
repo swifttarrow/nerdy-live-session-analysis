@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import type { NudgeEvent } from "@/lib/coaching/engine";
+import type { NudgeEvent } from "@coaching-system/engine";
 
 interface Props {
   nudge: NudgeEvent;

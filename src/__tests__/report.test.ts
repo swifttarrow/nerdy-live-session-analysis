@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { aggregateSessionSummary } from "@/lib/post-session/summary";
-import { generateRecommendations } from "@/lib/post-session/recommendations";
-import { generateReport } from "@/lib/post-session/report";
-import type { SessionMetrics } from "@/lib/session/metrics-schema";
+import { aggregateSessionSummary } from "@analytics-dashboard/summary";
+import { generateRecommendations } from "@analytics-dashboard/recommendations";
+import { generateReport } from "@analytics-dashboard/report";
+import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 
 function makeMetrics(
   tutorEye: number,

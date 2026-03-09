@@ -3,12 +3,12 @@
  * Verifies triggers fire at expected times and report generates from session.
  */
 import { describe, it, expect, beforeEach } from "vitest";
-import { createCoachingEngine, NudgeEvent } from "@/lib/coaching/engine";
-import { generateReport } from "@/lib/post-session/report";
-import { validateMetrics, SessionMetrics } from "@/lib/session/metrics-schema";
-import { combineEnergyScores } from "@/lib/energy/energy-level";
-import { createDriftDetector } from "@/lib/video/attention-drift";
-import type { CoachingConfig } from "@/lib/coaching/config";
+import { createCoachingEngine, NudgeEvent } from "@coaching-system/engine";
+import { generateReport } from "@analytics-dashboard/report";
+import { validateMetrics, type SessionMetrics } from "@metrics-engine/metrics-schema";
+import { combineEnergyScores } from "@metrics-engine/energy/energy-level";
+import { createDriftDetector } from "@video-processor/attention-drift";
+import type { CoachingConfig } from "@coaching-system/config";
 
 const FAST_CONFIG: CoachingConfig = {
   studentSilentSec: 3,

@@ -1,5 +1,5 @@
 import { MetricBar } from "./MetricBar";
-import type { SessionSummary } from "@/lib/post-session/summary";
+import type { SessionSummary } from "@analytics-dashboard/summary";
 
 interface KeyMetricsSectionProps {
   summary: SessionSummary;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { SessionSummary } from "@/lib/post-session/summary";
-import { SessionSummarySchema } from "@/lib/post-session/summary-schema";
+import type { SessionSummary } from "@analytics-dashboard/summary";
+import { SessionSummarySchema } from "@analytics-dashboard/summary-schema";
 
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
 

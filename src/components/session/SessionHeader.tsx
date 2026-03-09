@@ -1,6 +1,6 @@
 import SensitivitySelector from "@/components/SensitivitySelector";
 import SessionTypeSelector from "@/components/SessionTypeSelector";
-import type { SessionPreset } from "@/lib/coaching/presets";
+import type { SessionPreset } from "@coaching-system/presets";
 import type { SessionStatus } from "@/hooks/useSessionRoom";
 
 type SessionRole = "teacher" | "student";

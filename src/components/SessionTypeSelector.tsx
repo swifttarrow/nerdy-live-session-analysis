@@ -1,5 +1,5 @@
 "use client";
-import { SESSION_PRESETS, SessionPreset } from "@/lib/coaching/presets";
+import { SESSION_PRESETS, type SessionPreset } from "@coaching-system/presets";
 
 interface Props {
   value: SessionPreset;

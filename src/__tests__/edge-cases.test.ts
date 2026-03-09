@@ -3,13 +3,13 @@
  * Covers: no face, no audio, poor video, dropped frames.
  */
 import { describe, it, expect } from "vitest";
-import { deriveGazeScore } from "@/lib/video/gaze";
-import { createEmaSmoother } from "@/lib/video/smoothing";
-import { computeExpressionEnergy } from "@/lib/video/facial-expression";
-import { computeRmsEnergy } from "@/lib/audio/voice-energy";
-import { combineEnergyScores } from "@/lib/energy/energy-level";
-import { createDriftDetector } from "@/lib/video/attention-drift";
-import { validateMetrics } from "@/lib/session/metrics-schema";
+import { deriveGazeScore } from "@video-processor/gaze";
+import { createEmaSmoother } from "@video-processor/smoothing";
+import { computeExpressionEnergy } from "@video-processor/facial-expression";
+import { computeRmsEnergy } from "@metrics-engine/audio/voice-energy";
+import { combineEnergyScores } from "@metrics-engine/energy/energy-level";
+import { createDriftDetector } from "@video-processor/attention-drift";
+import { validateMetrics } from "@metrics-engine/metrics-schema";
 import type { FaceLandmarkerResult } from "@mediapipe/tasks-vision";
 
 // ---------------------------------------------------------------------------

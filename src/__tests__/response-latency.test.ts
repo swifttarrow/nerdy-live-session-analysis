@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createResponseLatencyTracker } from "@/lib/audio/response-latency";
+import { createResponseLatencyTracker } from "@metrics-engine/audio/response-latency";
 
 describe("createResponseLatencyTracker", () => {
   it("computes latency correctly when student responds after tutor stops", () => {

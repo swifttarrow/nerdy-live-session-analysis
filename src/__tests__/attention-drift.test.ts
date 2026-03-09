@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createDriftDetector } from "@/lib/video/attention-drift";
+import { createDriftDetector } from "@video-processor/attention-drift";
 
 describe("createDriftDetector", () => {
   it("returns false initially (no drift at start)", () => {

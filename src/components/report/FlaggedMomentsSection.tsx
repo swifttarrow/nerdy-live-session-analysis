@@ -1,5 +1,5 @@
-import { formatOffset } from "@/lib/post-session/flagged-moments";
-import type { FlaggedMoment } from "@/lib/post-session/flagged-moments";
+import { formatOffset } from "@analytics-dashboard/flagged-moments";
+import type { FlaggedMoment } from "@analytics-dashboard/flagged-moments";
 
 interface FlaggedMomentsSectionProps {
   flaggedMoments: FlaggedMoment[];

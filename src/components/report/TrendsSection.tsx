@@ -1,4 +1,4 @@
-import type { SessionSummary } from "@/lib/post-session/summary";
+import type { SessionSummary } from "@analytics-dashboard/summary";
 
 interface TrendsSectionProps {
   summary: SessionSummary;

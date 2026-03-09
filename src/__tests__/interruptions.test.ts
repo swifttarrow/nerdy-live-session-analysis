@@ -3,11 +3,11 @@ import {
   createInterruptionTracker,
   detectOverlaps,
   type VadSegment,
-} from "@/lib/audio/interruptions";
+} from "@metrics-engine/audio/interruptions";
 import {
   classifyInterruptions,
   classifyInterruptionsWithContent,
-} from "@/lib/audio/interruption-classification";
+} from "@metrics-engine/audio/interruption-classification";
 
 // ---------------------------------------------------------------------------
 // createInterruptionTracker — real-time tracker
