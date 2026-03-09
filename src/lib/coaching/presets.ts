@@ -1,26 +1,21 @@
 import type { CoachingConfig } from "./config";
 import { DEFAULT_CONFIG } from "./config";
 
-export type SessionPreset = "general" | "lecture" | "practice" | "socratic";
+export type SessionPreset = "lecture" | "practice" | "socratic";
 
 export interface PresetDefinition {
   id: SessionPreset;
   label: string;
-  description: string;
+  tooltip: string;
   config: Partial<CoachingConfig>;
 }
 
 export const SESSION_PRESETS: PresetDefinition[] = [
   {
-    id: "general",
-    label: "General",
-    description: "Standard tutoring session",
-    config: {},
-  },
-  {
     id: "lecture",
     label: "Lecture",
-    description: "Tutor explains concepts; higher tutor talk is expected",
+    tooltip:
+      "• Tutor can talk up to 92% of the time\n• Student silence up to 90 seconds before a nudge\n• Best for explaining concepts",
     config: {
       tutorTalkThreshold: 0.92, // higher tolerance for tutor talk
       studentSilentSec: 90,     // longer silence OK during explanations
@@ -29,7 +24,8 @@ export const SESSION_PRESETS: PresetDefinition[] = [
   {
     id: "practice",
     label: "Practice",
-    description: "Student works through problems with tutor guidance",
+    tooltip:
+      "• Tutor talk up to 80%\n• Student silence over 30 seconds triggers a nudge\n• Best when student works through problems with guidance",
     config: {
       tutorTalkThreshold: 0.80,
       studentSilentSec: 30, // student silence during practice is a concern
@@ -38,7 +34,8 @@ export const SESSION_PRESETS: PresetDefinition[] = [
   {
     id: "socratic",
     label: "Socratic",
-    description: "Student-led; high student talk expected",
+    tooltip:
+      "• Tutor should stay under 70% talk\n• Student silence over 20 seconds triggers a nudge\n• Shorter cooldowns; best for student-led discussion",
     config: {
       tutorTalkThreshold: 0.70, // tutor should speak much less
       studentSilentSec: 20,
@@ -60,11 +57,11 @@ const STORAGE_KEY = "sessionlens-preset";
 export function loadPreset(): SessionPreset {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (["general", "lecture", "practice", "socratic"].includes(stored ?? "")) {
+    if (["lecture", "practice", "socratic"].includes(stored ?? "")) {
       return stored as SessionPreset;
     }
   } catch {}
-  return "general";
+  return "socratic";
 }
 
 export function savePreset(preset: SessionPreset): void {

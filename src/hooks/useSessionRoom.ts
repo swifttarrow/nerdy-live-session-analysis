@@ -23,9 +23,9 @@ import { generateReport } from "@/lib/post-session/report";
 import { DEFAULT_CONFIG } from "@/lib/coaching/config";
 import {
   applySensitivity,
-  loadSensitivity,
-  saveSensitivity,
-  type SensitivityLevel,
+  loadSensitivityPercent,
+  saveSensitivityPercent,
+  percentToLevel,
 } from "@/lib/coaching/sensitivity";
 import {
   applyPreset,
@@ -65,9 +65,8 @@ export function useSessionRoom() {
     null
   );
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
-  const [sensitivityLevel, setSensitivityLevel] =
-    useState<SensitivityLevel>("medium");
-  const [sessionPreset, setSessionPreset] = useState<SessionPreset>("general");
+  const [sensitivityPercent, setSensitivityPercent] = useState<number>(50);
+  const [sessionPreset, setSessionPreset] = useState<SessionPreset>("socratic");
 
   const localVideoRef = useRef<HTMLDivElement>(null);
   const remoteVideoRef = useRef<HTMLDivElement>(null);
@@ -80,13 +79,13 @@ export function useSessionRoom() {
   const sessionStartMsRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setSensitivityLevel(loadSensitivity());
+    setSensitivityPercent(loadSensitivityPercent());
     setSessionPreset(loadPreset());
   }, []);
 
-  const handleSensitivityChange = useCallback((level: SensitivityLevel) => {
-    setSensitivityLevel(level);
-    saveSensitivity(level);
+  const handleSensitivityChange = useCallback((percent: number) => {
+    setSensitivityPercent(percent);
+    saveSensitivityPercent(percent);
   }, []);
 
   const handlePresetChange = useCallback((preset: SessionPreset) => {
@@ -112,7 +111,7 @@ export function useSessionRoom() {
       const { token } = await res.json();
 
       const config = applyPreset(
-        applySensitivity(DEFAULT_CONFIG, sensitivityLevel),
+        applySensitivity(DEFAULT_CONFIG, percentToLevel(sensitivityPercent)),
         sessionPreset
       );
 
@@ -212,7 +211,7 @@ export function useSessionRoom() {
     role,
     localRole,
     remoteRole,
-    sensitivityLevel,
+    sensitivityPercent,
     sessionPreset,
   ]);
 
@@ -289,7 +288,7 @@ export function useSessionRoom() {
     metrics,
     videoQuality,
     nudges,
-    sensitivityLevel,
+    sensitivityPercent,
     sessionPreset,
     handleSensitivityChange,
     handlePresetChange,

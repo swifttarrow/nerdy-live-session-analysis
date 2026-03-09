@@ -19,7 +19,7 @@ function SessionContent() {
     metrics,
     videoQuality,
     nudges,
-    sensitivityLevel,
+    sensitivityPercent,
     sessionPreset,
     hasRemoteParticipant,
     handleSensitivityChange,
@@ -59,7 +59,7 @@ function SessionContent() {
         role={role}
         status={status}
         sessionPreset={sessionPreset}
-        sensitivityLevel={sensitivityLevel}
+        sensitivityPercent={sensitivityPercent}
         onPresetChange={handlePresetChange}
         onSensitivityChange={handleSensitivityChange}
         onEndSession={endSession}

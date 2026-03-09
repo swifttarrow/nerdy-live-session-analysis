@@ -14,7 +14,7 @@ export default function SessionTypeSelector({ value, onChange }: Props) {
         <button
           key={p.id}
           onClick={() => onChange(p.id)}
-          title={p.description}
+          title={p.tooltip}
           className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
             value === p.id
               ? "bg-violet-600 text-white"

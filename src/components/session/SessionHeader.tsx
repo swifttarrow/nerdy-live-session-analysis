@@ -1,7 +1,6 @@
 import SensitivitySelector from "@/components/SensitivitySelector";
 import SessionTypeSelector from "@/components/SessionTypeSelector";
 import type { SessionPreset } from "@/lib/coaching/presets";
-import type { SensitivityLevel } from "@/lib/coaching/sensitivity";
 import type { SessionStatus } from "@/hooks/useSessionRoom";
 
 type SessionRole = "teacher" | "student";
@@ -11,9 +10,9 @@ interface SessionHeaderProps {
   role: SessionRole;
   status: SessionStatus;
   sessionPreset: SessionPreset;
-  sensitivityLevel: SensitivityLevel;
+  sensitivityPercent: number;
   onPresetChange: (preset: SessionPreset) => void;
-  onSensitivityChange: (level: SensitivityLevel) => void;
+  onSensitivityChange: (percent: number) => void;
   onEndSession: () => void;
   /** If false, mode controls (preset, sensitivity) are hidden (student view) */
   showModeControls?: boolean;
@@ -24,7 +23,7 @@ export function SessionHeader({
   role,
   status,
   sessionPreset,
-  sensitivityLevel,
+  sensitivityPercent,
   onPresetChange,
   onSensitivityChange,
   onEndSession,
@@ -58,7 +57,7 @@ export function SessionHeader({
         {showModeControls && (
           <>
             <SessionTypeSelector value={sessionPreset} onChange={onPresetChange} />
-            <SensitivitySelector value={sensitivityLevel} onChange={onSensitivityChange} />
+            <SensitivitySelector value={sensitivityPercent} onChange={onSensitivityChange} />
           </>
         )}
         <span className={`text-xs px-2 py-1 rounded-full ${statusClass}`}>
