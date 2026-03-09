@@ -39,21 +39,35 @@ export function createAudioPipeline(
 ): AudioPipeline {
   const aggregator = createTalkTimeAggregator();
   const vadInstances: Array<{ destroy(): void }> = [];
+  const rolesWithTracks = new Set<ParticipantRole>();
+  let sessionStartMs: number | null = null;
+
+  function toOutput(state: { talkTimeMs: number; talkTimePercent: number; speaking: boolean }, _role: ParticipantRole): AudioPipelineOutput {
+    if (rolesWithTracks.size === 1 && sessionStartMs !== null) {
+      const sessionDurationMs = Math.max(1, Date.now() - sessionStartMs);
+      const percent = Math.min(1, state.talkTimeMs / sessionDurationMs);
+      return { talkTimePercent: percent, speaking: state.speaking };
+    }
+    return { talkTimePercent: state.talkTimePercent, speaking: state.speaking };
+  }
 
   return {
     addTrack(role, stream, onUpdate) {
+      rolesWithTracks.add(role);
+      if (sessionStartMs === null) sessionStartMs = Date.now();
+
       void createVad(stream, {
         onSpeechStart: () => {
           aggregator.onSpeechStart(role);
           interruptionTracker?.onSpeechStart(role);
           responseLatencyTracker?.onSpeechStart(role);
-          onUpdate(aggregator.getState(role));
+          onUpdate(toOutput(aggregator.getState(role), role));
         },
         onSpeechEnd: (_audio) => {
           aggregator.onSpeechEnd(role);
           interruptionTracker?.onSpeechEnd(role);
           responseLatencyTracker?.onSpeechEnd(role);
-          onUpdate(aggregator.getState(role));
+          onUpdate(toOutput(aggregator.getState(role), role));
         },
         onVADMisfire: () => {
           // Misfire: treat as silence
@@ -61,7 +75,7 @@ export function createAudioPipeline(
             aggregator.onSpeechEnd(role);
             interruptionTracker?.onSpeechEnd(role);
             responseLatencyTracker?.onSpeechEnd(role);
-            onUpdate(aggregator.getState(role));
+            onUpdate(toOutput(aggregator.getState(role), role));
           }
         },
       }).then((vad) => {
