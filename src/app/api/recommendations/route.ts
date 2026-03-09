@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import type { SessionSummary } from "@analytics-dashboard/summary";
 import { SessionSummarySchema } from "@analytics-dashboard/summary-schema";
 
-const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
-
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "LLM not configured" }, { status: 503 });
   }
+
+  const client = new OpenAI({ apiKey });
 
   let body: unknown;
   try {
@@ -30,16 +30,13 @@ export async function POST(req: NextRequest) {
   const prompt = buildPrompt(summary);
 
   try {
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
+    const completion = await client.chat.completions.create({
+      model: "gpt-4o",
       max_tokens: 512,
       messages: [{ role: "user", content: prompt }],
     });
 
-    const text = message.content
-      .filter((b) => b.type === "text")
-      .map((b) => (b as { type: "text"; text: string }).text)
-      .join("");
+    const text = completion.choices[0]?.message?.content?.trim() ?? "";
 
     // Parse 1–3 bullet recommendations from response
     const lines = text
