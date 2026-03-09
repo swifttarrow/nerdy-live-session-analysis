@@ -6,6 +6,7 @@ import { useSessionRoom } from "@/hooks/useSessionRoom";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
 import ConsentBanner from "@/components/ConsentBanner";
+import DebugPanel from "@/components/DebugPanel";
 import { SessionHeader } from "@/components/session/SessionHeader";
 import { SessionSidePanel } from "@/components/session/SessionSidePanel";
 import { VideoLayoutSelector } from "@/components/session/VideoLayoutSelector";
@@ -32,6 +33,9 @@ function SessionContent() {
     roomName,
     localRole,
     remoteRole,
+    debugMode,
+    setDebugMode,
+    debugStats,
   } = useSessionRoom();
 
   const [consented, setConsented] = useState(false);
@@ -64,6 +68,8 @@ function SessionContent() {
         onSensitivityChange={handleSensitivityChange}
         onEndSession={endSession}
         showModeControls={isTeacher}
+        debugMode={debugMode}
+        onDebugModeChange={setDebugMode}
       />
 
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
@@ -102,9 +108,17 @@ function SessionContent() {
           showMetricsPanel={isTeacher}
           metricsPanelOpen={metricsPanelOpen}
           metricsContent={
-            <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
+            <div className="space-y-4">
+              {debugMode && <DebugPanel debugStats={debugStats} />}
+              <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
+            </div>
           }
         />
+        {debugMode && (!isTeacher || !metricsPanelOpen) && (
+          <div className="fixed bottom-4 left-4 z-40 max-w-sm max-h-[70vh] overflow-auto">
+            <DebugPanel debugStats={debugStats} />
+          </div>
+        )}
       </div>
 
       {status === "error" && (

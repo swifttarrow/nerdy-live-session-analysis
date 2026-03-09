@@ -17,7 +17,11 @@ import {
   classifyInterruptionsWithContent,
   createResponseLatencyTracker,
 } from "@metrics-engine/index";
-import type { ResponseLatencyTracker, InterruptionTracker } from "@metrics-engine/index";
+import type {
+  ResponseLatencyTracker,
+  InterruptionTracker,
+  AudioPipeline,
+} from "@metrics-engine/index";
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import {
   createCoachingEngine,
@@ -34,8 +38,31 @@ import type { NudgeEvent, SessionPreset } from "@coaching-system/index";
 import { saveSession, loadHistory } from "@/lib/session/session-store";
 import { generateReport, computeTrends } from "@analytics-dashboard/index";
 import type { ParticipantRole } from "@/lib/livekit/room";
+import type { EmotionScores } from "@video-processor/emotion-detection";
 
 export type SessionRole = "teacher" | "student";
+
+/** Debug stats exposed when debug mode is on */
+export interface DebugStats {
+  /** Who is currently speaking: teacher, student, both, or neither */
+  speakerState: "teacher" | "student" | "both" | "neither";
+  /** Cumulative talk time in ms per role */
+  talkTimeMs: { tutor: number; student: number };
+  /** Raw emotion scores contributing to student emotional state */
+  emotionScores: EmotionScores;
+  /** Current emotional state label */
+  emotionalState: string;
+  /** Interruption counts */
+  interruptions: { studentToTutor: number; tutorToStudent: number };
+  /** Response latency stats */
+  responseLatency: { turnCount: number; avgMs: number; hesitationCount: number };
+  /** Eye contact scores (tutor, student) */
+  eyeContact: { tutor: number; student: number };
+  /** Video quality per role */
+  videoQuality: VideoQualityState | null;
+  /** Pipeline latency (mediapipe p50 ms) */
+  pipelineLatencyMs: number;
+}
 
 export type SessionStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -66,11 +93,15 @@ export function useSessionRoom() {
   const remoteVideoRef = useRef<HTMLDivElement>(null);
   const roomRef = useRef<Room | null>(null);
   const videoPipelineRef = useRef<VideoPipeline | null>(null);
+  const audioPipelineRef = useRef<AudioPipeline | null>(null);
   const sessionMetricsHistory = useRef<SessionMetrics[]>([]);
   const interruptionTrackerRef = useRef<InterruptionTracker | null>(null);
   const responseLatencyTrackerRef = useRef<ResponseLatencyTracker | null>(null);
   const allNudgesRef = useRef<NudgeEvent[]>([]);
   const sessionStartMsRef = useRef<number | null>(null);
+
+  const [debugMode, setDebugMode] = useState(false);
+  const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
 
   useEffect(() => {
     setSensitivityPercent(loadSensitivityPercent());
@@ -86,6 +117,94 @@ export function useSessionRoom() {
     setSessionPreset(preset);
     savePreset(preset);
   }, []);
+
+  // Poll debug stats when debug mode is on and connected
+  useEffect(() => {
+    if (!debugMode || status !== "connected") {
+      setDebugStats(null);
+      return;
+    }
+    const interval = setInterval(() => {
+      const vp = videoPipelineRef.current;
+      const ap = audioPipelineRef.current;
+      const it = interruptionTrackerRef.current;
+      const rt = responseLatencyTrackerRef.current;
+      const m = metrics;
+
+      if (!m) return;
+
+      const { tutor, student } = m.metrics;
+      const speakerState: DebugStats["speakerState"] =
+        tutor.current_speaking && student.current_speaking
+          ? "both"
+          : tutor.current_speaking
+            ? "teacher"
+            : student.current_speaking
+              ? "student"
+              : "neither";
+
+      const talkTimeMs = ap
+        ? (() => {
+            const s = ap.getState();
+            return { tutor: s.tutor.talkTimeMs, student: s.student.talkTimeMs };
+          })()
+        : { tutor: 0, student: 0 };
+
+      const emotionScores = vp?.getStudentEmotionScores?.() ?? {
+        engaged: 0,
+        attentive: 0,
+        curious: 0,
+        confident: 0,
+        understanding: 0,
+        excited: 0,
+        focused: 0,
+        neutral: 0,
+        thinking: 0,
+        confused: 0,
+        frustrated: 0,
+        tired: 0,
+        defeated: 0,
+        bored: 0,
+        anxious: 0,
+      };
+      const emotionalState = student.emotional_state ?? "neutral";
+
+      const interruptions = it
+        ? it.getStats()
+        : { studentToTutor: 0, tutorToStudent: 0 };
+      const latencyStats = rt?.getStats(5000);
+      const responseLatency = {
+        turnCount: latencyStats?.turnCount ?? 0,
+        avgMs: latencyStats?.avgResponseLatencyMs ?? 0,
+        hesitationCount: latencyStats?.hesitationCount ?? 0,
+      };
+
+      const videoQualityState = vp?.getQualityStatus?.() ?? null;
+      const scores = vp?.getLatestScores?.();
+      const eyeContact = scores
+        ? { tutor: scores.tutor.eyeContactScore, student: scores.student.eyeContactScore }
+        : { tutor: tutor.eye_contact_score, student: student.eye_contact_score };
+
+      const mediapipeStats = vp?.latency?.getStageStats?.("mediapipe");
+      const pipelineLatencyMs = mediapipeStats?.p50 ?? 0;
+
+      setDebugStats({
+        speakerState,
+        talkTimeMs,
+        emotionScores,
+        emotionalState,
+        interruptions: {
+          studentToTutor: interruptions.studentToTutor,
+          tutorToStudent: interruptions.tutorToStudent,
+        },
+        responseLatency,
+        eyeContact,
+        videoQuality: videoQualityState ?? videoQuality,
+        pipelineLatencyMs,
+      });
+    }, 500);
+    return () => clearInterval(interval);
+  }, [debugMode, status, metrics, videoQuality]);
 
   const startSession = useCallback(async () => {
     setStatus("connecting");
@@ -133,6 +252,7 @@ export function useSessionRoom() {
         interruptionTracker,
         latencyTracker
       );
+      audioPipelineRef.current = audioPipeline;
       const aggregator = createMetricsAggregator(roomName, (m) => {
         setMetrics(m);
         sessionMetricsHistory.current.push(m);
@@ -217,7 +337,9 @@ export function useSessionRoom() {
 
   const endSession = useCallback(async () => {
     videoPipelineRef.current = null;
+    audioPipelineRef.current = null;
     setVideoQuality(null);
+    setDebugStats(null);
     if (roomRef.current) {
       await disconnectRoom(roomRef.current);
       roomRef.current = null;
@@ -277,7 +399,7 @@ export function useSessionRoom() {
     setNudges((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
-  return {
+    return {
     roomName,
     role,
     localRole,
@@ -290,6 +412,9 @@ export function useSessionRoom() {
     nudges,
     sensitivityPercent,
     sessionPreset,
+    debugMode,
+    setDebugMode,
+    debugStats,
     handleSensitivityChange,
     handlePresetChange,
     startSession,
