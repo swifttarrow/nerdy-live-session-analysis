@@ -78,7 +78,8 @@ function createEnergyVad(stream: MediaStream, callbacks: VadCallbacks): VadInsta
   let silenceStart = 0;
   let intervalId: ReturnType<typeof setInterval> | null = null;
 
-  const SPEECH_THRESHOLD = 0.01;
+  // Higher threshold to avoid ambient noise (fan, AC, room tone) triggering false speech
+  const SPEECH_THRESHOLD = 0.03;
   const SILENCE_DURATION_MS = 500;
 
   return {
