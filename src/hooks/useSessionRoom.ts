@@ -58,6 +58,7 @@ export function useSessionRoom() {
   const remoteRole: ParticipantRole = role === "teacher" ? "student" : "tutor";
 
   const [status, setStatus] = useState<SessionStatus>("idle");
+  const [hasRemoteParticipant, setHasRemoteParticipant] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
   const [videoQuality, setVideoQuality] = useState<VideoQualityState | null>(
@@ -95,6 +96,7 @@ export function useSessionRoom() {
 
   const startSession = useCallback(async () => {
     setStatus("connecting");
+    setHasRemoteParticipant(false);
 
     try {
       const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
@@ -158,6 +160,7 @@ export function useSessionRoom() {
           sampler.start();
         },
         onRemoteVideoTrack: (el) => {
+          setHasRemoteParticipant(true);
           el.style.cssText =
             "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
           remoteVideoRef.current?.appendChild(el);
@@ -187,6 +190,7 @@ export function useSessionRoom() {
           });
         },
         onRemoteDisconnect: () => {
+          setHasRemoteParticipant(false);
           console.log("Remote participant disconnected");
         },
         onConnectionStateChange: (state) => {
@@ -280,6 +284,7 @@ export function useSessionRoom() {
     localRole,
     remoteRole,
     status,
+    hasRemoteParticipant,
     errorMsg,
     metrics,
     videoQuality,
