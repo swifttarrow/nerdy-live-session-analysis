@@ -31,6 +31,9 @@ Full transcription would require either server-side processing or significant cl
 **Rule-based coaching over LLM**
 Real-time LLM inference (even with a fast model) adds 500–2000 ms per decision, making it incompatible with non-intrusive nudges. Template-based triggers with configurable thresholds and 2-minute cooldowns achieve the correct behavioral outcomes at zero latency and cost.
 
+**Post-session interruption analysis over live feedback**
+Interruptions are social signals; they can mean different things depending on context. Real-time feedback risks false positives — e.g., a student interrupting to ask a clarifying question vs. the tutor cutting the student off. We surface the detailed classification (productive/neutral/unproductive) and breakdown only in the post-session report, where tutors can review counts and patterns with full context. The live "interruptions spike" trigger remains a coarse, count-based nudge (tutor→student exceeds threshold) rather than a contextual judgment.
+
 **Browser-first processing**
 Keeping all CV and audio analysis in the browser eliminates server round-trips (saves 200–500 ms), prevents raw video/audio from leaving the device (privacy), and removes per-minute API costs. The tradeoff is client CPU load, which is kept acceptable by limiting analysis to ~5 FPS.
 
