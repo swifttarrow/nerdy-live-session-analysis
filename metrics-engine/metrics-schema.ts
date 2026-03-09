@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+/** Student emotional states from face analysis */
+export const EmotionalStateSchema = z.enum(["neutral", "tired", "frustrated", "defeated"]);
+export type EmotionalState = z.infer<typeof EmotionalStateSchema>;
+
 export const ParticipantMetricsSchema = z.object({
   eye_contact_score: z.number().min(0).max(1),
   talk_time_percent: z.number().min(0).max(1),
@@ -8,6 +12,8 @@ export const ParticipantMetricsSchema = z.object({
   energy_level: z.number().min(0).max(1).optional(),
   /** M12: sustained attention drift (looking away > threshold) */
   attention_drift: z.boolean().optional(),
+  /** Student emotional state from face landmarks (tired, frustrated, defeated) */
+  emotional_state: EmotionalStateSchema.optional(),
 });
 
 export const SessionMetricsSchema = z.object({

@@ -9,6 +9,7 @@ interface ParticipantState {
   speaking: boolean;
   energyLevel?: number;
   attentionDrift?: boolean;
+  emotionalState?: import("./metrics-schema").EmotionalState;
 }
 
 export interface MetricsAggregator {
@@ -18,6 +19,8 @@ export interface MetricsAggregator {
   updateEnergyLevel(role: StreamRole, level: number): void;
   /** M12: update attention drift flag for a participant */
   updateAttentionDrift(role: StreamRole, drifting: boolean): void;
+  /** Update student emotional state (tired, frustrated, defeated, neutral) */
+  updateEmotionalState(role: StreamRole, state: import("./metrics-schema").EmotionalState): void;
   start(): void;
   stop(): void;
 }
@@ -46,6 +49,7 @@ export function createMetricsAggregator(
         current_speaking: p.speaking,
         ...(p.energyLevel !== undefined ? { energy_level: Math.round(p.energyLevel * 100) / 100 } : {}),
         ...(p.attentionDrift !== undefined ? { attention_drift: p.attentionDrift } : {}),
+        ...(p.emotionalState !== undefined ? { emotional_state: p.emotionalState } : {}),
       };
     };
 
@@ -80,6 +84,10 @@ export function createMetricsAggregator(
 
     updateAttentionDrift(role, drifting) {
       state[role].attentionDrift = drifting;
+    },
+
+    updateEmotionalState(role, emotionalState) {
+      state[role].emotionalState = emotionalState;
     },
 
     start() {
