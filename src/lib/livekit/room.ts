@@ -38,6 +38,11 @@ export async function connectToRoom(
   const room = new Room({
     adaptiveStream: true,
     dynacast: true,
+    audioCaptureDefaults: {
+      noiseSuppression: true,
+      echoCancellation: true,
+      autoGainControl: true,
+    },
   });
 
   room.on(RoomEvent.ConnectionStateChanged, (state: ConnectionState) => {
