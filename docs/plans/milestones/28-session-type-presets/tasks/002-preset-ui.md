@@ -6,10 +6,10 @@ Add UI for selecting session type preset.
 
 ## Deliverables
 
-- [ ] Pre-session or session start: select Lecture, Practice, Socratic, General
-- [ ] Clear labels; brief description per preset
-- [ ] Default: General
-- [ ] Persist for session
+- [x] Pre-session or session start: select Lecture, Practice, Socratic, General
+- [x] Clear labels; brief description per preset
+- [x] Default: General
+- [x] Persist for session
 
 ## Verification
 

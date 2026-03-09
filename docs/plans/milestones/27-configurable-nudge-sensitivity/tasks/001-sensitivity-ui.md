@@ -6,9 +6,9 @@ Add UI controls for nudge sensitivity.
 
 ## Deliverables
 
-- [ ] Slider or preset buttons (Low, Medium, High)
-- [ ] Place in session settings or pre-session config
-- [ ] Clear labels; non-intrusive
+- [x] Slider or preset buttons (Low, Medium, High)
+- [x] Place in session settings or pre-session config
+- [x] Clear labels; non-intrusive
 
 ## Verification
 

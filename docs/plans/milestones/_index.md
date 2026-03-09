@@ -50,20 +50,20 @@
 
 | # | Milestone | Status |
 |---|-----------|--------|
-| 21 | [21-response-latency](./21-response-latency/) | Pending |
-| 22 | [22-participation-balance](./22-participation-balance/) | Pending |
-| 23 | [23-attention-cycles](./23-attention-cycles/) | Pending |
+| 21 | [21-response-latency](./21-response-latency/) | Complete |
+| 22 | [22-participation-balance](./22-participation-balance/) | Complete |
+| 23 | [23-attention-cycles](./23-attention-cycles/) | Complete |
 
 ### Post-MVP: Stretch (Post-Session & UX)
 
 | # | Milestone | Status |
 |---|-----------|--------|
-| 24 | [24-post-session-trend-analysis](./24-post-session-trend-analysis/) | Pending |
-| 25 | [25-post-session-flagged-moments](./25-post-session-flagged-moments/) | Pending |
-| 26 | [26-post-session-llm-recommendations](./26-post-session-llm-recommendations/) | Pending |
-| 27 | [27-configurable-nudge-sensitivity](./27-configurable-nudge-sensitivity/) | Pending |
-| 28 | [28-session-type-presets](./28-session-type-presets/) | Pending |
-| 29 | [29-interruptions-tier2-transcription](./29-interruptions-tier2-transcription/) | Pending (Stretch) |
+| 24 | [24-post-session-trend-analysis](./24-post-session-trend-analysis/) | Complete |
+| 25 | [25-post-session-flagged-moments](./25-post-session-flagged-moments/) | Complete |
+| 26 | [26-post-session-llm-recommendations](./26-post-session-llm-recommendations/) | Complete |
+| 27 | [27-configurable-nudge-sensitivity](./27-configurable-nudge-sensitivity/) | Complete |
+| 28 | [28-session-type-presets](./28-session-type-presets/) | Complete |
+| 29 | [29-interruptions-tier2-transcription](./29-interruptions-tier2-transcription/) | Complete (Stretch) |
 
 ## Quick Links
 

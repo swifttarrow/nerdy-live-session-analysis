@@ -24,8 +24,8 @@
 | **Post-session: LLM recommendations**                  | Optional in MVP            | **Stretch** — "personalized"                  |
 | **Configurable nudge sensitivity (UI)**                | In-memory config only      | **Stretch**                                   |
 | **Session-type presets** (Lecture, Practice, Socratic) | General only               | **Stretch**                                   |
-| **Privacy considerations documented**                 | ConsentBanner only         | **Required** — Submission checklist           |
-| **15+ tests** (Technical Implementation Excellent)    | MVP has unit tests         | **Required** — Evaluation criteria            |
+| **Privacy considerations documented**                  | ConsentBanner only         | **Required** — Submission checklist           |
+| **15+ tests** (Technical Implementation Excellent)     | MVP has unit tests         | **Required** — Evaluation criteria            |
 | **Auth / OAuth**                                       | Session tokens only        | **Excluded** — skip for now                   |
 
 
@@ -150,20 +150,23 @@ Phases grouped by related functionality; order respects dependencies.
 | **4.2** | Architecture Document (1–2 pages) | 1–2h |
 | **4.3** | Development Log (1 page)          | 1h   |
 | **4.4** | Demo Video (3–5 min)              | 1h   |
-| **4.5** | Privacy & Compliance document    | 1–2h |
+| **4.5** | Privacy & Compliance document     | 1–2h |
 
 
 ### Group 5: Testing & Quality Assurance
 
 *REQUIREMENTS: "15+ tests" for Excellent Technical Implementation; "Handles edge cases."*
 
-| Phase   | Scope                                                                 | Est. |
-| ------- | -------------------------------------------------------------------- | ---- |
-| **5.1** | Test suite expansion to 15+ tests                                    | 2–3h |
-| **5.2** | Labeled test clips for metric validation (gaze, talk-time)            | 1–2h |
-| **5.3** | Latency instrumentation and E2E assertions                            | 1h   |
+
+| Phase   | Scope                                                      | Est. |
+| ------- | ---------------------------------------------------------- | ---- |
+| **5.1** | Test suite expansion to 15+ tests                          | 2–3h |
+| **5.2** | Labeled test clips for metric validation (gaze, talk-time) | 1–2h |
+| **5.3** | Latency instrumentation and E2E assertions                 | 1h   |
+
 
 **5.1 Test coverage targets:**
+
 - Unit: gaze derivation, talk-time aggregation, coaching triggers (synthetic metric streams), metrics schema validation
 - Integration: full pipeline with recorded session; coaching triggers fire at expected times; cooldowns respected
 - Edge cases: no face, no audio, poor video quality, dropped frames
@@ -179,6 +182,7 @@ Phases grouped by related functionality; order respects dependencies.
 *REQUIREMENTS: "Privacy considerations documented"; "Consent required"; "Clearly disclose what is measured."*
 
 **Sections to include:**
+
 - **What is captured:** Face landmarks, gaze vectors, VAD/diarization features; no raw video/audio egress to server unless recording opted in
 - **Consent & disclosure:** Pre-session wording: "We analyze face position, gaze direction, and speech patterns for coaching. No raw video stored." (per pre-search-checklist)
 - **Retention:** Configurable; recommend 30–90 days default; deletion on request
@@ -216,10 +220,4 @@ The system aims to understand *engagement quality*, not just raw counts. Interru
 5. **Group 3** (3.1 → 3.2) — stretch, if time permits
 
 ---
-
-## Next Steps
-
-1. Review phase structure and estimates.
-2. I can add detailed phase specs (changes required, success criteria) for each phase.
-3. Optionally: generate milestones/tasks for the chosen scope.
 

@@ -6,10 +6,10 @@ Compute time between tutor stops speaking and student starts (response latency).
 
 ## Deliverables
 
-- [ ] Use VAD: tutor track silence → student track speech
-- [ ] Per-turn latency (ms or seconds)
-- [ ] Track sequence: tutor speaks → tutor stops → (gap) → student speaks
-- [ ] Output: latency per turn, running stats
+- [x] Use VAD: tutor track silence → student track speech
+- [x] Per-turn latency (ms or seconds)
+- [x] Track sequence: tutor speaks → tutor stops → (gap) → student speaks
+- [x] Output: latency per turn, running stats
 
 ## Notes
 

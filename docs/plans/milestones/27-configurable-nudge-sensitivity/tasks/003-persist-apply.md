@@ -6,10 +6,10 @@ Persist sensitivity preference and apply to coaching engine.
 
 ## Deliverables
 
-- [ ] Save to localStorage (or session)
-- [ ] Load on session start
-- [ ] Apply to coaching engine before/during session
-- [ ] Default: Medium if not set
+- [x] Save to localStorage (or session)
+- [x] Load on session start
+- [x] Apply to coaching engine before/during session
+- [x] Default: Medium if not set
 
 ## Verification
 

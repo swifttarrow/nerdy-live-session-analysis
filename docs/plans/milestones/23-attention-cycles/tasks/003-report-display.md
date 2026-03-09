@@ -6,9 +6,9 @@ Add attention cycles to post-session report.
 
 ## Deliverables
 
-- [ ] Report: attention by segment (table or chart)
-- [ ] "Drifted in middle" callout if detected
-- [ ] Optional: simple visualization (bar chart by segment)
+- [x] Report: attention by segment (table or chart)
+- [x] "Drifted in middle" callout if detected
+- [x] Optional: simple visualization (bar chart by segment)
 
 ## Verification
 

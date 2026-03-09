@@ -6,10 +6,10 @@ Transcribe overlapping speech segments for content-based classification.
 
 ## Deliverables
 
-- [ ] Extract audio for overlap windows
-- [ ] Run Whisper or browser transcription on segments
-- [ ] Output: text per overlap
-- [ ] Handle: no speech, unclear audio
+- [x] Extract audio for overlap windows
+- [x] Run Whisper or browser transcription on segments
+- [x] Output: text per overlap
+- [x] Handle: no speech, unclear audio
 
 ## Notes
 

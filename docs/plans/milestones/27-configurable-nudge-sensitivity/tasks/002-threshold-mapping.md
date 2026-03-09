@@ -6,10 +6,10 @@ Map sensitivity levels to coaching thresholds.
 
 ## Deliverables
 
-- [ ] Low: looser thresholds (e.g. student_silent_sec: 60, tutor_talk: 0.9)
-- [ ] Medium: current defaults
-- [ ] High: stricter (e.g. student_silent_sec: 30, tutor_talk: 0.8)
-- [ ] Pass to coaching engine config
+- [x] Low: looser thresholds (e.g. student_silent_sec: 60, tutor_talk: 0.9)
+- [x] Medium: current defaults
+- [x] High: stricter (e.g. student_silent_sec: 30, tutor_talk: 0.8)
+- [x] Pass to coaching engine config
 
 ## Verification
 

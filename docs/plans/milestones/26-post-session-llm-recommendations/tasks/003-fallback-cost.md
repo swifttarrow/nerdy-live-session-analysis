@@ -6,9 +6,9 @@ Ensure template fallback and document LLM cost.
 
 ## Deliverables
 
-- [ ] Fallback: template recommendations when LLM fails or disabled
-- [ ] Update AI Cost Analysis (Milestone 16): tokens per session, $ estimate
-- [ ] Config: enable/disable LLM recommendations
+- [x] Fallback: template recommendations when LLM fails or disabled
+- [x] Update AI Cost Analysis (Milestone 16): tokens per session, $ estimate
+- [x] Config: enable/disable LLM recommendations
 
 ## Verification
 

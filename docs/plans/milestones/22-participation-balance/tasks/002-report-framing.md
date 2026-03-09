@@ -6,10 +6,10 @@ Add passive/engaged framing to post-session report.
 
 ## Deliverables
 
-- [ ] Report section: "Participation: Passive" or "Engaged" with explanation
-- [ ] Tie to student talk ratio
-- [ ] Actionable: "Consider asking more open-ended questions" for passive
-- [ ] Optional: real-time display in metrics UI
+- [x] Report section: "Participation: Passive" or "Engaged" with explanation
+- [x] Tie to student talk ratio
+- [x] Actionable: "Consider asking more open-ended questions" for passive
+- [x] Optional: real-time display in metrics UI
 
 ## Verification
 

@@ -6,10 +6,10 @@ Compute attention/eye contact per time segment (beginning, middle, end).
 
 ## Deliverables
 
-- [ ] Divide session into segments (e.g. 3 or 5)
-- [ ] Per-segment average eye contact score
-- [ ] Per participant (tutor, student)
-- [ ] Output: segment scores for report
+- [x] Divide session into segments (e.g. 3 or 5)
+- [x] Per-segment average eye contact score
+- [x] Per participant (tutor, student)
+- [x] Output: segment scores for report
 
 ## Notes
 

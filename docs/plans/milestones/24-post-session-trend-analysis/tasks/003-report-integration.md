@@ -6,9 +6,9 @@ Add trend analysis to post-session report.
 
 ## Deliverables
 
-- [ ] Report section: "Trends" or "Compared to previous sessions"
-- [ ] E.g. "Eye contact improved 10% vs. last 3 sessions"
-- [ ] Only show when 2+ sessions exist
+- [x] Report section: "Trends" or "Compared to previous sessions"
+- [x] E.g. "Eye contact improved 10% vs. last 3 sessions"
+- [x] Only show when 2+ sessions exist
 
 ## Verification
 

@@ -6,9 +6,9 @@ Detect and store flagged moments during session.
 
 ## Deliverables
 
-- [ ] During session: detect low eye contact, long silence, interruption spike
-- [ ] Store: timestamp, reason, optional severity
-- [ ] Aggregate for post-session report
+- [x] During session: detect low eye contact, long silence, interruption spike
+- [x] Store: timestamp, reason, optional severity
+- [x] Aggregate for post-session report
 
 ## Notes
 

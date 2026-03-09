@@ -6,9 +6,9 @@ Apply preset to coaching engine and report.
 
 ## Deliverables
 
-- [ ] Coaching engine: load thresholds from selected preset
-- [ ] Report: optional interpretation per preset (e.g. "Lecture mode: tutor-led session")
-- [ ] Wire preset selection to config
+- [x] Coaching engine: load thresholds from selected preset
+- [x] Report: optional interpretation per preset (e.g. "Lecture mode: tutor-led session")
+- [x] Wire preset selection to config
 
 ## Verification
 

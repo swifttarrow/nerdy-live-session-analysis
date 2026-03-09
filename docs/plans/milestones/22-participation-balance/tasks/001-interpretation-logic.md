@@ -6,9 +6,9 @@ Add interpretation logic: student talk ratio → passive vs. engaged.
 
 ## Deliverables
 
-- [ ] Thresholds: e.g. <20% student = passive, 20–50% = moderate, >50% = engaged
-- [ ] Per ONE_PAGER: primary behavioral signal
-- [ ] Output: label + optional score for report
+- [x] Thresholds: e.g. <20% student = passive, 20–50% = moderate, >50% = engaged
+- [x] Per ONE_PAGER: primary behavioral signal
+- [x] Output: label + optional score for report
 
 ## Notes
 

@@ -6,10 +6,10 @@ Design prompt for personalized recommendations.
 
 ## Deliverables
 
-- [ ] Prompt: session metrics + brief context → actionable recommendation
-- [ ] Include: eye contact, talk ratio, interruptions, response latency
-- [ ] Output: 1–3 personalized recommendations
-- [ ] Test with varied metrics → relevant output
+- [x] Prompt: session metrics + brief context → actionable recommendation
+- [x] Include: eye contact, talk ratio, interruptions, response latency
+- [x] Output: 1–3 personalized recommendations
+- [x] Test with varied metrics → relevant output
 
 ## Verification
 

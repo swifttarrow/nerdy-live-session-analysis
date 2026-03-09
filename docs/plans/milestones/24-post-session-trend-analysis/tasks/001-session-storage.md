@@ -6,9 +6,9 @@ Store session metrics/aggregates for trend analysis.
 
 ## Deliverables
 
-- [ ] Persist session summary (localStorage, backend, or file)
-- [ ] Per-session: key metrics (eye contact, talk ratio, duration)
-- [ ] Retrieve session history for current user/tutor
+- [x] Persist session summary (localStorage, backend, or file)
+- [x] Per-session: key metrics (eye contact, talk ratio, duration)
+- [x] Retrieve session history for current user/tutor
 
 ## Notes
 

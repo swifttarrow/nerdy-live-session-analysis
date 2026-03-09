@@ -6,10 +6,10 @@ Define session-type presets and their threshold/weight configurations.
 
 ## Deliverables
 
-- [ ] Lecture: tutor talk 70–90% OK; fewer "tutor talk dominant" nudges
-- [ ] Practice: balanced; standard thresholds
-- [ ] Socratic: student talk 40%+ expected; stricter tutor-dominant trigger
-- [ ] General: current MVP behavior (default)
+- [x] Lecture: tutor talk 70–90% OK; fewer "tutor talk dominant" nudges
+- [x] Practice: balanced; standard thresholds
+- [x] Socratic: student talk 40%+ expected; stricter tutor-dominant trigger
+- [x] General: current MVP behavior (default)
 
 ## Notes
 
