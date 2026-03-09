@@ -12,6 +12,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@video-processor": path.resolve(__dirname, "./video-processor"),
+      "@metrics-engine": path.resolve(__dirname, "./metrics-engine"),
+      "@coaching-system": path.resolve(__dirname, "./coaching-system"),
+      "@analytics-dashboard": path.resolve(__dirname, "./analytics-dashboard"),
     },
   },
 });

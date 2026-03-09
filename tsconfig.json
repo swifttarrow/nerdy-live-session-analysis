@@ -20,7 +20,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@video-processor/*": ["./video-processor/*"],
+      "@metrics-engine/*": ["./metrics-engine/*"],
+      "@coaching-system/*": ["./coaching-system/*"],
+      "@analytics-dashboard/*": ["./analytics-dashboard/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
