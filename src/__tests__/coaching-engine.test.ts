@@ -15,6 +15,11 @@ const TEST_CONFIG: CoachingConfig = {
   hesitationThresholdMs: 5_000,
   hesitationCountThreshold: 3,
   hesitationWindowMs: 120_000,
+  studentTiredSec: 15,
+  studentFrustratedSec: 12,
+  studentDefeatedSec: 12,
+  tutorMonologueThresholdSec: 90,
+  turnTakingMinPerMinute: 0.5,
 };
 
 function makeMetrics(overrides: {
@@ -23,16 +28,22 @@ function makeMetrics(overrides: {
   studentSpeaking?: boolean;
   tutorEyeContact?: number;
   studentEyeContact?: number;
+  tutorMonologueSec?: number;
+  tutorTurnsPerMinute?: number;
 } = {}): SessionMetrics {
+  const tutor: SessionMetrics["metrics"]["tutor"] = {
+    eye_contact_score: overrides.tutorEyeContact ?? 0.8,
+    talk_time_percent: overrides.tutorTalk ?? 0.5,
+    current_speaking: true,
+  };
+  if (overrides.tutorMonologueSec !== undefined) tutor.tutor_monologue_sec = overrides.tutorMonologueSec;
+  if (overrides.tutorTurnsPerMinute !== undefined) tutor.tutor_turns_per_minute = overrides.tutorTurnsPerMinute;
+
   return {
     timestamp: new Date().toISOString(),
     session_id: "test-session",
     metrics: {
-      tutor: {
-        eye_contact_score: overrides.tutorEyeContact ?? 0.8,
-        talk_time_percent: overrides.tutorTalk ?? 0.5,
-        current_speaking: true,
-      },
+      tutor,
       student: {
         eye_contact_score: overrides.studentEyeContact ?? 0.75,
         talk_time_percent: overrides.studentTalk ?? 0.5,
@@ -89,6 +100,16 @@ describe("createCoachingEngine", () => {
       expect(nudges.some((n) => n.type === "tutor_talk_dominant")).toBe(true);
     });
 
+    it("uses rolling ratio when available", () => {
+      const m = makeMetrics({
+        tutorTalk: 0.50, // session-level below threshold
+        studentTalk: 0.50,
+      });
+      (m.metrics.tutor as Record<string, unknown>).talk_time_percent_rolling = 0.90;
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "tutor_talk_dominant")).toBe(true);
+    });
+
     it("does not fire when tutor talk is below threshold", () => {
       const m = makeMetrics({ tutorTalk: 0.60, studentTalk: 0.40 });
       engine.evaluate(m);
@@ -107,6 +128,46 @@ describe("createCoachingEngine", () => {
       const m = makeMetrics({ tutorEyeContact: 0.8 });
       for (let i = 0; i < 10; i++) engine.evaluate(m);
       expect(nudges.some((n) => n.type === "low_eye_contact")).toBe(false);
+    });
+  });
+
+  describe("tutor_monologue_long trigger", () => {
+    it("fires when tutor monologue exceeds threshold", () => {
+      const m = makeMetrics({ tutorMonologueSec: 95 });
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "tutor_monologue_long")).toBe(true);
+    });
+
+    it("does not fire when tutor monologue is below threshold", () => {
+      const m = makeMetrics({ tutorMonologueSec: 60 });
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "tutor_monologue_long")).toBe(false);
+    });
+
+    it("does not fire when tutor_monologue_sec is undefined", () => {
+      const m = makeMetrics();
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "tutor_monologue_long")).toBe(false);
+    });
+  });
+
+  describe("turn_taking_low trigger", () => {
+    it("fires when turns per minute is below threshold", () => {
+      const m = makeMetrics({ tutorTurnsPerMinute: 0.3 });
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "turn_taking_low")).toBe(true);
+    });
+
+    it("does not fire when turns per minute meets threshold", () => {
+      const m = makeMetrics({ tutorTurnsPerMinute: 0.8 });
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "turn_taking_low")).toBe(false);
+    });
+
+    it("does not fire when tutor_turns_per_minute is undefined", () => {
+      const m = makeMetrics();
+      engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "turn_taking_low")).toBe(false);
     });
   });
 

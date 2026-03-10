@@ -109,6 +109,28 @@ describe("createResponseLatencyTracker", () => {
     expect(stats.turnCount).toBe(0);
   });
 
+  it("computes turnsPerMinute in rolling window", () => {
+    let now = 0;
+    const clock = () => now;
+    const tracker = createResponseLatencyTracker(clock);
+
+    // 3 turns in 2 minutes = 1.5 turns/min
+    tracker.onSpeechEnd("tutor");
+    now = 10_000;
+    tracker.onSpeechStart("student");
+    now = 30_000;
+    tracker.onSpeechEnd("tutor");
+    now = 50_000;
+    tracker.onSpeechStart("student");
+    now = 90_000;
+    tracker.onSpeechEnd("tutor");
+    now = 120_000; // 2 min
+    tracker.onSpeechStart("student");
+
+    const stats = tracker.getStats(undefined, 120_000);
+    expect(stats.turnsPerMinute).toBeCloseTo(1.5, 1); // 3 turns / 2 min
+  });
+
   it("does not record negative latency", () => {
     let now = 1000;
     const clock = () => now;

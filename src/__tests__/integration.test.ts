@@ -21,6 +21,11 @@ const FAST_CONFIG: CoachingConfig = {
   hesitationThresholdMs: 0,
   hesitationCountThreshold: 2,
   hesitationWindowMs: 120_000,
+  studentTiredSec: 15,
+  studentFrustratedSec: 12,
+  studentDefeatedSec: 12,
+  tutorMonologueThresholdSec: 90,
+  turnTakingMinPerMinute: 0.5,
 };
 
 function makeMetrics(overrides: {

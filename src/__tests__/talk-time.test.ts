@@ -70,6 +70,40 @@ describe("createTalkTimeAggregator", () => {
     expect(agg.getState("tutor").talkTimePercent).toBe(0);
   });
 
+  it("rolling state computes ratio in window", () => {
+    let now = 0;
+    const clock = () => now;
+    const agg = createTalkTimeAggregator(clock);
+
+    agg.onSpeechStart("tutor");
+    agg.onSpeechEnd("tutor", 2000); // tutor 2s
+    agg.onSpeechStart("student");
+    agg.onSpeechEnd("student", 1000); // student 1s
+
+    const windowMs = 6000; // 6s window
+    const rolling = agg.getRollingState(windowMs, 3000);
+    expect(rolling.tutor.talkTimePercent).toBeCloseTo(2 / 3, 2);
+    expect(rolling.student.talkTimePercent).toBeCloseTo(1 / 3, 2);
+  });
+
+  it("rolling state excludes segments outside window", () => {
+    let now = 0;
+    const clock = () => now;
+    const agg = createTalkTimeAggregator(clock);
+
+    agg.onSpeechStart("tutor");
+    agg.onSpeechEnd("tutor", 5000); // tutor 5s at t=0
+    now = 200_000; // 200s later
+    agg.onSpeechStart("student");
+    agg.onSpeechEnd("student", 2000); // student 2s at t=200s
+
+    const windowMs = 10_000; // 10s window
+    const rolling = agg.getRollingState(windowMs, 202_000);
+    // Only student's 2s in window (tutor's 5s was 200s ago)
+    expect(rolling.student.talkTimePercent).toBeCloseTo(1, 1);
+    expect(rolling.tutor.talkTimePercent).toBeCloseTo(0, 1);
+  });
+
   it("VAD segments → expected talk-time range", () => {
     // Simulate: tutor speaks 6 × 500ms = 3000ms; student speaks 4 × 500ms = 2000ms
     for (let i = 0; i < 6; i++) {
