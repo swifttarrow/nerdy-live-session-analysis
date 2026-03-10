@@ -20,6 +20,12 @@ export interface SessionSummary {
   avgStudentTalkPercent: number;
   studentTalkRatio: number; // primary engagement-quality signal (ONE_PAGER)
   engagementScore: number; // composite 0–1
+  /** Component breakdown for engagement score (for UI chart) */
+  engagementBreakdown?: {
+    talkBalance: number;   // 0.4 * talkBalanceScore
+    tutorEyeContact: number; // 0.2 * avgTutorEyeContact
+    studentEyeContact: number; // 0.4 * avgStudentEyeContact
+  };
   sampleCount: number;
   interruptions?: InterruptionStats & { classification: InterruptionClassification };
   /** M21: average response latency in ms */
@@ -109,6 +115,12 @@ export function aggregateSessionSummary(
     0.2 * avgTutorEyeContact +
     0.4 * avgStudentEyeContact;
 
+  const engagementBreakdown = {
+    talkBalance: 0.4 * talkBalanceScore,
+    tutorEyeContact: 0.2 * avgTutorEyeContact,
+    studentEyeContact: 0.4 * avgStudentEyeContact,
+  };
+
   // M22: participation label
   const pLabel = classifyParticipation(studentTalkRatio);
   const pDesc = participationDescription(pLabel);
@@ -125,6 +137,7 @@ export function aggregateSessionSummary(
     avgStudentTalkPercent,
     studentTalkRatio,
     engagementScore,
+    engagementBreakdown,
     sampleCount: n,
     participationLabel: pLabel,
     participationDescription: pDesc,

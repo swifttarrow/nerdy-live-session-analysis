@@ -52,7 +52,10 @@ export default function ReportPage() {
           </p>
         </div>
 
-        <EngagementScore engagementScore={summary.engagementScore} />
+        <EngagementScore
+          engagementScore={summary.engagementScore}
+          engagementBreakdown={summary.engagementBreakdown}
+        />
         <KeyMetricsSection summary={summary} />
         <ParticipationSection summary={summary} />
         <AttentionCyclesSection summary={summary} />
