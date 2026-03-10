@@ -70,6 +70,28 @@ describe("aggregateSessionSummary", () => {
     expect(s.durationSec).toBe(120);
     expect(s.sampleCount).toBe(120);
   });
+
+  it("Gaussian: at center scores higher than far from center (socratic, 70% ideal)", () => {
+    const eye = 0.8;
+    const at70 = aggregateSessionSummary("test", repeat(makeMetrics(eye, eye, 0.3, 0.7), 10), {
+      preset: "socratic",
+    });
+    const at100 = aggregateSessionSummary("test", repeat(makeMetrics(eye, eye, 0, 1), 10), {
+      preset: "socratic",
+    });
+    expect(at70.engagementScore).toBeGreaterThan(at100.engagementScore);
+  });
+
+  it("preset centers differ: 30% ideal for lecture, 70% for socratic", () => {
+    const m30 = makeMetrics(0.8, 0.8, 0.7, 0.3);
+    const m70 = makeMetrics(0.8, 0.8, 0.3, 0.7);
+    const lectureAt30 = aggregateSessionSummary("test", repeat(m30, 10), { preset: "lecture" });
+    const lectureAt70 = aggregateSessionSummary("test", repeat(m70, 10), { preset: "lecture" });
+    const socraticAt30 = aggregateSessionSummary("test", repeat(m30, 10), { preset: "socratic" });
+    const socraticAt70 = aggregateSessionSummary("test", repeat(m70, 10), { preset: "socratic" });
+    expect(lectureAt30.engagementScore).toBeGreaterThan(lectureAt70.engagementScore);
+    expect(socraticAt70.engagementScore).toBeGreaterThan(socraticAt30.engagementScore);
+  });
 });
 
 describe("generateRecommendations", () => {
