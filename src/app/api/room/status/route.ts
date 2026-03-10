@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RoomServiceClient } from "livekit-server-sdk";
+import { HTTP_STATUS } from "@/lib/constants";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   if (!room) {
     return NextResponse.json(
       { error: "Missing required param: room" },
-      { status: 400 }
+      { status: HTTP_STATUS.BAD_REQUEST }
     );
   }
 
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
   if (!apiKey || !apiSecret || !livekitUrl) {
     return NextResponse.json(
       { error: "LiveKit credentials not configured" },
-      { status: 500 }
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     );
   }
 
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
     console.error("Room status check failed:", err);
     return NextResponse.json(
       { error: "Failed to check room status" },
-      { status: 500 }
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     );
   }
 }

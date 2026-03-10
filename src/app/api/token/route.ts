@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AccessToken } from "livekit-server-sdk";
+import { HTTP_STATUS, DEFAULTS } from "@/lib/constants";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
   if (!room || !identity) {
     return NextResponse.json(
       { error: "Missing required params: room, identity" },
-      { status: 400 }
+      { status: HTTP_STATUS.BAD_REQUEST }
     );
   }
 
@@ -20,14 +21,14 @@ export async function GET(request: NextRequest) {
   if (!apiKey || !apiSecret) {
     return NextResponse.json(
       { error: "LiveKit credentials not configured" },
-      { status: 500 }
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     );
   }
 
   try {
     const at = new AccessToken(apiKey, apiSecret, {
       identity,
-      ttl: "4h",
+      ttl: DEFAULTS.TOKEN_TTL,
       metadata: JSON.stringify({ role }),
     });
     at.addGrant({
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
     console.error("Token generation failed:", err);
     return NextResponse.json(
       { error: "Failed to generate token" },
-      { status: 500 }
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     );
   }
 }
