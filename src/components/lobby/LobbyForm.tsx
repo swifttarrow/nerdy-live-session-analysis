@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SessionRole } from "@/hooks/useRoomStatus";
+import { DEFAULTS } from "@/lib/constants";
 
 interface LobbyFormProps {
   room: string;
@@ -109,7 +110,7 @@ export function LobbyForm({
               type="text"
               value={room}
               onChange={(e) => onRoomChange(e.target.value)}
-              placeholder="sessionlens-demo"
+              placeholder={DEFAULTS.ROOM_NAME}
               className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

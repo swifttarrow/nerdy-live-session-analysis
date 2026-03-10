@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRoomStatus } from "@/hooks/useRoomStatus";
 import { LobbyForm } from "@/components/lobby/LobbyForm";
+import { DEFAULTS } from "@/lib/constants";
 
 export default function HomePage() {
-  const [room, setRoom] = useState("sessionlens-demo");
+  const [room, setRoom] = useState<string>(DEFAULTS.ROOM_NAME);
   const {
     roomFull,
     teacherDisabled,

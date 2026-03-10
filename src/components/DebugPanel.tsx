@@ -2,6 +2,10 @@
 
 import type { DebugStats } from "@/hooks/useSessionRoom";
 import EmotionIcon from "@/components/EmotionIcon";
+import {
+  TIME_UNITS,
+  PIPELINE_LATENCY_WARNING_MS,
+} from "@/lib/constants";
 
 interface DebugPanelProps {
   debugStats: DebugStats | null;
@@ -61,8 +65,8 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
   } = debugStats;
 
   const formatMs = (ms: number) => {
-    const s = Math.floor(ms / 1000);
-    const m = Math.floor(s / 60);
+    const s = Math.floor(ms / TIME_UNITS.MS_PER_SEC);
+    const m = Math.floor(s / TIME_UNITS.SEC_PER_MIN);
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
 
@@ -239,7 +243,9 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
           <span className="text-gray-500">Pipeline latency: </span>
           <span
             className={
-              pipelineLatencyMs > 200 ? "text-amber-400" : "text-green-400"
+              pipelineLatencyMs > PIPELINE_LATENCY_WARNING_MS
+                ? "text-amber-400"
+                : "text-green-400"
             }
           >
             {pipelineLatencyMs.toFixed(0)}ms

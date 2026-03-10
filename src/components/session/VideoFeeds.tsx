@@ -1,8 +1,8 @@
 import type { RefObject } from "react";
 import type { ParticipantRole } from "@/lib/livekit/room";
 import type { SessionStatus } from "@/hooks/useSessionRoom";
-
-type SessionRole = "teacher" | "student";
+import type { SessionRole } from "@/lib/roles";
+import { VIDEO_RING_CLASSES, ROLE_LABELS } from "@/lib/roles";
 
 export type VideoLayout = "side-by-side" | "focus-self" | "focus-other";
 
@@ -27,12 +27,12 @@ export function VideoFeeds({
 }: VideoFeedsProps) {
   const localRingClass =
     role === "teacher"
-      ? "ring-2 ring-amber-500/50 ring-offset-2 ring-offset-gray-950"
-      : "ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-gray-950";
+      ? VIDEO_RING_CLASSES.teacherLocal
+      : VIDEO_RING_CLASSES.studentLocal;
   const remoteRingClass =
     role === "teacher"
-      ? "ring-2 ring-emerald-500/30 ring-offset-2 ring-offset-gray-950"
-      : "ring-2 ring-amber-500/30 ring-offset-2 ring-offset-gray-950";
+      ? VIDEO_RING_CLASSES.teacherRemote
+      : VIDEO_RING_CLASSES.studentRemote;
 
   const localLabelClass =
     role === "teacher" ? "text-amber-400" : "text-emerald-400";
@@ -46,7 +46,7 @@ export function VideoFeeds({
 
   const gridClass =
     layout === "side-by-side"
-      ? "grid-cols-[minmax(0,1fr)_minmax(0,1fr)] grid-rows-1"
+      ? "grid-cols-[minmax(120px,1fr)_minmax(120px,1fr)] grid-rows-1"
       : "grid-cols-1 grid-rows-1";
 
   return (
@@ -60,7 +60,7 @@ export function VideoFeeds({
           } ${!showLocal ? "hidden" : ""} ${localRingClass}`}
         >
           <p className={`text-sm font-medium mb-2 px-1 flex-shrink-0 ${localLabelClass}`}>
-            You — {role === "teacher" ? "Teacher" : "Student"}
+            You — {ROLE_LABELS[role]}
           </p>
           <div
             ref={localVideoRef}
@@ -81,7 +81,7 @@ export function VideoFeeds({
           } ${!showRemote ? "hidden" : ""} ${remoteRingClass}`}
         >
           <p className={`text-sm font-medium mb-2 px-1 flex-shrink-0 ${remoteLabelClass}`}>
-            {remoteRole === "tutor" ? "Teacher" : "Student"}
+            {ROLE_LABELS[remoteRole]}
           </p>
           <div
             ref={remoteVideoRef}
@@ -91,7 +91,7 @@ export function VideoFeeds({
           >
             {status === "connected" && !hasRemoteParticipant && (
               <span className="text-gray-500 text-sm absolute inset-0 flex items-center justify-center bg-gray-800 z-10">
-                Waiting for {remoteRole === "tutor" ? "teacher" : "student"}…
+                Waiting for {ROLE_LABELS[remoteRole].toLowerCase()}…
               </span>
             )}
           </div>

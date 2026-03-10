@@ -3,6 +3,7 @@
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import type { VideoQualityState } from "@video-processor/pipeline";
 import EmotionIcon, { EMOTION_COLORS } from "@/components/EmotionIcon";
+import { SCORE_THRESHOLDS } from "@/lib/constants";
 
 interface Props {
   metrics: SessionMetrics | null;
@@ -12,9 +13,11 @@ interface Props {
 function ScoreBar({ label, value }: { label: string; value: number }) {
   const pct = Math.round(value * 100);
   const color =
-    pct >= 70 ? "bg-green-500" :
-    pct >= 40 ? "bg-yellow-500" :
-    "bg-red-500";
+    pct >= SCORE_THRESHOLDS.GOOD
+      ? "bg-green-500"
+      : pct >= SCORE_THRESHOLDS.FAIR
+        ? "bg-yellow-500"
+        : "bg-red-500";
 
   return (
     <div>
@@ -120,7 +123,10 @@ export default function MetricsDisplay({ metrics, videoQuality }: Props) {
             const total = tutor.talk_time_percent + student.talk_time_percent;
             if (total === 0) return "—";
             const ratio = Math.round((student.talk_time_percent / total) * 100);
-            const color = ratio >= 35 ? "text-green-400" : "text-yellow-400";
+            const color =
+              ratio >= SCORE_THRESHOLDS.STUDENT_TALK_RATIO_GOOD
+                ? "text-green-400"
+                : "text-yellow-400";
             return <span className={color}>{ratio}%</span>;
           })()}
         </div>
