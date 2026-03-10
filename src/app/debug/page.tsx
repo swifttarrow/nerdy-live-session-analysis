@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDebugSession } from "@/hooks/useDebugSession";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
+import { EyeContactOverlay } from "@/components/EyeContactOverlay";
 import SensitivitySelector from "@/components/SensitivitySelector";
 import SessionTypeSelector from "@/components/SessionTypeSelector";
 import type { SessionPreset } from "@coaching-system/presets";
@@ -195,19 +196,37 @@ export default function DebugPage() {
               <p className="text-sm font-medium mb-2 px-1 text-amber-400">
                 Teacher
               </p>
-              <div
-                ref={tutorContainerRef}
-                className="flex-1 bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center min-h-0 aspect-video [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
-              />
+              <div className="relative flex-1 bg-gray-800 rounded-lg overflow-hidden min-h-0 aspect-video">
+                <div
+                  ref={tutorContainerRef}
+                  className="absolute inset-0 flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
+                />
+                {metrics && (
+                  <EyeContactOverlay
+                    score={metrics.metrics.tutor.eye_contact_score}
+                    faceDetected={metrics.metrics.tutor.face_detected}
+                    variant="tutor"
+                  />
+                )}
+              </div>
             </div>
             <div className="rounded-xl overflow-hidden flex flex-col min-h-0 border-2 border-emerald-500/30">
               <p className="text-sm font-medium mb-2 px-1 text-emerald-400">
                 Student
               </p>
-              <div
-                ref={studentContainerRef}
-                className="flex-1 bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center min-h-0 aspect-video [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
-              />
+              <div className="relative flex-1 bg-gray-800 rounded-lg overflow-hidden min-h-0 aspect-video">
+                <div
+                  ref={studentContainerRef}
+                  className="absolute inset-0 flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
+                />
+                {metrics && (
+                  <EyeContactOverlay
+                    score={metrics.metrics.student.eye_contact_score}
+                    faceDetected={metrics.metrics.student.face_detected}
+                    variant="student"
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
