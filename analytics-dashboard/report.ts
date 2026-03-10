@@ -1,4 +1,5 @@
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
+import type { SessionPreset } from "@coaching-system/presets";
 import { aggregateSessionSummary, SessionSummary } from "./summary";
 import { generateRecommendations, Recommendation } from "./recommendations";
 import type { InterruptionStats } from "@metrics-engine/audio/interruptions";
@@ -19,6 +20,7 @@ export interface GenerateReportOptions {
   nudgeEvents?: NudgeEvent[];
   sessionStartMs?: number;
   trends?: SessionTrends;
+  preset?: SessionPreset;
 }
 
 /**
@@ -34,7 +36,10 @@ export function generateReport(
   interruptionData?: (InterruptionStats & { classification: InterruptionClassification }) | null,
   options?: GenerateReportOptions
 ): SessionReport {
-  const summary = aggregateSessionSummary(sessionId, metricsHistory, interruptionData);
+  const summary = aggregateSessionSummary(sessionId, metricsHistory, {
+    interruptionData: interruptionData ?? undefined,
+    preset: options?.preset,
+  });
 
   // Attach M21 latency stats if provided
   if (options?.nudgeEvents !== undefined && options.nudgeEvents.length > 0) {

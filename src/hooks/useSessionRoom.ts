@@ -264,7 +264,10 @@ export function useSessionRoom() {
         onLocalVideoTrack: (el) => {
           el.style.cssText =
             "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
-          localVideoRef.current?.appendChild(el);
+          const container = localVideoRef.current;
+          if (container) {
+            container.replaceChildren(el);
+          }
 
           const sampler = createFrameSampler(el, (imageData, ts) => {
             const score = videoPipeline.processFrame(localRole, imageData, ts);
@@ -279,7 +282,11 @@ export function useSessionRoom() {
           setHasRemoteParticipant(true);
           el.style.cssText =
             "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
-          remoteVideoRef.current?.appendChild(el);
+          const container = remoteVideoRef.current;
+          if (container) {
+            container.replaceChildren(el);
+            el.play().catch(() => {});
+          }
 
           const sampler = createFrameSampler(el, (imageData, ts) => {
             const score = videoPipeline.processFrame(remoteRole, imageData, ts);
@@ -365,6 +372,7 @@ export function useSessionRoom() {
       {
         nudgeEvents: allNudgesRef.current,
         sessionStartMs: sessionStartMsRef.current ?? Date.now(),
+        preset: sessionPreset,
       }
     );
 
@@ -393,7 +401,7 @@ export function useSessionRoom() {
     saveSession(storedSummary);
     sessionStorage.setItem("sessionlens-report", JSON.stringify(report));
     router.push("/report");
-  }, [roomName, router]);
+  }, [roomName, router, sessionPreset]);
 
   const dismissNudge = useCallback((id: string) => {
     setNudges((prev) => prev.filter((n) => n.id !== id));
