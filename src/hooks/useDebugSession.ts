@@ -15,12 +15,14 @@ import {
   createInterruptionTracker,
   classifyInterruptionsWithContent,
   createResponseLatencyTracker,
+  createMonologueTracker,
 } from "@metrics-engine/index";
 import type {
   ResponseLatencyTracker,
   InterruptionTracker,
   AudioPipeline,
   MetricsAggregator,
+  MonologueTracker,
 } from "@metrics-engine/index";
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import {
@@ -37,7 +39,7 @@ import {
 import type { NudgeEvent, SessionPreset } from "@coaching-system/index";
 import { generateReport, computeTrends } from "@analytics-dashboard/index";
 import { saveSession, loadHistory } from "@/lib/session/session-store";
-import { STORAGE_KEYS, VIDEO_ELEMENT_STYLES } from "@/lib/constants";
+import { STORAGE_KEYS, VIDEO_ELEMENT_STYLES, INTERVALS } from "@/lib/constants";
 
 export type DebugSessionStatus =
   | "idle"
@@ -156,9 +158,13 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         const latencyTracker = createResponseLatencyTracker();
         responseLatencyTrackerRef.current = latencyTracker;
 
+        const monologueTracker = createMonologueTracker();
+
         const audioPipeline = createAudioPipeline(
           interruptionTracker,
-          latencyTracker
+          latencyTracker,
+          monologueTracker,
+          INTERVALS.ROLLING_TALK_WINDOW_MS
         );
         audioPipelineRef.current = audioPipeline;
 
@@ -180,14 +186,26 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
           aggregator.updateTalkTime(
             "tutor",
             talkTime.talkTimePercent,
-            talkTime.speaking
+            talkTime.speaking,
+            {
+              percentRolling: talkTime.talkTimePercentRolling,
+              rollingState: talkTime.rollingState,
+              tutorMonologueSec: talkTime.tutorMonologueSec,
+              tutorTurnsPerMinute: talkTime.tutorTurnsPerMinute,
+            }
           );
         });
         audioPipeline.addTrack("student", studentStream, (talkTime) => {
           aggregator.updateTalkTime(
             "student",
             talkTime.talkTimePercent,
-            talkTime.speaking
+            talkTime.speaking,
+            {
+              percentRolling: talkTime.talkTimePercentRolling,
+              rollingState: talkTime.rollingState,
+              tutorMonologueSec: talkTime.tutorMonologueSec,
+              tutorTurnsPerMinute: talkTime.tutorTurnsPerMinute,
+            }
           );
         });
 

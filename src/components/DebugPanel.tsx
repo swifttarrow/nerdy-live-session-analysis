@@ -59,6 +59,7 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
     emotionalState,
     interruptions,
     responseLatency,
+    tutorMonologueSec,
     eyeContact,
     videoQuality,
     pipelineLatencyMs,
@@ -191,7 +192,7 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
       {/* Response latency */}
       <div>
         <div className="text-gray-400 mb-1.5 font-medium">Response latency</div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div className="bg-gray-800/50 rounded px-2 py-1.5">
             <span className="text-gray-500">Turns:</span> {responseLatency.turnCount}
           </div>
@@ -205,8 +206,25 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
             <span className="text-amber-400">Hesitations:</span>{" "}
             {responseLatency.hesitationCount}
           </div>
+          {responseLatency.turnsPerMinute !== undefined && (
+            <div className="bg-gray-800/50 rounded px-2 py-1.5">
+              <span className="text-gray-500">Turns/min:</span>{" "}
+              {responseLatency.turnsPerMinute.toFixed(2)}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Tutor monologue */}
+      {tutorMonologueSec !== undefined && tutorMonologueSec > 0 && (
+        <div>
+          <div className="text-gray-400 mb-1.5 font-medium">Tutor monologue</div>
+          <div className="bg-gray-800/50 rounded px-2 py-1.5">
+            <span className="text-amber-400">Current/last:</span>{" "}
+            {tutorMonologueSec.toFixed(1)}s
+          </div>
+        </div>
+      )}
 
       {/* Eye contact */}
       <div>

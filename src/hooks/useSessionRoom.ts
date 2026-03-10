@@ -16,11 +16,13 @@ import {
   createInterruptionTracker,
   classifyInterruptionsWithContent,
   createResponseLatencyTracker,
+  createMonologueTracker,
 } from "@metrics-engine/index";
 import type {
   ResponseLatencyTracker,
   InterruptionTracker,
   AudioPipeline,
+  MonologueTracker,
 } from "@metrics-engine/index";
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import {
@@ -68,7 +70,9 @@ export interface DebugStats {
   /** Interruption counts */
   interruptions: { studentToTutor: number; tutorToStudent: number };
   /** Response latency stats */
-  responseLatency: { turnCount: number; avgMs: number; hesitationCount: number };
+  responseLatency: { turnCount: number; avgMs: number; hesitationCount: number; turnsPerMinute?: number };
+  /** Tutor monologue length in seconds */
+  tutorMonologueSec?: number;
   /** Eye contact scores (tutor, student) */
   eyeContact: { tutor: number; student: number };
   /** Video quality per role */
@@ -114,6 +118,7 @@ export function useSessionRoom() {
   const sessionMetricsHistory = useRef<SessionMetrics[]>([]);
   const interruptionTrackerRef = useRef<InterruptionTracker | null>(null);
   const responseLatencyTrackerRef = useRef<ResponseLatencyTracker | null>(null);
+  const monologueTrackerRef = useRef<MonologueTracker | null>(null);
   const allNudgesRef = useRef<NudgeEvent[]>([]);
   const sessionStartMsRef = useRef<number | null>(null);
 
@@ -189,12 +194,23 @@ export function useSessionRoom() {
       const interruptions = it
         ? it.getStats()
         : { studentToTutor: 0, tutorToStudent: 0 };
-      const latencyStats = rt?.getStats(INTERVALS.RESPONSE_LATENCY_STATS_WINDOW_MS);
+      const latencyStats = rt?.getStats(
+        undefined,
+        INTERVALS.ROLLING_TALK_WINDOW_MS
+      );
       const responseLatency = {
         turnCount: latencyStats?.turnCount ?? 0,
         avgMs: latencyStats?.avgResponseLatencyMs ?? 0,
         hesitationCount: latencyStats?.hesitationCount ?? 0,
+        turnsPerMinute: latencyStats?.turnsPerMinute,
       };
+      const tutorMonologueSec = (() => {
+        const mt = monologueTrackerRef.current;
+        if (!mt) return undefined;
+        const stats = mt.getStats();
+        const ms = stats.currentMonologueMs || stats.lastMonologueMs;
+        return ms > 0 ? ms / 1000 : undefined;
+      })();
 
       const videoQualityState = vp?.getQualityStatus?.() ?? null;
       const scores = vp?.getLatestScores?.();
@@ -215,6 +231,7 @@ export function useSessionRoom() {
           tutorToStudent: interruptions.tutorToStudent,
         },
         responseLatency,
+        tutorMonologueSec,
         eyeContact,
         videoQuality: videoQualityState ?? videoQuality,
         pipelineLatencyMs,
@@ -265,9 +282,14 @@ export function useSessionRoom() {
       const latencyTracker = createResponseLatencyTracker();
       responseLatencyTrackerRef.current = latencyTracker;
 
+      const monologueTracker = createMonologueTracker();
+      monologueTrackerRef.current = monologueTracker;
+
       const audioPipeline = createAudioPipeline(
         interruptionTracker,
-        latencyTracker
+        latencyTracker,
+        monologueTracker,
+        INTERVALS.ROLLING_TALK_WINDOW_MS
       );
       audioPipelineRef.current = audioPipeline;
       const aggregator = createMetricsAggregator(roomName, (m) => {
@@ -317,7 +339,13 @@ export function useSessionRoom() {
             aggregator.updateTalkTime(
               localRole,
               talkTime.talkTimePercent,
-              talkTime.speaking
+              talkTime.speaking,
+              {
+                percentRolling: talkTime.talkTimePercentRolling,
+                rollingState: talkTime.rollingState,
+                tutorMonologueSec: talkTime.tutorMonologueSec,
+                tutorTurnsPerMinute: talkTime.tutorTurnsPerMinute,
+              }
             );
           });
         },
@@ -326,7 +354,13 @@ export function useSessionRoom() {
             aggregator.updateTalkTime(
               remoteRole,
               talkTime.talkTimePercent,
-              talkTime.speaking
+              talkTime.speaking,
+              {
+                percentRolling: talkTime.talkTimePercentRolling,
+                rollingState: talkTime.rollingState,
+                tutorMonologueSec: talkTime.tutorMonologueSec,
+                tutorTurnsPerMinute: talkTime.tutorTurnsPerMinute,
+              }
             );
           });
         },

@@ -42,6 +42,8 @@ export const PUSHER_EVENTS = {
 export const INTERVALS = {
   DEBUG_POLL_MS: 500,
   RESPONSE_LATENCY_STATS_WINDOW_MS: 5000,
+  /** Rolling window for talk ratio and turn-taking (3 min) */
+  ROLLING_TALK_WINDOW_MS: 180_000,
 } as const;
 
 /** Video element inline styles for LiveKit tracks */
