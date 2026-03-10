@@ -10,25 +10,38 @@ interface Props {
   videoQuality?: VideoQualityState | null;
 }
 
-function ScoreBar({ label, value }: { label: string; value: number }) {
+function ScoreBar({
+  label,
+  value,
+  faceDetected = true,
+}: {
+  label: string;
+  value: number;
+  faceDetected?: boolean;
+}) {
   const pct = Math.round(value * 100);
+  const noFace = !faceDetected && pct === 0;
   const color =
-    pct >= SCORE_THRESHOLDS.GOOD
-      ? "bg-green-500"
-      : pct >= SCORE_THRESHOLDS.FAIR
-        ? "bg-yellow-500"
-        : "bg-red-500";
+    noFace
+      ? "bg-gray-600"
+      : pct >= SCORE_THRESHOLDS.GOOD
+        ? "bg-green-500"
+        : pct >= SCORE_THRESHOLDS.FAIR
+          ? "bg-yellow-500"
+          : "bg-red-500";
 
   return (
     <div>
       <div className="flex justify-between text-xs mb-1">
         <span className="text-gray-400">{label}</span>
-        <span className="text-white">{pct}%</span>
+        <span className={noFace ? "text-gray-500" : "text-white"}>
+          {noFace ? "No face" : `${pct}%`}
+        </span>
       </div>
       <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${color}`}
-          style={{ width: `${pct}%` }}
+          style={{ width: noFace ? "0%" : `${pct}%` }}
         />
       </div>
     </div>
@@ -83,7 +96,11 @@ export default function MetricsDisplay({ metrics, videoQuality }: Props) {
           <SpeakingIndicator speaking={tutor.current_speaking} />
           <span className="text-xs font-medium text-gray-300">Tutor</span>
         </div>
-        <ScoreBar label="Eye Contact" value={tutor.eye_contact_score} />
+        <ScoreBar
+          label="Eye Contact"
+          value={tutor.eye_contact_score}
+          faceDetected={tutor.face_detected}
+        />
         <ScoreBar label="Talk Time" value={tutor.talk_time_percent} />
       </div>
 
@@ -95,7 +112,11 @@ export default function MetricsDisplay({ metrics, videoQuality }: Props) {
           <SpeakingIndicator speaking={student.current_speaking} />
           <span className="text-xs font-medium text-gray-300">Student</span>
         </div>
-        <ScoreBar label="Eye Contact" value={student.eye_contact_score} />
+        <ScoreBar
+          label="Eye Contact"
+          value={student.eye_contact_score}
+          faceDetected={student.face_detected}
+        />
         <ScoreBar label="Talk Time" value={student.talk_time_percent} />
         <div className="flex items-center gap-2 text-xs">
           <span className="text-gray-400">Emotional state:</span>
