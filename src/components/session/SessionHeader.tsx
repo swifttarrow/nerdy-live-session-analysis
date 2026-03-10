@@ -16,9 +16,11 @@ interface SessionHeaderProps {
   onEndSession: () => void;
   /** If false, mode controls (preset, sensitivity) are hidden (student view) */
   showModeControls?: boolean;
-  /** Debug mode toggle (for feature verification) */
+  /** Debug toggle – shown in header when debug off and panel doesn't show it (student / panel closed) */
   debugMode?: boolean;
   onDebugModeChange?: (enabled: boolean) => void;
+  /** When true, panel has the toggle so header hides it */
+  debugToggleInPanel?: boolean;
 }
 
 export function SessionHeader({
@@ -33,6 +35,7 @@ export function SessionHeader({
   showModeControls = true,
   debugMode = false,
   onDebugModeChange,
+  debugToggleInPanel = false,
 }: SessionHeaderProps) {
   const statusClass =
     status === "connected"
@@ -65,7 +68,7 @@ export function SessionHeader({
             <SensitivitySelector value={sensitivityPercent} onChange={onSensitivityChange} />
           </>
         )}
-        {onDebugModeChange && (
+        {onDebugModeChange && !debugMode && !debugToggleInPanel && (
           <label className="flex items-center gap-2 cursor-pointer">
             <span className="text-xs text-gray-400">Debug</span>
             <button

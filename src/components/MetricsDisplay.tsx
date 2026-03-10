@@ -3,11 +3,18 @@
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import type { VideoQualityState } from "@video-processor/pipeline";
 import EmotionIcon, { EMOTION_COLORS } from "@/components/EmotionIcon";
+import { DebugMetricsContent } from "@/components/DebugPanel";
+import type { DebugStats } from "@/hooks/useSessionRoom";
 import { SCORE_THRESHOLDS } from "@/lib/constants";
 
 interface Props {
   metrics: SessionMetrics | null;
   videoQuality?: VideoQualityState | null;
+  /** When provided, debug sections are shown inline (debug mode on) */
+  debugStats?: DebugStats | null;
+  /** When provided, a debug toggle is shown in the panel header */
+  debugMode?: boolean;
+  onDebugModeChange?: (enabled: boolean) => void;
 }
 
 function ScoreBar({
@@ -70,8 +77,14 @@ function VideoQualityIndicator({ videoQuality }: { videoQuality: VideoQualitySta
   );
 }
 
-export default function MetricsDisplay({ metrics, videoQuality }: Props) {
-  if (!metrics) {
+export default function MetricsDisplay({
+  metrics,
+  videoQuality,
+  debugStats,
+  debugMode = false,
+  onDebugModeChange,
+}: Props) {
+  if (!metrics && !debugStats) {
     return (
       <div className="bg-gray-900 rounded-2xl p-4 text-gray-500 text-sm">
         Waiting for metrics...
@@ -79,79 +92,118 @@ export default function MetricsDisplay({ metrics, videoQuality }: Props) {
     );
   }
 
-  const { tutor, student } = metrics.metrics;
+  const tutor = metrics?.metrics?.tutor;
+  const student = metrics?.metrics?.student;
 
   return (
     <div className="bg-gray-900 rounded-2xl p-4 space-y-5">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 flex-shrink-0">
         <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
           Live Metrics
         </h2>
-        {videoQuality && <VideoQualityIndicator videoQuality={videoQuality} />}
-      </div>
-
-      {/* Tutor */}
-      <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <SpeakingIndicator speaking={tutor.current_speaking} />
-          <span className="text-xs font-medium text-gray-300">Tutor</span>
-        </div>
-        <ScoreBar
-          label="Eye Contact"
-          value={tutor.eye_contact_score}
-          faceDetected={tutor.face_detected}
-        />
-        <ScoreBar label="Talk Time" value={tutor.talk_time_percent} />
-      </div>
-
-      <div className="border-t border-gray-800" />
-
-      {/* Student */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <SpeakingIndicator speaking={student.current_speaking} />
-          <span className="text-xs font-medium text-gray-300">Student</span>
-        </div>
-        <ScoreBar
-          label="Eye Contact"
-          value={student.eye_contact_score}
-          faceDetected={student.face_detected}
-        />
-        <ScoreBar label="Talk Time" value={student.talk_time_percent} />
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-gray-400">Emotional state:</span>
-          <span className="flex items-center gap-1.5">
-            <EmotionIcon state={student.emotional_state} size="sm" />
-            <span
-              className={
-                EMOTION_COLORS[student.emotional_state ?? "neutral"] ??
-                "text-gray-400"
-              }
-            >
-              {(student.emotional_state ?? "neutral").replace(/^./, (c) =>
-                c.toUpperCase()
-              )}
-            </span>
-          </span>
+          {videoQuality && <VideoQualityIndicator videoQuality={videoQuality} />}
+          {onDebugModeChange && (
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <span className="text-xs text-gray-400">Debug</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={debugMode}
+                onClick={() => onDebugModeChange(!debugMode)}
+                className={`relative w-8 h-4 rounded-full transition-colors ${
+                  debugMode ? "bg-cyan-600" : "bg-gray-700"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
+                    debugMode ? "translate-x-4" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </label>
+          )}
         </div>
       </div>
 
-      {/* Student talk ratio highlight */}
-      <div className="border-t border-gray-800 pt-3">
-        <div className="text-xs text-gray-400 mb-1">Student talk ratio</div>
-        <div className="text-lg font-bold text-white">
-          {(() => {
-            const total = tutor.talk_time_percent + student.talk_time_percent;
-            if (total === 0) return "—";
-            const ratio = Math.round((student.talk_time_percent / total) * 100);
-            const color =
-              ratio >= SCORE_THRESHOLDS.STUDENT_TALK_RATIO_GOOD
-                ? "text-green-400"
-                : "text-yellow-400";
-            return <span className={color}>{ratio}%</span>;
-          })()}
-        </div>
-      </div>
+      {metrics ? (
+        <>
+          {/* Tutor */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <SpeakingIndicator speaking={tutor!.current_speaking} />
+              <span className="text-xs font-medium text-gray-300">Tutor</span>
+            </div>
+            <ScoreBar
+              label="Eye Contact"
+              value={tutor!.eye_contact_score}
+              faceDetected={tutor!.face_detected}
+            />
+            <ScoreBar label="Talk Time" value={tutor!.talk_time_percent} />
+          </div>
+
+          <div className="border-t border-gray-800" />
+
+          {/* Student */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <SpeakingIndicator speaking={student!.current_speaking} />
+              <span className="text-xs font-medium text-gray-300">Student</span>
+            </div>
+            <ScoreBar
+              label="Eye Contact"
+              value={student!.eye_contact_score}
+              faceDetected={student!.face_detected}
+            />
+            <ScoreBar label="Talk Time" value={student!.talk_time_percent} />
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-gray-400">Emotional state:</span>
+              <span className="flex items-center gap-1.5">
+                <EmotionIcon state={student!.emotional_state} size="sm" />
+                <span
+                  className={
+                    EMOTION_COLORS[student!.emotional_state ?? "neutral"] ??
+                    "text-gray-400"
+                  }
+                >
+                  {(student!.emotional_state ?? "neutral").replace(/^./, (c) =>
+                    c.toUpperCase()
+                  )}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          {/* Student talk ratio highlight */}
+          <div className="border-t border-gray-800 pt-3">
+            <div className="text-xs text-gray-400 mb-1">Student talk ratio</div>
+            <div className="text-lg font-bold text-white">
+              {(() => {
+                const total =
+                  tutor!.talk_time_percent + student!.talk_time_percent;
+                if (total === 0) return "—";
+                const ratio = Math.round(
+                  (student!.talk_time_percent / total) * 100
+                );
+                const color =
+                  ratio >= SCORE_THRESHOLDS.STUDENT_TALK_RATIO_GOOD
+                    ? "text-green-400"
+                    : "text-yellow-400";
+                return <span className={color}>{ratio}%</span>;
+              })()}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="text-gray-500 text-sm">Waiting for metrics...</div>
+      )}
+
+      {debugStats && (
+        <>
+          <div className="border-t border-gray-800" />
+          <DebugMetricsContent debugStats={debugStats} embedded />
+        </>
+      )}
     </div>
   );
 }

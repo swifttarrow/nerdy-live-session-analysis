@@ -7,10 +7,6 @@ import {
   PIPELINE_LATENCY_WARNING_MS,
 } from "@/lib/constants";
 
-interface DebugPanelProps {
-  debugStats: DebugStats | null;
-}
-
 function DebugBadge({
   label,
   active,
@@ -43,15 +39,14 @@ function DebugBadge({
   );
 }
 
-export default function DebugPanel({ debugStats }: DebugPanelProps) {
-  if (!debugStats) {
-    return (
-      <div className="bg-gray-900/80 rounded-lg p-3 text-gray-500 text-xs">
-        Debug mode: waiting for connection...
-      </div>
-    );
-  }
-
+/** Debug metrics content for embedding in Live Metrics when debug mode is on */
+export function DebugMetricsContent({
+  debugStats,
+  embedded = false,
+}: {
+  debugStats: DebugStats;
+  embedded?: boolean;
+}) {
   const {
     speakerState,
     talkTimeMs,
@@ -72,12 +67,14 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
   };
 
   return (
-    <div className="bg-gray-900/95 rounded-lg p-4 space-y-4 text-xs border border-gray-700">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-cyan-400 uppercase tracking-wider">
-          Debug Mode
-        </h3>
-      </div>
+    <div className={embedded ? "space-y-4 text-xs" : "bg-gray-900/95 rounded-lg p-4 space-y-4 text-xs border border-gray-700"}>
+      {!embedded && (
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-cyan-400 uppercase tracking-wider">
+            Debug Mode
+          </h3>
+        </div>
+      )}
 
       {/* Speaker detection */}
       <div>
@@ -154,7 +151,7 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
               score: emotionScores[k as keyof typeof emotionScores] ?? 0,
             }))
             .sort((a, b) => b.score - a.score)
-            .slice(0, 8)
+            .slice(0, 3)
             .map(({ key, score }) => (
               <div key={key} className="flex items-center gap-2">
                 <EmotionIcon state={key} size="sm" />
@@ -192,7 +189,7 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
       {/* Response latency */}
       <div>
         <div className="text-gray-400 mb-1.5 font-medium">Response latency</div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="bg-gray-800/50 rounded px-2 py-1.5">
             <span className="text-gray-500">Turns:</span> {responseLatency.turnCount}
           </div>
@@ -202,6 +199,8 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
               ? `${(responseLatency.avgMs / 1000).toFixed(2)}s`
               : "—"}
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-2">
           <div className="bg-gray-800/50 rounded px-2 py-1.5">
             <span className="text-amber-400">Hesitations:</span>{" "}
             {responseLatency.hesitationCount}
@@ -272,4 +271,20 @@ export default function DebugPanel({ debugStats }: DebugPanelProps) {
       </div>
     </div>
   );
+}
+
+interface DebugPanelProps {
+  debugStats: DebugStats | null;
+}
+
+export default function DebugPanel({ debugStats }: DebugPanelProps) {
+  if (!debugStats) {
+    return (
+      <div className="bg-gray-900/80 rounded-lg p-3 text-gray-500 text-xs">
+        Debug mode: waiting for connection...
+      </div>
+    );
+  }
+
+  return <DebugMetricsContent debugStats={debugStats} embedded={false} />;
 }

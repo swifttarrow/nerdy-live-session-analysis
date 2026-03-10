@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useDebugSession } from "@/hooks/useDebugSession";
 import MetricsDisplay from "@/components/MetricsDisplay";
-import DebugPanel from "@/components/DebugPanel";
 import NudgeToast from "@/components/NudgeToast";
 import { EyeContactOverlay } from "@/components/EyeContactOverlay";
 import SensitivitySelector from "@/components/SensitivitySelector";
@@ -91,7 +90,6 @@ export default function DebugPage() {
     startSession,
     endSession,
     togglePause,
-    seekTo,
     dismissNudge,
   } = useDebugSession();
 
@@ -111,7 +109,7 @@ export default function DebugPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
       <header className="flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-3">
           <Link
@@ -166,7 +164,7 @@ export default function DebugPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
         {status === "idle" && (
           <div className="flex-1 flex flex-col items-center justify-center p-8">
             <div className="w-full max-w-lg space-y-6">
@@ -251,15 +249,12 @@ export default function DebugPage() {
               <span className="text-xs text-gray-400 tabular-nums w-10">
                 {formatTime(currentTime)}
               </span>
-              <input
-                type="range"
-                min={0}
-                max={duration}
-                step={0.1}
-                value={currentTime}
-                onChange={(e) => seekTo(parseFloat(e.target.value))}
-                className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-              />
+              <div className="flex-1 h-2 bg-gray-700 rounded-lg overflow-hidden">
+                <div
+                  className="h-full bg-cyan-500/60 rounded-lg transition-[width] duration-200"
+                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                />
+              </div>
               <span className="text-xs text-gray-400 tabular-nums w-10">
                 {formatTime(duration)}
               </span>
@@ -268,31 +263,15 @@ export default function DebugPage() {
         </div>
 
         {isActive && (
-          <aside className="w-80 flex-shrink-0 flex flex-col gap-4 min-h-0">
-            <div className="flex items-center justify-end gap-1 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setDebugPanelOpen((v) => !v)}
-                className={`p-2 rounded-md transition-colors ${
-                  debugPanelOpen
-                    ? "bg-cyan-600/30 text-cyan-400"
-                    : "text-gray-500 hover:text-gray-400 hover:bg-gray-700"
-                }`}
-                title={debugPanelOpen ? "Hide debug panel" : "Show debug panel"}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 3v18h18" />
-                  <path d="m19 9-5 5-4-4-3 3" />
-                </svg>
-              </button>
-            </div>
-            {debugPanelOpen && (
-              <div className="min-h-0 overflow-auto flex-shrink-0">
-                <DebugPanel debugStats={debugStats} />
-              </div>
-            )}
-            <div className="min-h-0 overflow-auto flex-1">
-              <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
+          <aside className="w-80 flex-shrink-0 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <MetricsDisplay
+                metrics={metrics}
+                videoQuality={videoQuality}
+                debugStats={debugPanelOpen ? debugStats : null}
+                debugMode={debugPanelOpen}
+                onDebugModeChange={(v) => setDebugPanelOpen(v)}
+              />
             </div>
           </aside>
         )}

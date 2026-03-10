@@ -452,20 +452,6 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     }
   }, []);
 
-  const seekTo = useCallback((seconds: number) => {
-    const tutor = tutorVideoRef.current;
-    const student = studentVideoRef.current;
-    if (!tutor || !student) return;
-    const maxT = Math.min(
-      tutor.duration || Infinity,
-      student.duration || Infinity
-    );
-    const t = Math.max(0, Math.min(seconds, Number.isFinite(maxT) ? maxT : seconds));
-    tutor.currentTime = t;
-    student.currentTime = t;
-    setCurrentTime(t);
-  }, []);
-
   return {
     status,
     errorMsg,
@@ -482,7 +468,6 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     startSession,
     endSession,
     togglePause,
-    seekTo,
     dismissNudge,
     tutorVideoRef,
     studentVideoRef,

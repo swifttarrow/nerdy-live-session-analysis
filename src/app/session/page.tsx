@@ -6,7 +6,6 @@ import { useSessionRoom } from "@/hooks/useSessionRoom";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
 import ConsentBanner from "@/components/ConsentBanner";
-import DebugPanel from "@/components/DebugPanel";
 import { SessionHeader } from "@/components/session/SessionHeader";
 import { SessionSidePanel } from "@/components/session/SessionSidePanel";
 import { VideoLayoutSelector } from "@/components/session/VideoLayoutSelector";
@@ -57,7 +56,7 @@ function SessionContent() {
   const showNudges = isTeacher && hasRemoteParticipant;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
       <SessionHeader
         roomName={roomName}
         role={role}
@@ -70,9 +69,10 @@ function SessionContent() {
         showModeControls={isTeacher}
         debugMode={debugMode}
         onDebugModeChange={setDebugMode}
+        debugToggleInPanel={isTeacher && metricsPanelOpen}
       />
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <div className="flex items-center justify-end gap-1 flex-shrink-0 mb-2">
             <VideoLayoutSelector value={layout} onChange={setLayout} />
@@ -108,15 +108,26 @@ function SessionContent() {
           showMetricsPanel={isTeacher}
           metricsPanelOpen={metricsPanelOpen}
           metricsContent={
-            <div className="space-y-4">
-              {debugMode && <DebugPanel debugStats={debugStats} />}
-              <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
-            </div>
+            <MetricsDisplay
+              metrics={metrics}
+              videoQuality={videoQuality}
+              debugStats={debugMode ? debugStats : null}
+              debugMode={debugMode}
+              onDebugModeChange={setDebugMode}
+            />
           }
         />
         {debugMode && (!isTeacher || !metricsPanelOpen) && (
-          <div className="fixed bottom-4 left-4 z-40 max-w-sm max-h-[70vh] overflow-auto">
-            <DebugPanel debugStats={debugStats} />
+          <div className="fixed bottom-4 left-4 z-40 max-w-sm max-h-[70vh] overflow-hidden flex flex-col rounded-2xl bg-gray-900 shadow-xl">
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <MetricsDisplay
+                metrics={metrics}
+                videoQuality={videoQuality}
+                debugStats={debugStats}
+                debugMode={debugMode}
+                onDebugModeChange={setDebugMode}
+              />
+            </div>
           </div>
         )}
       </div>
