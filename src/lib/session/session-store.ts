@@ -3,7 +3,7 @@
  * Browser-only; gracefully no-ops in SSR contexts.
  */
 
-const STORE_KEY = "sessionlens-history";
+import { STORAGE_KEYS } from "@/lib/constants";
 const MAX_SESSIONS = 20;
 
 export interface StoredSessionSummary {
@@ -30,13 +30,13 @@ export function saveSession(summary: StoredSessionSummary): void {
   if (!isAvailable()) return;
   const history = loadHistory();
   const updated = [summary, ...history].slice(0, MAX_SESSIONS);
-  localStorage.setItem(STORE_KEY, JSON.stringify(updated));
+  localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updated));
 }
 
 export function loadHistory(): StoredSessionSummary[] {
   if (!isAvailable()) return [];
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEYS.HISTORY);
     if (!raw) return [];
     return JSON.parse(raw) as StoredSessionSummary[];
   } catch {
@@ -46,5 +46,5 @@ export function loadHistory(): StoredSessionSummary[] {
 
 export function clearHistory(): void {
   if (!isAvailable()) return;
-  localStorage.removeItem(STORE_KEY);
+  localStorage.removeItem(STORAGE_KEYS.HISTORY);
 }
