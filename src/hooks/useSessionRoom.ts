@@ -292,12 +292,16 @@ export function useSessionRoom() {
         INTERVALS.ROLLING_TALK_WINDOW_MS
       );
       audioPipelineRef.current = audioPipeline;
-      const aggregator = createMetricsAggregator(roomName, (m) => {
-        setMetrics(m);
-        sessionMetricsHistory.current.push(m);
-        setVideoQuality(videoPipelineRef.current?.getQualityStatus() ?? null);
-        coachingEngine.evaluate(m);
-      });
+      const aggregator = createMetricsAggregator(
+        roomName,
+        (m) => {
+          setMetrics(m);
+          sessionMetricsHistory.current.push(m);
+          setVideoQuality(videoPipelineRef.current?.getQualityStatus() ?? null);
+          coachingEngine.evaluate(m);
+        },
+        sessionStartMsRef.current ?? undefined
+      );
 
       const room = await connectToRoom(liveKitUrl, token, {
         onLocalVideoTrack: (el) => {

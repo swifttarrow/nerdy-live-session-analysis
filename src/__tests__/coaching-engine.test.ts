@@ -20,6 +20,7 @@ const TEST_CONFIG: CoachingConfig = {
   studentDefeatedSec: 12,
   tutorMonologueThresholdSec: 90,
   turnTakingMinPerMinute: 0.5,
+  turnTakingMinSessionSec: 0, // allow immediate fire in tests
 };
 
 function makeMetrics(overrides: {

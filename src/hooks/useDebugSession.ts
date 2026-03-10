@@ -168,12 +168,16 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         );
         audioPipelineRef.current = audioPipeline;
 
-        const aggregator = createMetricsAggregator(sessionId, (m) => {
+        const aggregator = createMetricsAggregator(
+          sessionId,
+          (m) => {
           setMetrics(m);
           sessionMetricsHistory.current.push(m);
           setVideoQuality(videoPipelineRef.current?.getQualityStatus() ?? null);
           coachingEngine.evaluate(m);
-        });
+        },
+          sessionStartMsRef.current ?? undefined
+        );
         aggregatorRef.current = aggregator;
 
         // captureStream() exists on HTMLMediaElement but may be missing from TS DOM lib

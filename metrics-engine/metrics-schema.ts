@@ -22,6 +22,8 @@ export type EmotionalState = z.infer<typeof EmotionalStateSchema>;
 
 export const ParticipantMetricsSchema = z.object({
   eye_contact_score: z.number().min(0).max(1),
+  /** True when we've received at least one valid score; false = no face detected yet */
+  face_detected: z.boolean().optional(),
   talk_time_percent: z.number().min(0).max(1),
   current_speaking: z.boolean(),
   /** M11: combined voice + expression energy level [0, 1] */
@@ -41,6 +43,8 @@ export const ParticipantMetricsSchema = z.object({
 export const SessionMetricsSchema = z.object({
   timestamp: z.string().datetime(),
   session_id: z.string(),
+  /** Session start timestamp (ms) for trigger warm-up checks */
+  session_start_ms: z.number().optional(),
   metrics: z.object({
     tutor: ParticipantMetricsSchema,
     student: ParticipantMetricsSchema,

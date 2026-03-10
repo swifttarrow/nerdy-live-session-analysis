@@ -5,6 +5,8 @@ type StreamRole = "tutor" | "student";
 
 interface ParticipantState {
   eyeContactScore: number;
+  /** True once we've received at least one valid score from the video pipeline */
+  faceDetected: boolean;
   talkTimePercent: number;
   speaking: boolean;
   energyLevel?: number;
@@ -41,14 +43,17 @@ export interface MetricsAggregator {
 /**
  * Combines eye contact, talk-time, energy level, and attention drift outputs;
  * emits validated SessionMetrics at 1 Hz.
+ *
+ * @param sessionStartMs - optional; used for trigger warm-up (e.g. turn_taking_low)
  */
 export function createMetricsAggregator(
   sessionId: string,
-  onMetrics: (metrics: SessionMetrics) => void
+  onMetrics: (metrics: SessionMetrics) => void,
+  sessionStartMs?: number
 ): MetricsAggregator {
   const state: Record<StreamRole, ParticipantState> = {
-    tutor: { eyeContactScore: 0, talkTimePercent: 0, speaking: false },
-    student: { eyeContactScore: 0, talkTimePercent: 0, speaking: false },
+    tutor: { eyeContactScore: 0, faceDetected: false, talkTimePercent: 0, speaking: false },
+    student: { eyeContactScore: 0, faceDetected: false, talkTimePercent: 0, speaking: false },
   };
 
   let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -58,6 +63,7 @@ export function createMetricsAggregator(
       const p = state[role];
       const base: Record<string, unknown> = {
         eye_contact_score: Math.round(p.eyeContactScore * 100) / 100,
+        face_detected: p.faceDetected,
         talk_time_percent: Math.round(p.talkTimePercent * 100) / 100,
         current_speaking: p.speaking,
         ...(p.energyLevel !== undefined ? { energy_level: Math.round(p.energyLevel * 100) / 100 } : {}),
@@ -75,6 +81,7 @@ export function createMetricsAggregator(
     const payload = {
       timestamp: new Date().toISOString(),
       session_id: sessionId,
+      ...(sessionStartMs !== undefined ? { session_start_ms: sessionStartMs } : {}),
       metrics: {
         tutor: buildParticipant("tutor"),
         student: buildParticipant("student"),
@@ -90,6 +97,7 @@ export function createMetricsAggregator(
   return {
     updateEyeContact(role, score) {
       state[role].eyeContactScore = Math.max(0, Math.min(1, score));
+      state[role].faceDetected = true;
     },
 
     updateTalkTime(role, percent, speaking, options) {

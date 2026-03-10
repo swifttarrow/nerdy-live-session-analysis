@@ -37,6 +37,8 @@ export interface CoachingConfig {
   // Turn-taking frequency trigger
   /** Turns per minute below this → nudge "involve student more" */
   turnTakingMinPerMinute: number;
+  /** Minimum session duration (sec) before turn_taking_low can fire */
+  turnTakingMinSessionSec: number;
 }
 
 export const DEFAULT_CONFIG: CoachingConfig = {
@@ -59,4 +61,5 @@ export const DEFAULT_CONFIG: CoachingConfig = {
   tutorMonologueThresholdSec: 90,
   // Turn-taking: healthy tutoring has frequent handoffs
   turnTakingMinPerMinute: 0.5,
+  turnTakingMinSessionSec: 60,
 };

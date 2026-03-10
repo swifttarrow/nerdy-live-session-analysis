@@ -244,6 +244,12 @@ export const TRIGGERS: Trigger[] = [
     evaluate(metrics, _state, config) {
       const tpm = metrics.metrics.tutor.tutor_turns_per_minute;
       if (tpm === undefined) return false;
+      // Require minimum session duration before firing (avoids erroneous trigger at 1s)
+      const sessionStartMs = metrics.session_start_ms;
+      if (sessionStartMs !== undefined && config.turnTakingMinSessionSec > 0) {
+        const sessionSec = (Date.now() - sessionStartMs) / 1000;
+        if (sessionSec < config.turnTakingMinSessionSec) return false;
+      }
       return tpm < config.turnTakingMinPerMinute && tpm >= 0;
     },
   },
