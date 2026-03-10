@@ -54,18 +54,8 @@ make build
 | `LIVEKIT_URL` | LiveKit server WebSocket URL (e.g. `wss://your-project.livekit.cloud`) |
 | `LIVEKIT_API_KEY` | LiveKit API key |
 | `LIVEKIT_API_SECRET` | LiveKit API secret |
-| `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_CLUSTER` | Pusher credentials for real-time room status (optional; falls back to polling) |
-| `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER` | Pusher client config (optional) |
 
-### Real-time room status (optional)
-
-For instant updates when participants join/leave (instead of 2s polling):
-
-1. Create a [Pusher](https://pusher.com) account (free Sandbox plan).
-2. Add Pusher env vars to `.env.local` (see `.env.example`).
-3. In [LiveKit Cloud](https://cloud.livekit.io) → Settings → Webhooks, add a webhook:
-   - URL: `https://your-domain.com/api/webhooks/livekit` (use ngrok for local dev)
-   - Events: `participant_joined`, `participant_left`
+Room status is updated via 1s polling against `/api/room/status`.
 
 ## Architecture
 

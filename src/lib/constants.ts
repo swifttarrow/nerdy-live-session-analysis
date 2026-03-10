@@ -29,13 +29,7 @@ export const STORAGE_KEYS = {
 /** Default values */
 export const DEFAULTS = {
   ROOM_NAME: "sessionlens-demo",
-  PUSHER_CLUSTER: "us2",
   TOKEN_TTL: "4h",
-} as const;
-
-/** Pusher channel event names */
-export const PUSHER_EVENTS = {
-  PARTICIPANT_UPDATE: "participant-update",
 } as const;
 
 /** Debug / polling intervals (ms) */
