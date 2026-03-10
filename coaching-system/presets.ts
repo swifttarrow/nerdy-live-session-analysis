@@ -1,5 +1,6 @@
 import type { CoachingConfig } from "./config";
 import { DEFAULT_CONFIG } from "./config";
+import { STORAGE_KEYS, DEFAULT_SESSION_PRESET } from "./constants";
 
 export type SessionPreset = "lecture" | "practice" | "socratic";
 
@@ -52,21 +53,19 @@ export function applyPreset(base: CoachingConfig, preset: SessionPreset): Coachi
   return { ...base, ...getPresetConfig(preset) };
 }
 
-const STORAGE_KEY = "sessionlens-preset";
-
 export function loadPreset(): SessionPreset {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_KEYS.PRESET);
     if (["lecture", "practice", "socratic"].includes(stored ?? "")) {
       return stored as SessionPreset;
     }
   } catch {}
-  return "socratic";
+  return DEFAULT_SESSION_PRESET;
 }
 
 export function savePreset(preset: SessionPreset): void {
   try {
-    localStorage.setItem(STORAGE_KEY, preset);
+    localStorage.setItem(STORAGE_KEYS.PRESET, preset);
   } catch {}
 }
 
