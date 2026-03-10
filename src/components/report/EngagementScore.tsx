@@ -10,27 +10,68 @@ interface EngagementScoreProps {
   engagementBreakdown?: EngagementBreakdown;
 }
 
-function BreakdownBar({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  const pct = Math.round(value * 100);
+const COMPONENT_CONFIG = [
+  {
+    key: "talkBalance" as const,
+    label: "Talk balance",
+    weight: "40%",
+    color: "bg-cyan-500",
+    getValue: (b: EngagementBreakdown) => b.talkBalance / 0.4,
+    getContribution: (b: EngagementBreakdown) => b.talkBalance,
+  },
+  {
+    key: "tutorEyeContact" as const,
+    label: "Tutor eye contact",
+    weight: "20%",
+    color: "bg-amber-500",
+    getValue: (b: EngagementBreakdown) => b.tutorEyeContact / 0.2,
+    getContribution: (b: EngagementBreakdown) => b.tutorEyeContact,
+  },
+  {
+    key: "studentEyeContact" as const,
+    label: "Student eye contact",
+    weight: "40%",
+    color: "bg-emerald-500",
+    getValue: (b: EngagementBreakdown) => b.studentEyeContact / 0.4,
+    getContribution: (b: EngagementBreakdown) => b.studentEyeContact,
+  },
+] as const;
+
+function StackedBreakdownBar({ breakdown }: { breakdown: EngagementBreakdown }) {
+  const segments = COMPONENT_CONFIG.map((cfg) => ({
+    ...cfg,
+    contribution: cfg.getContribution(breakdown),
+  }));
+
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs">
-        <span className="text-gray-400">{label}</span>
-        <span className="text-gray-300">{pct}%</span>
+    <div className="space-y-2">
+      <p className="text-gray-400 text-xs font-medium">
+        Score breakdown by category
+      </p>
+      <div className="h-4 bg-gray-800 rounded-lg overflow-hidden flex">
+        {segments.map(({ key, contribution, color }) => {
+          const pct = Math.max(0, Math.min(100, contribution * 100));
+          return (
+            <div
+              key={key}
+              className={`h-full transition-all ${color} first:rounded-l-md last:rounded-r-md`}
+              style={{ width: `${pct}%` }}
+              title={`${Math.round(contribution * 100)}%`}
+            />
+          );
+        })}
       </div>
-      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: `${Math.min(100, pct)}%` }}
-        />
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+        {segments.map(({ label, weight, color, getValue }) => {
+          const score = Math.round(getValue(breakdown) * 100);
+          return (
+            <div key={label} className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-sm ${color}`} />
+              <span className="text-gray-400">{label} ({weight}):</span>
+              <span className="text-gray-200 font-medium">{score}%</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -58,25 +99,8 @@ export function EngagementScore({
         </p>
       </div>
       {engagementBreakdown && (
-        <div className="pt-4 border-t border-gray-800 space-y-3">
-          <p className="text-gray-400 text-xs font-medium mb-2">
-            Score breakdown (weighted components)
-          </p>
-          <BreakdownBar
-            label="Talk balance (40%)"
-            value={engagementBreakdown.talkBalance / 0.4}
-            color="bg-cyan-500"
-          />
-          <BreakdownBar
-            label="Tutor eye contact (20%)"
-            value={engagementBreakdown.tutorEyeContact / 0.2}
-            color="bg-amber-500"
-          />
-          <BreakdownBar
-            label="Student eye contact (40%)"
-            value={engagementBreakdown.studentEyeContact / 0.4}
-            color="bg-emerald-500"
-          />
+        <div className="pt-4 border-t border-gray-800">
+          <StackedBreakdownBar breakdown={engagementBreakdown} />
         </div>
       )}
     </div>
