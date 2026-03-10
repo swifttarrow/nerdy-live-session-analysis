@@ -160,6 +160,10 @@ Derived from MediaPipe 478-point landmarks:
 - Real-time: `InterruptionTracker` detects when one participant starts speaking while the other is active
 - Post-session: `detectOverlaps()` on VAD segment arrays for batch analysis and classification (productive vs. unproductive)
 
+### Engagement Score (Stretch: Delivery Moderation)
+- Current: weighted combination of talk balance (40%), tutor eye contact (20%), student eye contact (40%)
+- **Stretch (M31):** Factor instructor delivery quality as moderating variable. Poor delivery (rambling, filler words, disorganized explanations) dampens the score — some "student engagement problems" are tutor-driven. Delivery signals: fluency (filler rate, pause frequency), structure (monologue length, turn-taking), confidence (prosody)
+
 ---
 
 ## Key Architecture Decisions

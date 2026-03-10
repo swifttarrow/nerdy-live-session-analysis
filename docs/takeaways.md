@@ -360,6 +360,35 @@ High-level takeaways from each milestone and task, plus notable technical challe
 
 ---
 
+## Milestone 30: Instructor Delivery Quality (Stretch)
+
+**Takeaway:** Tutor delivery strongly affects attention and cognitive load. Poor delivery (rambling, filler words, disorganized explanations) increases extraneous load and suppresses student participation. Some "student engagement problems" are actually tutor delivery problems. Add delivery quality metrics: speech fluency (filler rate, pause frequency, restart rate), explanation structure (monologue length, turn-taking, question density), confidence (prosody).
+
+### Tasks
+
+- **001-delivery-fluency:** Filler word rate, pause frequency, speech restart rate from VAD/transcription.
+- **002-delivery-structure:** Avg tutor monologue length, turn-taking frequency, question density.
+- **003-delivery-confidence:** Speech rate consistency, vocal energy/prosody variation.
+- **004-report-integration:** Add delivery quality to session summary and report.
+
+### Technical Challenges
+
+- Filler detection without transcription is limited; Tier 2 (Whisper) improves accuracy. Pause/restart and monologue length feasible from VAD segments.
+
+---
+
+## Milestone 31: Engagement Score with Delivery Moderation (Stretch)
+
+**Takeaway:** Factor instructor delivery quality into engagement score as a moderating variable. When tutor delivery is poor, the engagement score is adjusted to reflect that some "student engagement problems" may be tutor-driven. Recommendations distinguish tutor-delivery issues from student-engagement issues.
+
+### Tasks
+
+- **001-moderation-formula:** Define formula; integrate delivery quality into `aggregateSessionSummary()`.
+- **002-report-display:** Show delivery-adjusted engagement score; explain when delivery is low.
+- **003-recommendations:** Delivery-aware recommendation logic — suggest delivery improvements when delivery low + engagement low.
+
+---
+
 ## Cross-Cutting Technical Challenges
 
 - **Browser-first processing:** All CV and audio analysis in browser eliminates server round-trips (saves 200–500 ms), keeps raw video/audio local (privacy), removes per-minute API costs. Tradeoff: client CPU; mitigated by ~5 FPS analysis limit.

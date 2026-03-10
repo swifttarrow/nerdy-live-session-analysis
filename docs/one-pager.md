@@ -56,7 +56,7 @@ Some signals must be computed with extremely low latency (<1–2s) to support co
 
 **Post-session analytics**
 
-- Engagement score per session
+- Engagement score per session (optionally moderated by instructor delivery quality — see stretch)
 - Moments of confusion or frustration
 - Tutor talk balance
 - Persistence patterns
@@ -65,6 +65,16 @@ Some signals must be computed with extremely low latency (<1–2s) to support co
 
 - Which tutors drive the most student talk
 - Which explanations produce more attempts or questions
+
+---
+
+## Instructor Delivery as Moderating Variable (Stretch)
+
+Tutor delivery strongly affects attention and cognitive load. Poor delivery (rambling, filler words, disorganized explanations) increases extraneous load and suppresses student participation. Research shows that some "student engagement problems" are actually tutor delivery problems.
+
+**Treat delivery as a moderating variable:** If student talk ratio is low, check whether the tutor is dominating; if response latency is high, check whether the tutor explanation was long or unclear; if student attempts are low, check whether the tutor is rambling instead of prompting.
+
+**Measurable delivery signals:** Speech fluency (filler word rate, pause frequency, speech restart rate); explanation structure (avg tutor monologue length, turn-taking frequency, question density); confidence (speech rate consistency, prosody variation). These can be factored into the engagement score so that poor delivery dampens the score without fully overriding strong student engagement.
 
 ---
 

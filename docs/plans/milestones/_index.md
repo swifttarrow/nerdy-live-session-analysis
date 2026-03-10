@@ -64,6 +64,8 @@
 | 27 | [27-configurable-nudge-sensitivity](./27-configurable-nudge-sensitivity/) | Complete |
 | 28 | [28-session-type-presets](./28-session-type-presets/) | Complete |
 | 29 | [29-interruptions-tier2-transcription](./29-interruptions-tier2-transcription/) | Complete (Stretch) |
+| 30 | [30-instructor-delivery-quality](./30-instructor-delivery-quality/) | Pending (Stretch) |
+| 31 | [31-engagement-score-delivery-moderation](./31-engagement-score-delivery-moderation/) | Pending (Stretch) |
 
 ## Quick Links
 

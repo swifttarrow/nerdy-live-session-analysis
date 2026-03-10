@@ -454,6 +454,7 @@ Organized by the three deep structural problems in tutoring. **Priority: Engagem
 | Passive learning detection         | Student just watches; nods; can't reproduce later; illusion of learning                         | Beyond talk-time: detect "student watching" pattern (low student speech, long tutor monologues); nudge "Try having student explain back"     |
 | Session structure + goal alignment | Poor structure (random homework → solve → end); tutor/student/parent solving different problems | Detect homework-help vs learning pattern; detect misalignment from transcript; suggest structure (diagnose → one concept → practice → recap) |
 | Student confidence signals         | Math anxiety, "I don't know" responses, learned helplessness; harder to detect online           | Voice/facial cues for disengagement; suggest techniques ("Try: What do you think the first step is?")                                        |
+| **Instructor delivery quality**    | Tutor rambling, filler words, disorganized explanations increase cognitive load; suppress student participation; some "engagement problems" are tutor-driven | Speech fluency (filler rate, pause frequency, restart rate); structure (monologue length, turn-taking, question density); factor delivery into engagement score as moderating variable |
 
 
 ### Diagnosis

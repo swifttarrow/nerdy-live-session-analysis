@@ -182,6 +182,12 @@ Store short clips (e.g., 10–30 seconds) around each flagged moment. On the rep
 
 ---
 
+### 4. Instructor delivery quality (stretch)
+
+Measure tutor delivery: speech fluency (filler rate, pause frequency, restart rate), explanation structure (monologue length, turn-taking, question density), confidence (prosody). Factor delivery into the engagement score as a moderating variable — some "student engagement problems" are tutor-driven. See M30 and M31 milestones.
+
+---
+
 ## Test Steps
 
 - Run `make setup` then `make run`; open two tabs.

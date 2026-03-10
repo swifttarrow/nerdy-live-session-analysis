@@ -24,6 +24,8 @@
 | **Post-session: LLM recommendations**                  | Optional in MVP            | **Stretch** — "personalized"                  |
 | **Configurable nudge sensitivity (UI)**                | In-memory config only      | **Stretch**                                   |
 | **Session-type presets** (Lecture, Practice, Socratic) | General only               | **Stretch**                                   |
+| **Instructor delivery quality** (fluency, structure)  | Not in MVP                 | **Stretch**                                   |
+| **Engagement score with delivery moderation**        | Raw engagement only        | **Stretch** — factor delivery into score     |
 | **Privacy considerations documented**                  | ConsentBanner only         | **Required** — Submission checklist           |
 | **15+ tests** (Technical Implementation Excellent)     | MVP has unit tests         | **Required** — Evaluation criteria            |
 | **Auth / OAuth**                                       | Session tokens only        | **Excluded** — skip for now                   |
@@ -132,6 +134,16 @@ Phases grouped by related functionality; order respects dependencies.
 | **2.3** | Post-session: LLM-powered personalized recommendations | 2–3h |
 
 
+### Group 2d: Instructor Delivery Quality (Stretch)
+
+*Research: tutor delivery strongly affects attention and cognitive load. Poor delivery (rambling, filler words, disorganized explanations) increases extraneous load and suppresses student participation. Some "student engagement problems" are actually tutor delivery problems. Treat delivery as a **moderating variable** for engagement metrics.*
+
+| Phase    | Scope                                                                                                                       | Est. |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- | ---- |
+| **2.4**  | **Instructor delivery quality metrics** — speech fluency (filler rate, pause frequency, restart rate), structure (monologue length, turn-taking, question density), confidence (prosody) | 3–4h |
+| **2.5**  | **Engagement score with delivery moderation** — factor delivery into engagement score; recommendations distinguish tutor-delivery issues from student-engagement issues                 | 2h   |
+
+
 ### Group 3: UX & Config (Stretch)
 
 
@@ -209,6 +221,22 @@ The system aims to understand *engagement quality*, not just raw counts. Interru
 
 *Explanation length* (ONE_PAGER: cognitive signal) — duration of student speaking per turn; partial real-time (running talk duration); post-session: aggregate speaking length per turn, identify explanation-rich segments. Add as optional phase in Group 2 (e.g., 2.0d) if time permits.
 
+### Instructor Delivery Quality (Stretch — Group 2d)
+
+Tutor delivery strongly affects attention and cognitive load (Cognitive Load Theory). Poor delivery (rambling, filler words, disorganized explanations) increases extraneous load and suppresses student participation. Research (Chi et al., Graesser et al.) shows concise, structured, fluent explanations correlate with higher learning gains.
+
+**Key insight:** Some "student engagement problems" are actually tutor delivery problems. Treat delivery as a **moderating variable** for engagement metrics:
+
+| Engagement signal | Delivery effect |
+|-------------------|-----------------|
+| Student talk ratio | Rambling tutors suppress student participation |
+| Response latency | Unclear explanations increase hesitation |
+| Interruptions / overlap | Disorganized explanations cause clarification interruptions |
+| Explanation length | Inefficient explanations inflate tutor speaking time |
+| Student attempts | Clear delivery encourages attempts |
+
+**Measurable signals (from audio/video):** Speech fluency (filler word rate, pause frequency, speech restart rate); explanation structure (avg tutor monologue length, turn-taking frequency, question density); confidence (speech rate consistency, prosody variation).
+
 ---
 
 ## Recommended Execution Order
@@ -217,7 +245,8 @@ The system aims to understand *engagement quality*, not just raw counts. Interru
 2. **Group 5** (5.1 → 5.2 → 5.3) — testing; can run in parallel with feature work; validate before submission
 3. **Group 4** (4.1 → 4.2 → 4.3 → 4.4 → 4.5) — required for submission; can parallelize with Group 2/3
 4. **Group 2** (2.0a → 2.0b → 2.0c; then 2.1 → 2.2 → 2.3) — engagement quality stretch, then post-session stretch
-5. **Group 3** (3.1 → 3.2) — stretch, if time permits
+5. **Group 2d** (2.4 → 2.5) — instructor delivery quality stretch; factor delivery into engagement score
+6. **Group 3** (3.1 → 3.2) — stretch, if time permits
 
 ---
 
