@@ -1,4 +1,11 @@
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
+import {
+  DEFAULT_ATTENTION_SEGMENTS,
+  ATTENTION_SEGMENT_LABELS,
+  ATTENTION_DRIFT_THRESHOLD,
+  ATTENTION_DECLINE_TOLERANCE,
+  ATTENTION_DECLINE_THRESHOLD,
+} from "./constants";
 
 export interface AttentionSegment {
   label: string;          // e.g. "Beginning", "Middle", "End"
@@ -19,7 +26,7 @@ export interface AttentionCycles {
  */
 export function segmentAttention(
   metricsHistory: SessionMetrics[],
-  numSegments: number = 3
+  numSegments: number = DEFAULT_ATTENTION_SEGMENTS
 ): AttentionCycles {
   const n = metricsHistory.length;
   if (n === 0) return { segments: [], pattern: null };
@@ -27,8 +34,8 @@ export function segmentAttention(
   const actualSegments = Math.min(numSegments, n);
   const size = Math.ceil(n / actualSegments);
   const labels =
-    actualSegments === 3
-      ? ["Beginning", "Middle", "End"]
+    actualSegments === ATTENTION_SEGMENT_LABELS.length
+      ? [...ATTENTION_SEGMENT_LABELS]
       : Array.from({ length: actualSegments }, (_, i) => `Segment ${i + 1}`);
 
   const segments: AttentionSegment[] = [];
@@ -67,16 +74,19 @@ export function detectDriftPattern(segments: AttentionSegment[]): string | null 
   const avgMid = midSegments.reduce((s, seg) => s + seg.studentEyeContact, 0) / midSegments.length;
   const avgBoundary = (first + last) / 2;
 
-  if (avgBoundary - avgMid > 0.2) {
+  if (avgBoundary - avgMid > ATTENTION_DRIFT_THRESHOLD) {
     return "Student attention drifted in the middle of the session";
   }
 
   // Check if attention declined progressively
   const declining = segments.every(
-    (seg, i) => i === 0 || seg.studentEyeContact <= segments[i - 1].studentEyeContact + 0.05
+    (seg, i) =>
+      i === 0 ||
+      seg.studentEyeContact <=
+        segments[i - 1].studentEyeContact + ATTENTION_DECLINE_TOLERANCE
   );
   const totalDrop = first - last;
-  if (declining && totalDrop > 0.25) {
+  if (declining && totalDrop > ATTENTION_DECLINE_THRESHOLD) {
     return "Student attention declined progressively through the session";
   }
 

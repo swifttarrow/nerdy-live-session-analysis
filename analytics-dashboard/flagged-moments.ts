@@ -1,4 +1,5 @@
 import type { NudgeEvent } from "@coaching-system/engine";
+import { MS_PER_SEC, SEC_PER_MIN, SEVERITY, TRIGGER_SEVERITY } from "./constants";
 
 export interface FlaggedMoment {
   timestampMs: number;
@@ -19,35 +20,20 @@ export function buildFlaggedMoments(
 ): FlaggedMoment[] {
   return nudges.map((nudge) => ({
     timestampMs: nudge.timestamp,
-    sessionOffsetSec: Math.round((nudge.timestamp - sessionStartMs) / 1000),
+    sessionOffsetSec: Math.round((nudge.timestamp - sessionStartMs) / MS_PER_SEC),
     reason: nudge.headline,
     severity: severityForType(nudge.type),
   }));
 }
 
 function severityForType(type: string): FlaggedMoment["severity"] {
-  switch (type) {
-    case "student_silent":
-    case "tutor_talk_dominant":
-    case "interruptions_spike":
-    case "student_frustrated":
-    case "student_defeated":
-      return "warning";
-    case "low_eye_contact":
-    case "student_attention_drift":
-    case "student_tired":
-      return "info";
-    case "student_hesitating":
-      return "alert";
-    default:
-      return "info";
-  }
+  return TRIGGER_SEVERITY[type] ?? SEVERITY.INFO;
 }
 
 /** Format a session offset (seconds) as mm:ss */
 export function formatOffset(sec: number): string {
   if (sec < 0) return "0:00";
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
+  const m = Math.floor(sec / SEC_PER_MIN);
+  const s = sec % SEC_PER_MIN;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
