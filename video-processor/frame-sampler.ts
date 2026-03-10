@@ -1,8 +1,9 @@
 /**
  * Frame sampler: extracts frames from a video element at ~1–2 Hz.
  *
- * Uses requestVideoFrameCallback when available (Chrome 83+), with a
- * requestAnimationFrame fallback. Skips frames to achieve target rate.
+ * Uses requestAnimationFrame as the driver for reliable behavior across both
+ * live MediaStreams and file-backed video (e.g. debug mode). requestVideoFrameCallback
+ * can fire inconsistently for file-backed sources before/during playback.
  */
 export type FrameCallback = (
   imageData: ImageData,
@@ -40,14 +41,16 @@ export function createFrameSampler(
       const w = Math.min(videoEl.videoWidth || 640, 640);
       const h = Math.min(videoEl.videoHeight || 480, 480);
 
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
+      if (w > 0 && h > 0) {
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
 
-      ctx.drawImage(videoEl, 0, 0, w, h);
-      const imageData = ctx.getImageData(0, 0, w, h);
-      onFrame(imageData, now);
+        ctx.drawImage(videoEl, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+        onFrame(imageData, now);
+      }
     }
   }
 
@@ -57,27 +60,12 @@ export function createFrameSampler(
     rafId = requestAnimationFrame(tick);
   }
 
-  // Use requestVideoFrameCallback if available for better accuracy
-  function tickVFC(
-    now: DOMHighResTimeStamp,
-    _metadata: VideoFrameCallbackMetadata
-  ) {
-    if (!running) return;
-    processFrame(now);
-    videoEl.requestVideoFrameCallback(tickVFC);
-  }
-
   return {
     start() {
       if (running) return;
       running = true;
       lastFrameTime = 0;
-
-      if ("requestVideoFrameCallback" in videoEl) {
-        videoEl.requestVideoFrameCallback(tickVFC);
-      } else {
-        rafId = requestAnimationFrame(tick);
-      }
+      rafId = requestAnimationFrame(tick);
     },
     stop() {
       running = false;
