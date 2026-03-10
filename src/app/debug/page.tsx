@@ -10,6 +10,7 @@ import SensitivitySelector from "@/components/SensitivitySelector";
 import SessionTypeSelector from "@/components/SessionTypeSelector";
 import type { SessionPreset } from "@coaching-system/presets";
 import { ROLE_LABELS } from "@/lib/roles";
+import { formatTime } from "@/lib/utils/format";
 
 function FileUploadZone({
   label,
@@ -81,10 +82,14 @@ export default function DebugPage() {
     nudges,
     sensitivityPercent,
     sessionPreset,
+    currentTime,
+    duration,
     handleSensitivityChange,
     handlePresetChange,
     startSession,
     endSession,
+    togglePause,
+    seekTo,
     dismissNudge,
   } = useDebugSession();
 
@@ -138,6 +143,14 @@ export default function DebugPage() {
               >
                 {status}
               </span>
+              {status !== "loading" && (
+                <button
+                  onClick={togglePause}
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors"
+                >
+                  {status === "paused" ? "Resume" : "Pause"}
+                </button>
+              )}
               <button
                 onClick={endSession}
                 className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white text-sm rounded-lg transition-colors"
@@ -229,6 +242,25 @@ export default function DebugPage() {
               </div>
             </div>
           </div>
+          {status !== "loading" && duration > 0 && (
+            <div className="flex items-center gap-3 mt-2">
+              <span className="text-xs text-gray-400 tabular-nums w-10">
+                {formatTime(currentTime)}
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={duration}
+                step={0.1}
+                value={currentTime}
+                onChange={(e) => seekTo(parseFloat(e.target.value))}
+                className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              />
+              <span className="text-xs text-gray-400 tabular-nums w-10">
+                {formatTime(duration)}
+              </span>
+            </div>
+          )}
         </div>
 
         {isActive && (

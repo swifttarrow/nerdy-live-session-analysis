@@ -64,6 +64,8 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
   const [sensitivityPercent, setSensitivityPercent] = useState(loadSensitivityPercent);
   const [sessionPreset, setSessionPreset] = useState<SessionPreset>(loadPreset);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   const aggregatorRef = useRef<MetricsAggregator | null>(null);
 
@@ -241,6 +243,21 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         tutorVideo.addEventListener("ended", handleEnded);
         studentVideo.addEventListener("ended", handleEnded);
 
+        const syncDuration = () => {
+          const d = Math.min(tutorVideo.duration, studentVideo.duration);
+          if (Number.isFinite(d)) setDuration(d);
+        };
+        const syncTime = () => {
+          const t = Math.min(tutorVideo.currentTime, studentVideo.currentTime);
+          if (Number.isFinite(t)) setCurrentTime(t);
+        };
+        tutorVideo.addEventListener("loadedmetadata", syncDuration);
+        studentVideo.addEventListener("loadedmetadata", syncDuration);
+        tutorVideo.addEventListener("timeupdate", syncTime);
+        studentVideo.addEventListener("timeupdate", syncTime);
+        syncDuration();
+        syncTime();
+
         await Promise.all([tutorVideo.play(), studentVideo.play()]);
 
         setStatus("playing");
@@ -323,6 +340,35 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     setNudges((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
+  const togglePause = useCallback(() => {
+    const tutor = tutorVideoRef.current;
+    const student = studentVideoRef.current;
+    if (!tutor || !student) return;
+    if (tutor.paused) {
+      tutor.play();
+      student.play();
+      setStatus("playing");
+    } else {
+      tutor.pause();
+      student.pause();
+      setStatus("paused");
+    }
+  }, []);
+
+  const seekTo = useCallback((seconds: number) => {
+    const tutor = tutorVideoRef.current;
+    const student = studentVideoRef.current;
+    if (!tutor || !student) return;
+    const maxT = Math.min(
+      tutor.duration || Infinity,
+      student.duration || Infinity
+    );
+    const t = Math.max(0, Math.min(seconds, Number.isFinite(maxT) ? maxT : seconds));
+    tutor.currentTime = t;
+    student.currentTime = t;
+    setCurrentTime(t);
+  }, []);
+
   return {
     status,
     errorMsg,
@@ -331,10 +377,14 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     nudges,
     sensitivityPercent,
     sessionPreset,
+    currentTime,
+    duration,
     handleSensitivityChange,
     handlePresetChange,
     startSession,
     endSession,
+    togglePause,
+    seekTo,
     dismissNudge,
     tutorVideoRef,
     studentVideoRef,
