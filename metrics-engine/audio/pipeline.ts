@@ -110,10 +110,27 @@ export function createAudioPipeline(
     monologueTracker?.onSpeechEnd(role);
   }
 
+  const trackCallbacks: Array<{
+    role: ParticipantRole;
+    onUpdate: (out: AudioPipelineOutput) => void;
+  }> = [];
+  let pollIntervalId: ReturnType<typeof setInterval> | null = null;
+
+  function startPolling() {
+    if (pollIntervalId) return;
+    pollIntervalId = setInterval(() => {
+      for (const { role, onUpdate } of trackCallbacks) {
+        onUpdate(toOutput(aggregator.getState(role), role));
+      }
+    }, 1000);
+  }
+
   return {
     addTrack(role, stream, onUpdate) {
       rolesWithTracks.add(role);
       if (sessionStartMs === null) sessionStartMs = Date.now();
+
+      trackCallbacks.push({ role, onUpdate });
 
       void createVad(stream, {
         onSpeechStart: () => {
@@ -136,6 +153,8 @@ export function createAudioPipeline(
           void vad.start();
         }
       });
+
+      startPolling();
     },
 
     getState() {
@@ -143,6 +162,11 @@ export function createAudioPipeline(
     },
 
     destroy() {
+      if (pollIntervalId) {
+        clearInterval(pollIntervalId);
+        pollIntervalId = null;
+      }
+      trackCallbacks.length = 0;
       for (const vad of vadInstances) {
         vad.destroy();
       }
