@@ -1,7 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createFrameSampler } from "@video-processor/frame-sampler";
 import {
@@ -25,6 +25,7 @@ import type {
   MonologueTracker,
 } from "@metrics-engine/index";
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
+import type { DebugStats } from "@/hooks/useSessionRoom";
 import {
   createCoachingEngine,
   DEFAULT_CONFIG,
@@ -78,7 +79,9 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const responseLatencyTrackerRef = useRef<ResponseLatencyTracker | null>(null);
   const allNudgesRef = useRef<NudgeEvent[]>([]);
   const sessionStartMsRef = useRef<number | null>(null);
-  const frameSamplersRef = useRef<Array<{ stop: () => void }>>([]);
+  const frameSamplersRef = useRef<Array<{ start: () => void; stop: () => void }>>([]);
+  const monologueTrackerRef = useRef<MonologueTracker | null>(null);
+  const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
 
   const handleSensitivityChange = useCallback((percent: number) => {
     setSensitivityPercent(percent);
@@ -89,6 +92,94 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     setSessionPreset(preset);
     savePreset(preset);
   }, []);
+
+  // Poll debug stats when session is playing or paused
+  useEffect(() => {
+    if (status !== "playing" && status !== "paused") {
+      setDebugStats(null);
+      return;
+    }
+    const interval = setInterval(() => {
+      const vp = videoPipelineRef.current;
+      const ap = audioPipelineRef.current;
+      const it = interruptionTrackerRef.current;
+      const rt = responseLatencyTrackerRef.current;
+      const m = metrics;
+
+      if (!m) return;
+
+      const { tutor, student } = m.metrics;
+      const speakerState: DebugStats["speakerState"] =
+        tutor.current_speaking && student.current_speaking
+          ? "both"
+          : tutor.current_speaking
+            ? "teacher"
+            : student.current_speaking
+              ? "student"
+              : "neither";
+
+      const talkTimeMs = ap
+        ? (() => {
+            const s = ap.getState();
+            return { tutor: s.tutor.talkTimeMs, student: s.student.talkTimeMs };
+          })()
+        : { tutor: 0, student: 0 };
+
+      const emotionScores = vp?.getStudentEmotionScores?.() ?? {
+        engaged: 0, attentive: 0, curious: 0, confident: 0, understanding: 0,
+        excited: 0, focused: 0, neutral: 0, thinking: 0, confused: 0,
+        frustrated: 0, tired: 0, defeated: 0, bored: 0, anxious: 0,
+      };
+      const emotionalState = student.emotional_state ?? "neutral";
+
+      const interruptions = it
+        ? it.getStats()
+        : { studentToTutor: 0, tutorToStudent: 0 };
+      const latencyStats = rt?.getStats(
+        undefined,
+        INTERVALS.ROLLING_TALK_WINDOW_MS
+      );
+      const responseLatency = {
+        turnCount: latencyStats?.turnCount ?? 0,
+        avgMs: latencyStats?.avgResponseLatencyMs ?? 0,
+        hesitationCount: latencyStats?.hesitationCount ?? 0,
+        turnsPerMinute: latencyStats?.turnsPerMinute,
+      };
+      const tutorMonologueSec = (() => {
+        const mt = monologueTrackerRef.current;
+        if (!mt) return undefined;
+        const stats = mt.getStats();
+        const ms = stats.currentMonologueMs || stats.lastMonologueMs;
+        return ms > 0 ? ms / 1000 : undefined;
+      })();
+
+      const videoQualityState = vp?.getQualityStatus?.() ?? null;
+      const scores = vp?.getLatestScores?.();
+      const eyeContact = scores
+        ? { tutor: scores.tutor.eyeContactScore, student: scores.student.eyeContactScore }
+        : { tutor: tutor.eye_contact_score, student: student.eye_contact_score };
+
+      const mediapipeStats = vp?.latency?.getStageStats?.("mediapipe");
+      const pipelineLatencyMs = mediapipeStats?.p50 ?? 0;
+
+      setDebugStats({
+        speakerState,
+        talkTimeMs,
+        emotionScores,
+        emotionalState,
+        interruptions: {
+          studentToTutor: interruptions.studentToTutor,
+          tutorToStudent: interruptions.tutorToStudent,
+        },
+        responseLatency,
+        tutorMonologueSec,
+        eyeContact,
+        videoQuality: videoQualityState ?? videoQuality,
+        pipelineLatencyMs,
+      });
+    }, INTERVALS.DEBUG_POLL_MS);
+    return () => clearInterval(interval);
+  }, [status, metrics, videoQuality]);
 
   const startSession = useCallback(
     async (
@@ -161,6 +252,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         responseLatencyTrackerRef.current = latencyTracker;
 
         const monologueTracker = createMonologueTracker();
+        monologueTrackerRef.current = monologueTracker;
 
         const audioPipeline = createAudioPipeline(
           interruptionTracker,
@@ -281,7 +373,9 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     videoPipelineRef.current = null;
     audioPipelineRef.current?.destroy?.();
     audioPipelineRef.current = null;
+    monologueTrackerRef.current = null;
     setVideoQuality(null);
+    setDebugStats(null);
 
     let interruptionData = null;
     if (interruptionTrackerRef.current) {
@@ -343,14 +437,17 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const togglePause = useCallback(() => {
     const tutor = tutorVideoRef.current;
     const student = studentVideoRef.current;
+    const samplers = frameSamplersRef.current;
     if (!tutor || !student) return;
     if (tutor.paused) {
       tutor.play();
       student.play();
+      for (const s of samplers) s.start();
       setStatus("playing");
     } else {
       tutor.pause();
       student.pause();
+      for (const s of samplers) s.stop();
       setStatus("paused");
     }
   }, []);
@@ -379,6 +476,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     sessionPreset,
     currentTime,
     duration,
+    debugStats,
     handleSensitivityChange,
     handlePresetChange,
     startSession,

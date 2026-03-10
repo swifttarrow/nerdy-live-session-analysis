@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useDebugSession } from "@/hooks/useDebugSession";
 import MetricsDisplay from "@/components/MetricsDisplay";
+import DebugPanel from "@/components/DebugPanel";
 import NudgeToast from "@/components/NudgeToast";
 import { EyeContactOverlay } from "@/components/EyeContactOverlay";
 import SensitivitySelector from "@/components/SensitivitySelector";
@@ -84,6 +85,7 @@ export default function DebugPage() {
     sessionPreset,
     currentTime,
     duration,
+    debugStats,
     handleSensitivityChange,
     handlePresetChange,
     startSession,
@@ -92,6 +94,8 @@ export default function DebugPage() {
     seekTo,
     dismissNudge,
   } = useDebugSession();
+
+  const [debugPanelOpen, setDebugPanelOpen] = useState(true);
 
   const canStart =
     status === "idle" && tutorFile && studentFile;
@@ -264,8 +268,32 @@ export default function DebugPage() {
         </div>
 
         {isActive && (
-          <aside className="w-80 flex-shrink-0">
-            <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
+          <aside className="w-80 flex-shrink-0 flex flex-col gap-4 min-h-0">
+            <div className="flex items-center justify-end gap-1 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setDebugPanelOpen((v) => !v)}
+                className={`p-2 rounded-md transition-colors ${
+                  debugPanelOpen
+                    ? "bg-cyan-600/30 text-cyan-400"
+                    : "text-gray-500 hover:text-gray-400 hover:bg-gray-700"
+                }`}
+                title={debugPanelOpen ? "Hide debug panel" : "Show debug panel"}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 3v18h18" />
+                  <path d="m19 9-5 5-4-4-3 3" />
+                </svg>
+              </button>
+            </div>
+            {debugPanelOpen && (
+              <div className="min-h-0 overflow-auto flex-shrink-0">
+                <DebugPanel debugStats={debugStats} />
+              </div>
+            )}
+            <div className="min-h-0 overflow-auto flex-1">
+              <MetricsDisplay metrics={metrics} videoQuality={videoQuality} />
+            </div>
           </aside>
         )}
       </div>
