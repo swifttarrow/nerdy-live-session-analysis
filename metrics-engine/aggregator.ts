@@ -10,11 +10,24 @@ interface ParticipantState {
   energyLevel?: number;
   attentionDrift?: boolean;
   emotionalState?: import("./metrics-schema").EmotionalState;
+  talkTimePercentRolling?: number;
+  tutorMonologueSec?: number;
+  tutorTurnsPerMinute?: number;
 }
 
 export interface MetricsAggregator {
   updateEyeContact(role: StreamRole, score: number): void;
-  updateTalkTime(role: StreamRole, percent: number, speaking: boolean): void;
+  updateTalkTime(
+    role: StreamRole,
+    percent: number,
+    speaking: boolean,
+    options?: {
+      percentRolling?: number;
+      tutorMonologueSec?: number;
+      tutorTurnsPerMinute?: number;
+      rollingState?: { tutor: number; student: number };
+    }
+  ): void;
   /** M11: update energy level for a participant [0, 1] */
   updateEnergyLevel(role: StreamRole, level: number): void;
   /** M12: update attention drift flag for a participant */
@@ -43,14 +56,20 @@ export function createMetricsAggregator(
   function emit() {
     const buildParticipant = (role: StreamRole) => {
       const p = state[role];
-      return {
+      const base: Record<string, unknown> = {
         eye_contact_score: Math.round(p.eyeContactScore * 100) / 100,
         talk_time_percent: Math.round(p.talkTimePercent * 100) / 100,
         current_speaking: p.speaking,
         ...(p.energyLevel !== undefined ? { energy_level: Math.round(p.energyLevel * 100) / 100 } : {}),
         ...(p.attentionDrift !== undefined ? { attention_drift: p.attentionDrift } : {}),
         ...(p.emotionalState !== undefined ? { emotional_state: p.emotionalState } : {}),
+        ...(p.talkTimePercentRolling !== undefined ? { talk_time_percent_rolling: Math.round(p.talkTimePercentRolling * 100) / 100 } : {}),
       };
+      if (role === "tutor") {
+        if (p.tutorMonologueSec !== undefined) base.tutor_monologue_sec = Math.round(p.tutorMonologueSec * 10) / 10;
+        if (p.tutorTurnsPerMinute !== undefined) base.tutor_turns_per_minute = Math.round(p.tutorTurnsPerMinute * 10) / 10;
+      }
+      return base;
     };
 
     const payload = {
@@ -73,9 +92,22 @@ export function createMetricsAggregator(
       state[role].eyeContactScore = Math.max(0, Math.min(1, score));
     },
 
-    updateTalkTime(role, percent, speaking) {
+    updateTalkTime(role, percent, speaking, options) {
       state[role].talkTimePercent = Math.max(0, Math.min(1, percent));
       state[role].speaking = speaking;
+      if (options?.percentRolling !== undefined) {
+        state[role].talkTimePercentRolling = Math.max(0, Math.min(1, options.percentRolling));
+      }
+      if (options?.rollingState) {
+        state.tutor.talkTimePercentRolling = Math.max(0, Math.min(1, options.rollingState.tutor));
+        state.student.talkTimePercentRolling = Math.max(0, Math.min(1, options.rollingState.student));
+      }
+      if (options?.tutorMonologueSec !== undefined) {
+        state.tutor.tutorMonologueSec = Math.max(0, options.tutorMonologueSec);
+      }
+      if (options?.tutorTurnsPerMinute !== undefined) {
+        state.tutor.tutorTurnsPerMinute = Math.max(0, options.tutorTurnsPerMinute);
+      }
     },
 
     updateEnergyLevel(role, level) {

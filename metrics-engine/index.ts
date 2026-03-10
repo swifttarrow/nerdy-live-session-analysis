@@ -21,7 +21,9 @@ export type {
   VadSegment,
 } from "./audio/interruptions";
 export { createResponseLatencyTracker } from "./audio/response-latency";
-export type { ResponseLatencyTracker, ResponseLatencyStats } from "./audio/response-latency";
+export type { ResponseLatencyTracker, ResponseLatencyStats, TurnRecord } from "./audio/response-latency";
+export { createMonologueTracker } from "./audio/monologue-length";
+export type { MonologueTracker, MonologueStats } from "./audio/monologue-length";
 export { classifyInterruptions, classifyInterruptionsWithContent } from "./audio/interruption-classification";
 export type { InterruptionClassification, ClassificationConfig } from "./audio/interruption-classification";
 export { classifyOverlapContent, summarizeTier2Classifications } from "./audio/interruption-transcription";

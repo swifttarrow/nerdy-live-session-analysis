@@ -1,12 +1,25 @@
 import { createVad } from "./vad";
-import { createTalkTimeAggregator, TalkTimeState } from "./talk-time";
+import {
+  createTalkTimeAggregator,
+  TalkTimeState,
+  DEFAULT_ROLLING_TALK_WINDOW_MS,
+} from "./talk-time";
 import type { ParticipantRole } from "./talk-time";
 import type { InterruptionTracker } from "./interruptions";
 import type { ResponseLatencyTracker } from "./response-latency";
+import type { MonologueTracker } from "./monologue-length";
 
 export interface AudioPipelineOutput {
   talkTimePercent: number;
   speaking: boolean;
+  /** Rolling-window talk ratio (2–5 min) for realtime nudge */
+  talkTimePercentRolling?: number;
+  /** Rolling state for both roles (when both tracks present) */
+  rollingState?: { tutor: number; student: number };
+  /** Tutor monologue length in seconds */
+  tutorMonologueSec?: number;
+  /** Tutor→student handoffs per minute in rolling window */
+  tutorTurnsPerMinute?: number;
 }
 
 export interface AudioPipeline {
@@ -30,25 +43,71 @@ export interface AudioPipeline {
  * With LiveKit, each participant has a separate audio track, enabling
  * accurate per-person speaking detection without stereo diarization.
  *
- * @param interruptionTracker - optional tracker; receives speech start/end events
+ * @param interruptionTracker - optional; receives speech start/end events
  * @param responseLatencyTracker - optional M21 tracker; receives speech start/end events
+ * @param monologueTracker - optional; tracks tutor monologue length
+ * @param rollingTalkWindowMs - window for rolling talk ratio (default 3 min)
  */
 export function createAudioPipeline(
   interruptionTracker?: InterruptionTracker | null,
-  responseLatencyTracker?: ResponseLatencyTracker | null
+  responseLatencyTracker?: ResponseLatencyTracker | null,
+  monologueTracker?: MonologueTracker | null,
+  rollingTalkWindowMs: number = DEFAULT_ROLLING_TALK_WINDOW_MS
 ): AudioPipeline {
+
   const aggregator = createTalkTimeAggregator();
   const vadInstances: Array<{ destroy(): void }> = [];
   const rolesWithTracks = new Set<ParticipantRole>();
   let sessionStartMs: number | null = null;
 
-  function toOutput(state: { talkTimeMs: number; talkTimePercent: number; speaking: boolean }, _role: ParticipantRole): AudioPipelineOutput {
+  function toOutput(
+    state: { talkTimeMs: number; talkTimePercent: number; speaking: boolean },
+    role: ParticipantRole
+  ): AudioPipelineOutput {
+    const base: AudioPipelineOutput = {
+      talkTimePercent: state.talkTimePercent,
+      speaking: state.speaking,
+    };
     if (rolesWithTracks.size === 1 && sessionStartMs !== null) {
       const sessionDurationMs = Math.max(1, Date.now() - sessionStartMs);
-      const percent = Math.min(1, state.talkTimeMs / sessionDurationMs);
-      return { talkTimePercent: percent, speaking: state.speaking };
+      base.talkTimePercent = Math.min(1, state.talkTimeMs / sessionDurationMs);
     }
-    return { talkTimePercent: state.talkTimePercent, speaking: state.speaking };
+    if (rolesWithTracks.size >= 2) {
+      const rolling = aggregator.getRollingState(rollingTalkWindowMs);
+      base.talkTimePercentRolling = rolling[role].talkTimePercent;
+      base.rollingState = {
+        tutor: rolling.tutor.talkTimePercent,
+        student: rolling.student.talkTimePercent,
+      };
+    }
+    if (monologueTracker) {
+      const stats = monologueTracker.getStats();
+      // Only pass when tutor is currently speaking (for realtime nudge)
+      base.tutorMonologueSec =
+        stats.currentMonologueMs > 0 ? stats.currentMonologueMs / 1000 : undefined;
+    }
+    if (responseLatencyTracker) {
+      const stats = responseLatencyTracker.getStats(
+        undefined,
+        rollingTalkWindowMs
+      );
+      base.tutorTurnsPerMinute = stats.turnsPerMinute ?? 0;
+    }
+    return base;
+  }
+
+  function onSpeechEvent(role: ParticipantRole) {
+    aggregator.onSpeechStart(role);
+    interruptionTracker?.onSpeechStart(role);
+    responseLatencyTracker?.onSpeechStart(role);
+    monologueTracker?.onSpeechStart(role);
+  }
+
+  function onSpeechEndEvent(role: ParticipantRole) {
+    aggregator.onSpeechEnd(role);
+    interruptionTracker?.onSpeechEnd(role);
+    responseLatencyTracker?.onSpeechEnd(role);
+    monologueTracker?.onSpeechEnd(role);
   }
 
   return {
@@ -58,23 +117,16 @@ export function createAudioPipeline(
 
       void createVad(stream, {
         onSpeechStart: () => {
-          aggregator.onSpeechStart(role);
-          interruptionTracker?.onSpeechStart(role);
-          responseLatencyTracker?.onSpeechStart(role);
+          onSpeechEvent(role);
           onUpdate(toOutput(aggregator.getState(role), role));
         },
-        onSpeechEnd: (_audio) => {
-          aggregator.onSpeechEnd(role);
-          interruptionTracker?.onSpeechEnd(role);
-          responseLatencyTracker?.onSpeechEnd(role);
+        onSpeechEnd: () => {
+          onSpeechEndEvent(role);
           onUpdate(toOutput(aggregator.getState(role), role));
         },
         onVADMisfire: () => {
-          // Misfire: treat as silence
           if (aggregator.getState(role).speaking) {
-            aggregator.onSpeechEnd(role);
-            interruptionTracker?.onSpeechEnd(role);
-            responseLatencyTracker?.onSpeechEnd(role);
+            onSpeechEndEvent(role);
             onUpdate(toOutput(aggregator.getState(role), role));
           }
         },

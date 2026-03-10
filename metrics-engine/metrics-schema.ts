@@ -30,6 +30,12 @@ export const ParticipantMetricsSchema = z.object({
   attention_drift: z.boolean().optional(),
   /** Student emotional state from face landmarks (tired, frustrated, defeated) */
   emotional_state: EmotionalStateSchema.optional(),
+  /** Rolling-window talk ratio (2–5 min) for realtime nudge; uses this when available */
+  talk_time_percent_rolling: z.number().min(0).max(1).optional(),
+  /** Tutor only: current/last monologue length in seconds */
+  tutor_monologue_sec: z.number().min(0).optional(),
+  /** Tutor only: tutor→student handoffs per minute in rolling window */
+  tutor_turns_per_minute: z.number().min(0).optional(),
 });
 
 export const SessionMetricsSchema = z.object({
