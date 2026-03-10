@@ -48,7 +48,10 @@ export interface VideoPipeline {
  * Instruments per-stage latency via PipelineLatencyTracker.
  */
 export function createVideoPipeline(): VideoPipeline {
-  let landmarker: FaceLandmarker | null = null;
+  const landmarkers: Record<StreamRole, FaceLandmarker | null> = {
+    tutor: null,
+    student: null,
+  };
   let initInProgress = false;
 
   const smoothers: Record<StreamRole, EmaSmoother> = {
@@ -73,22 +76,28 @@ export function createVideoPipeline(): VideoPipeline {
 
   const latencyTracker = createPipelineLatencyTracker();
 
+  function ensureLandmarker(role: StreamRole) {
+    if (landmarkers[role]) return;
+    if (!initInProgress) {
+      initInProgress = true;
+      void Promise.all([
+        initFaceLandmarker().then((l) => { landmarkers.tutor = l; }),
+        initFaceLandmarker().then((l) => { landmarkers.student = l; }),
+      ]).catch(() => {});
+    }
+  }
+
   // Kick off initialization immediately
-  void initFaceLandmarker().then((l) => {
-    landmarker = l;
-  });
+  ensureLandmarker("tutor");
+  ensureLandmarker("student");
 
   return {
     latency: latencyTracker,
 
     processFrame(role: StreamRole, imageData: ImageData, timestampMs: number): number | null {
+      const landmarker = landmarkers[role];
       if (!landmarker) {
-        if (!initInProgress) {
-          initInProgress = true;
-          void initFaceLandmarker().then((l) => {
-            landmarker = l;
-          });
-        }
+        ensureLandmarker(role);
         return null; // not ready yet
       }
 

@@ -5,9 +5,6 @@ import {
   FilesetResolver,
 } from "@mediapipe/tasks-vision";
 
-let landmarkerInstance: FaceLandmarker | null = null;
-let initPromise: Promise<FaceLandmarker> | null = null;
-
 const MODEL_URL =
   "/face_landmarker.task"; // served from public/ after setup
 
@@ -25,20 +22,15 @@ const OPTIONS: FaceLandmarkerOptions = {
   outputFacialTransformationMatrixes: true,
 };
 
-/**
- * Initialize MediaPipe Face Landmarker (singleton).
- * Falls back to CDN model if local file not found.
- */
-export async function initFaceLandmarker(): Promise<FaceLandmarker> {
-  if (landmarkerInstance) return landmarkerInstance;
-  if (initPromise) return initPromise;
+type LandmarkerInit = { vision: Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>; modelPath: string };
+let initPromise: Promise<LandmarkerInit> | null = null;
 
+async function getLandmarkerInit(): Promise<LandmarkerInit> {
+  if (initPromise) return initPromise;
   initPromise = (async () => {
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
     );
-
-    // Try local model first, fall back to CDN
     let modelPath = MODEL_URL;
     try {
       const res = await fetch(MODEL_URL, { method: "HEAD" });
@@ -46,17 +38,24 @@ export async function initFaceLandmarker(): Promise<FaceLandmarker> {
     } catch {
       modelPath = CDN_FALLBACK;
     }
-
-    const opts: FaceLandmarkerOptions = {
-      ...OPTIONS,
-      baseOptions: { ...OPTIONS.baseOptions, modelAssetPath: modelPath },
-    };
-
-    landmarkerInstance = await FaceLandmarker.createFromOptions(vision, opts);
-    return landmarkerInstance;
+    return { vision, modelPath };
   })();
-
   return initPromise;
+}
+
+/**
+ * Create a new Face Landmarker instance.
+ * Each video stream (tutor, student) must use its own instance because
+ * MediaPipe maintains temporal state in VIDEO mode—sharing one instance
+ * corrupts detection when processing interleaved frames from two streams.
+ */
+export async function initFaceLandmarker(): Promise<FaceLandmarker> {
+  const { vision, modelPath } = await getLandmarkerInit();
+  const opts: FaceLandmarkerOptions = {
+    ...OPTIONS,
+    baseOptions: { ...OPTIONS.baseOptions, modelAssetPath: modelPath },
+  };
+  return FaceLandmarker.createFromOptions(vision, opts);
 }
 
 /**
