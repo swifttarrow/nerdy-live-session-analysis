@@ -213,6 +213,22 @@ Yes, especially for real-time media and WebRTC.
 
 ---
 
+## Debug Mode Troubleshooting
+
+### Why does eye contact show 0% or "No face" for one participant?
+
+Eye contact is derived from MediaPipe Face Landmarker. If the video has no detectable face (e.g., side profile, face too small, poor lighting, or MediaPipe still loading), the score stays at 0. The UI now shows **"No face"** when no valid score has been received, to distinguish "no data" from "looking away." Ensure both videos have a clear, front-facing face visible for accurate metrics.
+
+### Why doesn't talk time update in real time?
+
+Talk time is driven by VAD (voice activity detection). Updates occur on speech start/end events and now also every second via a 1 Hz poll, so the display should refresh even during silence. If it doesn't, check that both videos have audible audio tracks.
+
+### Why did a flagged moment fire at 1 second?
+
+Some triggers (e.g., "involve student more") require a minimum session duration before firing. The `turn_taking_low` trigger now waits 60 seconds by default to avoid erroneous early triggers.
+
+---
+
 ## References
 
 - [Architecture Research](./architecture-research.md)
