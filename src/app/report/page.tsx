@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useReportData } from "@/hooks/useReportData";
 import { formatDuration } from "@/lib/utils/format";
@@ -11,6 +12,8 @@ import { TrendsSection } from "@/components/report/TrendsSection";
 import { RecommendationsSection } from "@/components/report/RecommendationsSection";
 import { InterruptionsSection } from "@/components/report/InterruptionsSection";
 import { FlaggedMomentsSection } from "@/components/report/FlaggedMomentsSection";
+import { DebugSection } from "@/components/report/DebugSection";
+import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 
 export default function ReportPage() {
   const router = useRouter();
@@ -34,6 +37,9 @@ export default function ReportPage() {
   }
 
   const { summary, recommendations, flaggedMoments } = report;
+  const isDebug = (report as { isDebug?: boolean }).isDebug ?? false;
+  const metricsHistory =
+    (report as { metricsHistory?: SessionMetrics[] }).metricsHistory ?? [];
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
@@ -61,12 +67,28 @@ export default function ReportPage() {
         <InterruptionsSection summary={summary} />
         <FlaggedMomentsSection flaggedMoments={flaggedMoments} />
 
-        <button
-          onClick={() => router.push("/")}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition-colors"
-        >
-          Start New Session
-        </button>
+        {isDebug && metricsHistory.length > 0 && (
+          <DebugSection metricsHistory={metricsHistory} />
+        )}
+
+        <div className="flex gap-2">
+          {isDebug && (
+            <Link
+              href="/debug"
+              className="flex-1 py-3 bg-cyan-900/50 hover:bg-cyan-800/50 text-cyan-300 rounded-xl font-semibold transition-colors text-center"
+            >
+              Run Another Debug
+            </Link>
+          )}
+          <button
+            onClick={() => router.push("/")}
+            className={`py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition-colors ${
+              isDebug ? "flex-1" : "w-full"
+            }`}
+          >
+            Start New Session
+          </button>
+        </div>
       </div>
     </main>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SessionRole } from "@/hooks/useRoomStatus";
 import { DEFAULTS } from "@/lib/constants";
@@ -159,6 +160,13 @@ export function LobbyForm({
             <li>Second tab: join the same room as student</li>
           </ol>
         </div>
+
+        <Link
+          href="/debug"
+          className="mt-4 block text-center text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+        >
+          Debug: replay uploaded video →
+        </Link>
       </div>
     </main>
   );
