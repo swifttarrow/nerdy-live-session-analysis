@@ -34,10 +34,23 @@ import {
   loadPreset,
   savePreset,
 } from "@coaching-system/index";
-import type { NudgeEvent, SessionPreset } from "@coaching-system/index";
+import {
+  type NudgeEvent,
+  type SessionPreset,
+  DEFAULT_SESSION_PRESET,
+  DEFAULT_SENSITIVITY_PERCENT,
+} from "@coaching-system/index";
 import { saveSession, loadHistory } from "@/lib/session/session-store";
 import { generateReport, computeTrends } from "@analytics-dashboard/index";
 import type { ParticipantRole } from "@/lib/livekit/room";
+import {
+  API_PATHS,
+  DEFAULTS,
+  STORAGE_KEYS,
+  INTERVALS,
+  VIDEO_ELEMENT_STYLES,
+} from "@/lib/constants";
+import { sessionRoleToParticipantRole } from "@/lib/roles";
 import type { EmotionScores } from "@video-processor/emotion-detection";
 
 export type SessionRole = "teacher" | "student";
@@ -69,14 +82,15 @@ export type SessionStatus = "idle" | "connecting" | "connected" | "error";
 export function useSessionRoom() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const roomName = searchParams.get("room") ?? "sessionlens-demo";
+  const roomName = searchParams.get("room") ?? DEFAULTS.ROOM_NAME;
   const identity = searchParams.get("identity") ?? `user-${Date.now()}`;
   const role = (searchParams.get("role") === "student"
     ? "student"
     : "teacher") as SessionRole;
 
-  const localRole: ParticipantRole = role === "teacher" ? "tutor" : "student";
-  const remoteRole: ParticipantRole = role === "teacher" ? "student" : "tutor";
+  const localRole: ParticipantRole = sessionRoleToParticipantRole(role);
+  const remoteRole: ParticipantRole =
+    role === "teacher" ? "student" : "tutor";
 
   const [status, setStatus] = useState<SessionStatus>("idle");
   const [hasRemoteParticipant, setHasRemoteParticipant] = useState(false);
@@ -86,8 +100,11 @@ export function useSessionRoom() {
     null
   );
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
-  const [sensitivityPercent, setSensitivityPercent] = useState<number>(50);
-  const [sessionPreset, setSessionPreset] = useState<SessionPreset>("socratic");
+  const [sensitivityPercent, setSensitivityPercent] = useState<number>(
+    DEFAULT_SENSITIVITY_PERCENT
+  );
+  const [sessionPreset, setSessionPreset] =
+    useState<SessionPreset>(DEFAULT_SESSION_PRESET);
 
   const localVideoRef = useRef<HTMLDivElement>(null);
   const remoteVideoRef = useRef<HTMLDivElement>(null);
@@ -172,7 +189,7 @@ export function useSessionRoom() {
       const interruptions = it
         ? it.getStats()
         : { studentToTutor: 0, tutorToStudent: 0 };
-      const latencyStats = rt?.getStats(5000);
+      const latencyStats = rt?.getStats(INTERVALS.RESPONSE_LATENCY_STATS_WINDOW_MS);
       const responseLatency = {
         turnCount: latencyStats?.turnCount ?? 0,
         avgMs: latencyStats?.avgResponseLatencyMs ?? 0,
@@ -202,7 +219,7 @@ export function useSessionRoom() {
         videoQuality: videoQualityState ?? videoQuality,
         pipelineLatencyMs,
       });
-    }, 500);
+    }, INTERVALS.DEBUG_POLL_MS);
     return () => clearInterval(interval);
   }, [debugMode, status, metrics, videoQuality]);
 
@@ -215,7 +232,7 @@ export function useSessionRoom() {
       if (!liveKitUrl) throw new Error("NEXT_PUBLIC_LIVEKIT_URL not set");
 
       const res = await fetch(
-        `/api/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=${role}`
+        `${API_PATHS.TOKEN}?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=${role}`
       );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -262,8 +279,7 @@ export function useSessionRoom() {
 
       const room = await connectToRoom(liveKitUrl, token, {
         onLocalVideoTrack: (el) => {
-          el.style.cssText =
-            "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
+          el.style.cssText = VIDEO_ELEMENT_STYLES;
           const container = localVideoRef.current;
           if (container) {
             container.replaceChildren(el);
@@ -280,8 +296,7 @@ export function useSessionRoom() {
         },
         onRemoteVideoTrack: (el) => {
           setHasRemoteParticipant(true);
-          el.style.cssText =
-            "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
+          el.style.cssText = VIDEO_ELEMENT_STYLES;
           const container = remoteVideoRef.current;
           if (container) {
             container.replaceChildren(el);
@@ -399,7 +414,7 @@ export function useSessionRoom() {
     }
 
     saveSession(storedSummary);
-    sessionStorage.setItem("sessionlens-report", JSON.stringify(report));
+    sessionStorage.setItem(STORAGE_KEYS.REPORT, JSON.stringify(report));
     router.push("/report");
   }, [roomName, router, sessionPreset]);
 

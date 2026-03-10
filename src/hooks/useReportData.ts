@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { SessionReport } from "@analytics-dashboard/report";
 import type { Recommendation } from "@analytics-dashboard/recommendations";
+import { STORAGE_KEYS, API_PATHS } from "@/lib/constants";
 
 export function useReportData() {
   const [report, setReport] = useState<SessionReport | null>(null);
@@ -11,7 +12,7 @@ export function useReportData() {
   const [llmError, setLlmError] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("sessionlens-report");
+    const raw = sessionStorage.getItem(STORAGE_KEYS.REPORT);
     if (raw) {
       try {
         setReport(JSON.parse(raw));
@@ -26,7 +27,7 @@ export function useReportData() {
     setLlmLoading(true);
     setLlmError(null);
     try {
-      const res = await fetch("/api/recommendations", {
+      const res = await fetch(API_PATHS.RECOMMENDATIONS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(report.summary),

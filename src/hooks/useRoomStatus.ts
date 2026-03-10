@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Pusher from "pusher-js";
 import { getRoomChannelName } from "@/lib/room-channel";
+import { API_PATHS, DEFAULTS, PUSHER_EVENTS } from "@/lib/constants";
 
 export type SessionRole = "student" | "teacher";
 
@@ -31,7 +32,7 @@ export function useRoomStatus(room: string) {
 
     const fetchStatus = () => {
       if (cancelled) return;
-      fetch(`/api/room/status?room=${encodeURIComponent(room)}`)
+      fetch(`${API_PATHS.ROOM_STATUS}?room=${encodeURIComponent(room)}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (!cancelled && data) {
@@ -50,19 +51,19 @@ export function useRoomStatus(room: string) {
     fetchStatus();
 
     const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
-    const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER ?? "us2";
+    const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER ?? DEFAULTS.PUSHER_CLUSTER;
 
     if (key && typeof window !== "undefined") {
       if (!pusherRef.current) {
         pusherRef.current = new Pusher(key, { cluster });
       }
-      channelRef.current?.unbind("participant-update");
+      channelRef.current?.unbind(PUSHER_EVENTS.PARTICIPANT_UPDATE);
       channelRef.current?.unsubscribe();
       channelRef.current = null;
       const channelName = getRoomChannelName(room);
       channelRef.current = pusherRef.current.subscribe(channelName);
       channelRef.current.bind(
-        "participant-update",
+        PUSHER_EVENTS.PARTICIPANT_UPDATE,
         (data: {
           participantCount?: number;
           hasTeacher?: boolean;
@@ -87,7 +88,7 @@ export function useRoomStatus(room: string) {
 
     return () => {
       cancelled = true;
-      channelRef.current?.unbind("participant-update");
+      channelRef.current?.unbind(PUSHER_EVENTS.PARTICIPANT_UPDATE);
       channelRef.current?.unsubscribe();
       channelRef.current = null;
     };
