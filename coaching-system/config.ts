@@ -31,6 +31,12 @@ export interface CoachingConfig {
   studentFrustratedSec: number;
   /** Seconds student must appear defeated before nudge */
   studentDefeatedSec: number;
+  // Tutor monologue trigger
+  /** Tutor monologue above this (seconds) → nudge */
+  tutorMonologueThresholdSec: number;
+  // Turn-taking frequency trigger
+  /** Turns per minute below this → nudge "involve student more" */
+  turnTakingMinPerMinute: number;
 }
 
 export const DEFAULT_CONFIG: CoachingConfig = {
@@ -49,4 +55,8 @@ export const DEFAULT_CONFIG: CoachingConfig = {
   studentTiredSec: 15,
   studentFrustratedSec: 12,
   studentDefeatedSec: 12,
+  // Tutor monologue (60–120s typical)
+  tutorMonologueThresholdSec: 90,
+  // Turn-taking: healthy tutoring has frequent handoffs
+  turnTakingMinPerMinute: 0.5,
 };

@@ -10,7 +10,9 @@ export type TriggerType =
   | "student_attention_drift" // M12: student sustained gaze away
   | "student_tired"         // Student appears tired for threshold
   | "student_frustrated"   // Student appears frustrated for threshold
-  | "student_defeated";    // Student appears defeated for threshold
+  | "student_defeated"      // Student appears defeated for threshold
+  | "tutor_monologue_long"  // Tutor explaining too long without student involvement
+  | "turn_taking_low";      // Turn-taking frequency too low
 
 export interface Trigger {
   type: TriggerType;
@@ -160,7 +162,11 @@ export const TRIGGERS: Trigger[] = [
     headline: "You're doing most of the talking",
     suggestion: "Pause and invite the student to respond",
     evaluate(metrics, _state, config) {
-      return metrics.metrics.tutor.talk_time_percent >= config.tutorTalkThreshold;
+      // Prefer rolling-window ratio when available (more responsive for realtime)
+      const ratio =
+        metrics.metrics.tutor.talk_time_percent_rolling ??
+        metrics.metrics.tutor.talk_time_percent;
+      return ratio >= config.tutorTalkThreshold;
     },
   },
   {
@@ -220,6 +226,25 @@ export const TRIGGERS: Trigger[] = [
     suggestion: "Acknowledge the difficulty and try a simpler problem or different approach",
     evaluate(_metrics, state, config) {
       return state.consecutiveDefeatedSec >= config.studentDefeatedSec;
+    },
+  },
+  {
+    type: "tutor_monologue_long",
+    headline: "You've been explaining for a while",
+    suggestion: "Ask the student to attempt the next step",
+    evaluate(metrics, _state, config) {
+      const sec = metrics.metrics.tutor.tutor_monologue_sec;
+      return sec !== undefined && sec >= config.tutorMonologueThresholdSec;
+    },
+  },
+  {
+    type: "turn_taking_low",
+    headline: "Try involving the student more often",
+    suggestion: "Pause to ask questions or have them explain their reasoning",
+    evaluate(metrics, _state, config) {
+      const tpm = metrics.metrics.tutor.tutor_turns_per_minute;
+      if (tpm === undefined) return false;
+      return tpm < config.turnTakingMinPerMinute && tpm >= 0;
     },
   },
 ];
