@@ -1,12 +1,14 @@
 import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import type { InterruptionStats } from "@metrics-engine/audio/interruptions";
 import type { InterruptionClassification } from "@metrics-engine/audio/interruption-classification";
+import type { SessionPreset } from "@coaching-system/presets";
 import {
   classifyParticipation,
   participationDescription,
   type ParticipationLabel,
 } from "./participation";
 import { segmentAttention, type AttentionCycles } from "./attention-cycles";
+import { computeTalkBalanceScore } from "./talk-balance";
 import type { SessionTrends } from "./trends";
 
 export interface SessionSummary {
@@ -33,14 +35,30 @@ export interface SessionSummary {
   trends?: SessionTrends;
 }
 
+export interface AggregateSessionSummaryOptions {
+  interruptionData?: (InterruptionStats & { classification: InterruptionClassification }) | null;
+  preset?: SessionPreset;
+}
+
 /**
  * Aggregate session metrics history into a summary.
  */
 export function aggregateSessionSummary(
   sessionId: string,
   metricsHistory: SessionMetrics[],
-  interruptionData?: (InterruptionStats & { classification: InterruptionClassification }) | null
+  interruptionDataOrOptions?:
+    | (InterruptionStats & { classification: InterruptionClassification })
+    | AggregateSessionSummaryOptions
+    | null
 ): SessionSummary {
+  const isRawInterruption =
+    interruptionDataOrOptions && "classification" in interruptionDataOrOptions;
+  const interruptionData = isRawInterruption
+    ? interruptionDataOrOptions
+    : (interruptionDataOrOptions as AggregateSessionSummaryOptions)?.interruptionData ?? null;
+  const preset = !isRawInterruption
+    ? (interruptionDataOrOptions as AggregateSessionSummaryOptions)?.preset
+    : undefined;
   const n = metricsHistory.length;
 
   if (n === 0) {
@@ -82,11 +100,12 @@ export function aggregateSessionSummary(
     : 0;
 
   // Engagement score: weighted combination
-  // - student talk ratio (higher is better): 40%
+  // - talk balance (Gaussian curve, center varies by preset): 40%
   // - tutor eye contact: 20%
   // - student eye contact: 40%
+  const talkBalanceScore = computeTalkBalanceScore(studentTalkRatio, preset);
   const engagementScore =
-    0.4 * studentTalkRatio +
+    0.4 * talkBalanceScore +
     0.2 * avgTutorEyeContact +
     0.4 * avgStudentEyeContact;
 
