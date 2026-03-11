@@ -7,6 +7,7 @@ export const API_PATHS = {
   TOKEN: "/api/token",
   ROOM_STATUS: "/api/room/status",
   RECOMMENDATIONS: "/api/recommendations",
+  TRANSCRIBE: "/api/transcribe",
 } as const;
 
 /** Common HTTP status codes */
