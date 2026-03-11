@@ -16,7 +16,7 @@ export const SESSION_PRESETS: PresetDefinition[] = [
     id: "lecture",
     label: "Lecture",
     tooltip:
-      "• Tutor can talk up to 92% of the time\n• Student silence up to 90 seconds before a nudge\n• Best for explaining concepts",
+      "• Student ideally talks ~30% of the time\n• Tutor-led; student silence up to 90 seconds before a nudge\n• Best for explaining concepts",
     config: {
       tutorTalkThreshold: 0.92, // higher tolerance for tutor talk
       studentSilentSec: 90,     // longer silence OK during explanations
@@ -26,7 +26,7 @@ export const SESSION_PRESETS: PresetDefinition[] = [
     id: "practice",
     label: "Practice",
     tooltip:
-      "• Tutor talk up to 80%\n• Student silence over 30 seconds triggers a nudge\n• Best when student works through problems with guidance",
+      "• Student ideally talks ~50% of the time\n• Balanced; student silence over 30 seconds triggers a nudge\n• Best when student works through problems with guidance",
     config: {
       tutorTalkThreshold: 0.80,
       studentSilentSec: 30, // student silence during practice is a concern
@@ -36,7 +36,7 @@ export const SESSION_PRESETS: PresetDefinition[] = [
     id: "socratic",
     label: "Socratic",
     tooltip:
-      "• Tutor should stay under 70% talk\n• Student silence over 20 seconds triggers a nudge\n• Shorter cooldowns; best for student-led discussion",
+      "• Student ideally talks ~70% of the time\n• Student-led; silence over 20 seconds triggers a nudge\n• Shorter cooldowns; best for discussion",
     config: {
       tutorTalkThreshold: 0.70, // tutor should speak much less
       studentSilentSec: 20,
