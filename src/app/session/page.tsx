@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useSessionRoom } from "@/hooks/useSessionRoom";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
+import KudosToast from "@/components/KudosToast";
 import ConsentBanner from "@/components/ConsentBanner";
 import { SessionHeader } from "@/components/session/SessionHeader";
 import { SessionSidePanel } from "@/components/session/SessionSidePanel";
@@ -19,6 +20,7 @@ function SessionContent() {
     metrics,
     videoQuality,
     nudges,
+    kudos,
     sensitivityPercent,
     sessionPreset,
     hasRemoteParticipant,
@@ -27,6 +29,7 @@ function SessionContent() {
     startSession,
     endSession,
     dismissNudge,
+    dismissKudos,
     localVideoRef,
     remoteVideoRef,
     roomName,
@@ -140,6 +143,11 @@ function SessionContent() {
 
       {showNudges && (
         <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+          {kudos
+            .filter((k) => sessionPreset === "socratic")
+            .map((k) => (
+              <KudosToast key={k.id} kudos={k} onDismiss={dismissKudos} />
+            ))}
           {nudges.map((nudge) => (
             <NudgeToast key={nudge.id} nudge={nudge} onDismiss={dismissNudge} />
           ))}

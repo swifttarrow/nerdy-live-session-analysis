@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDebugSession } from "@/hooks/useDebugSession";
 import MetricsDisplay from "@/components/MetricsDisplay";
 import NudgeToast from "@/components/NudgeToast";
+import KudosToast from "@/components/KudosToast";
 import { EyeContactOverlay } from "@/components/EyeContactOverlay";
 import SensitivitySelector from "@/components/SensitivitySelector";
 import SessionTypeSelector from "@/components/SessionTypeSelector";
@@ -80,6 +81,7 @@ export default function DebugPage() {
     metrics,
     videoQuality,
     nudges,
+    kudos,
     sensitivityPercent,
     sessionPreset,
     currentTime,
@@ -91,6 +93,7 @@ export default function DebugPage() {
     endSession,
     togglePause,
     dismissNudge,
+    dismissKudos,
   } = useDebugSession();
 
   const [debugPanelOpen, setDebugPanelOpen] = useState(true);
@@ -283,8 +286,13 @@ export default function DebugPage() {
         </div>
       )}
 
-      {isActive && nudges.length > 0 && (
+      {isActive && (nudges.length > 0 || kudos.length > 0) && (
         <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+          {kudos
+            .filter((k) => sessionPreset === "socratic")
+            .map((k) => (
+              <KudosToast key={k.id} kudos={k} onDismiss={dismissKudos} />
+            ))}
           {nudges.map((nudge) => (
             <NudgeToast
               key={nudge.id}

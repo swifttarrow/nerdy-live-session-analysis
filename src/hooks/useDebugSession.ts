@@ -28,6 +28,7 @@ import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 import type { DebugStats } from "@/hooks/useSessionRoom";
 import {
   createCoachingEngine,
+  createKudosEngine,
   DEFAULT_CONFIG,
   applySensitivity,
   applyPreset,
@@ -37,10 +38,10 @@ import {
   loadSensitivityPercent,
   saveSensitivityPercent,
 } from "@coaching-system/index";
-import type { NudgeEvent, SessionPreset } from "@coaching-system/index";
+import type { NudgeEvent, KudosEvent, SessionPreset } from "@coaching-system/index";
 import { generateReport, computeTrends } from "@analytics-dashboard/index";
 import { saveSession, loadHistory } from "@/lib/session/session-store";
-import { STORAGE_KEYS, VIDEO_ELEMENT_STYLES, INTERVALS } from "@/lib/constants";
+import { API_PATHS, STORAGE_KEYS, VIDEO_ELEMENT_STYLES, INTERVALS } from "@/lib/constants";
 
 export type DebugSessionStatus =
   | "idle"
@@ -63,6 +64,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const [metrics, setMetrics] = useState<SessionMetrics | null>(null);
   const [videoQuality, setVideoQuality] = useState<VideoQualityState | null>(null);
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
+  const [kudos, setKudos] = useState<KudosEvent[]>([]);
   const [sensitivityPercent, setSensitivityPercent] = useState(loadSensitivityPercent);
   const [sessionPreset, setSessionPreset] = useState<SessionPreset>(loadPreset);
   const [currentTime, setCurrentTime] = useState(0);
@@ -81,7 +83,11 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const sessionStartMsRef = useRef<number | null>(null);
   const frameSamplersRef = useRef<Array<{ start: () => void; stop: () => void }>>([]);
   const monologueTrackerRef = useRef<MonologueTracker | null>(null);
+  const kudosEngineRef = useRef<ReturnType<typeof createKudosEngine> | null>(null);
+  const sessionPresetRef = useRef<SessionPreset>(sessionPreset);
   const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
+
+  sessionPresetRef.current = sessionPreset;
 
   const handleSensitivityChange = useCallback((percent: number) => {
     setSensitivityPercent(percent);
@@ -254,11 +260,37 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         const monologueTracker = createMonologueTracker();
         monologueTrackerRef.current = monologueTracker;
 
+        const kudosEngine = createKudosEngine(
+          (k) => setKudos((prev) => [...prev.slice(-4), k]),
+          { preset: () => sessionPresetRef.current }
+        );
+        kudosEngineRef.current = kudosEngine;
+
+        const transcriptionOptions = {
+          onTranscriptReady: async (_role: "tutor" | "student", blob: Blob) => {
+            try {
+              const formData = new FormData();
+              formData.append("file", blob, "segment.webm");
+              const res = await fetch(API_PATHS.TRANSCRIBE, {
+                method: "POST",
+                body: formData,
+              });
+              if (res.ok) {
+                const { text } = (await res.json()) as { text?: string };
+                if (text) await kudosEngineRef.current?.onTranscript(text);
+              }
+            } catch (err) {
+              console.warn("[useDebugSession] Transcription failed:", err);
+            }
+          },
+        };
+
         const audioPipeline = createAudioPipeline(
           interruptionTracker,
           latencyTracker,
           monologueTracker,
-          INTERVALS.ROLLING_TALK_WINDOW_MS
+          INTERVALS.ROLLING_TALK_WINDOW_MS,
+          transcriptionOptions
         );
         audioPipelineRef.current = audioPipeline;
 
@@ -373,6 +405,8 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     videoPipelineRef.current = null;
     audioPipelineRef.current?.destroy?.();
     audioPipelineRef.current = null;
+    kudosEngineRef.current?.destroy();
+    kudosEngineRef.current = null;
     monologueTrackerRef.current = null;
     setVideoQuality(null);
     setDebugStats(null);
@@ -434,6 +468,10 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     setNudges((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
+  const dismissKudos = useCallback((id: string) => {
+    setKudos((prev) => prev.filter((k) => k.id !== id));
+  }, []);
+
   const togglePause = useCallback(() => {
     const tutor = tutorVideoRef.current;
     const student = studentVideoRef.current;
@@ -458,6 +496,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     metrics,
     videoQuality,
     nudges,
+    kudos,
     sensitivityPercent,
     sessionPreset,
     currentTime,
@@ -469,6 +508,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     endSession,
     togglePause,
     dismissNudge,
+    dismissKudos,
     tutorVideoRef,
     studentVideoRef,
   };

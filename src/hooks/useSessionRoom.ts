@@ -37,7 +37,9 @@ import {
   savePreset,
 } from "@coaching-system/index";
 import {
+  createKudosEngine,
   type NudgeEvent,
+  type KudosEvent,
   type SessionPreset,
   DEFAULT_SESSION_PRESET,
   DEFAULT_SENSITIVITY_PERCENT,
@@ -104,6 +106,7 @@ export function useSessionRoom() {
     null
   );
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
+  const [kudos, setKudos] = useState<KudosEvent[]>([]);
   const [sensitivityPercent, setSensitivityPercent] = useState<number>(
     DEFAULT_SENSITIVITY_PERCENT
   );
@@ -120,7 +123,11 @@ export function useSessionRoom() {
   const responseLatencyTrackerRef = useRef<ResponseLatencyTracker | null>(null);
   const monologueTrackerRef = useRef<MonologueTracker | null>(null);
   const allNudgesRef = useRef<NudgeEvent[]>([]);
+  const kudosEngineRef = useRef<ReturnType<typeof createKudosEngine> | null>(null);
+  const sessionPresetRef = useRef<SessionPreset>(sessionPreset);
   const sessionStartMsRef = useRef<number | null>(null);
+
+  sessionPresetRef.current = sessionPreset;
 
   const [debugMode, setDebugMode] = useState(false);
   const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
@@ -285,11 +292,42 @@ export function useSessionRoom() {
       const monologueTracker = createMonologueTracker();
       monologueTrackerRef.current = monologueTracker;
 
+      const kudosEngine = createKudosEngine(
+        (k) => {
+          setKudos((prev) => [...prev.slice(-4), k]);
+        },
+        { preset: () => sessionPresetRef.current }
+      );
+      kudosEngineRef.current = kudosEngine;
+
+      const transcriptionOptions =
+        role === "teacher"
+          ? {
+              onTranscriptReady: async (_r: ParticipantRole, blob: Blob) => {
+                try {
+                  const formData = new FormData();
+                  formData.append("file", blob, "segment.webm");
+                  const res = await fetch(API_PATHS.TRANSCRIBE, {
+                    method: "POST",
+                    body: formData,
+                  });
+                  if (res.ok) {
+                    const { text } = (await res.json()) as { text?: string };
+                    if (text) await kudosEngineRef.current?.onTranscript(text);
+                  }
+                } catch (err) {
+                  console.warn("[useSessionRoom] Transcription failed:", err);
+                }
+              },
+            }
+          : undefined;
+
       const audioPipeline = createAudioPipeline(
         interruptionTracker,
         latencyTracker,
         monologueTracker,
-        INTERVALS.ROLLING_TALK_WINDOW_MS
+        INTERVALS.ROLLING_TALK_WINDOW_MS,
+        transcriptionOptions
       );
       audioPipelineRef.current = audioPipeline;
       const aggregator = createMetricsAggregator(
@@ -398,6 +436,8 @@ export function useSessionRoom() {
   const endSession = useCallback(async () => {
     videoPipelineRef.current = null;
     audioPipelineRef.current = null;
+    kudosEngineRef.current?.destroy();
+    kudosEngineRef.current = null;
     setVideoQuality(null);
     setDebugStats(null);
     if (roomRef.current) {
@@ -460,6 +500,10 @@ export function useSessionRoom() {
     setNudges((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
+  const dismissKudos = useCallback((id: string) => {
+    setKudos((prev) => prev.filter((k) => k.id !== id));
+  }, []);
+
     return {
     roomName,
     role,
@@ -471,6 +515,7 @@ export function useSessionRoom() {
     metrics,
     videoQuality,
     nudges,
+    kudos,
     sensitivityPercent,
     sessionPreset,
     debugMode,
@@ -481,6 +526,7 @@ export function useSessionRoom() {
     startSession,
     endSession,
     dismissNudge,
+    dismissKudos,
     localVideoRef,
     remoteVideoRef,
   };
