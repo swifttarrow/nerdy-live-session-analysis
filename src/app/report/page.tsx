@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useReportData } from "@/hooks/useReportData";
 import { formatDuration } from "@/lib/utils/format";
 import { EngagementScore } from "@/components/report/EngagementScore";
-import { KeyMetricsSection } from "@/components/report/KeyMetricsSection";
 import { ParticipationSection } from "@/components/report/ParticipationSection";
 import { AttentionCyclesSection } from "@/components/report/AttentionCyclesSection";
 import { TrendsSection } from "@/components/report/TrendsSection";
@@ -56,7 +55,6 @@ export default function ReportPage() {
           engagementScore={summary.engagementScore}
           engagementBreakdown={summary.engagementBreakdown}
         />
-        <KeyMetricsSection summary={summary} />
         <ParticipationSection summary={summary} />
         <AttentionCyclesSection summary={summary} />
         <TrendsSection summary={summary} />
