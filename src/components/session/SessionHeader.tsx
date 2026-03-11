@@ -21,6 +21,8 @@ interface SessionHeaderProps {
   onDebugModeChange?: (enabled: boolean) => void;
   /** When true, panel has the toggle so header hides it */
   debugToggleInPanel?: boolean;
+  /** When false, debug toggle is hidden until both users are present */
+  studentJoined?: boolean;
 }
 
 export function SessionHeader({
@@ -36,6 +38,7 @@ export function SessionHeader({
   debugMode = false,
   onDebugModeChange,
   debugToggleInPanel = false,
+  studentJoined = true,
 }: SessionHeaderProps) {
   const statusClass =
     status === "connected"
@@ -68,7 +71,7 @@ export function SessionHeader({
             <SensitivitySelector value={sensitivityPercent} onChange={onSensitivityChange} />
           </>
         )}
-        {onDebugModeChange && !debugMode && !debugToggleInPanel && (
+        {onDebugModeChange && studentJoined && !debugMode && !debugToggleInPanel && (
           <label className="flex items-center gap-2 cursor-pointer">
             <span className="text-xs text-gray-400">Debug</span>
             <button

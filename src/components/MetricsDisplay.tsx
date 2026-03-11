@@ -15,21 +15,27 @@ interface Props {
   /** When provided, a debug toggle is shown in the panel header */
   debugMode?: boolean;
   onDebugModeChange?: (enabled: boolean) => void;
+  /** When false, metrics show placeholders and debug toggle is disabled */
+  studentJoined?: boolean;
 }
 
 function ScoreBar({
   label,
   value,
   faceDetected = true,
+  na = false,
 }: {
   label: string;
   value: number;
   faceDetected?: boolean;
+  /** When true, show "n/a" instead of value (student not joined) */
+  na?: boolean;
 }) {
   const pct = Math.round(value * 100);
-  const noFace = !faceDetected && pct === 0;
+  const noFace = !na && !faceDetected && pct === 0;
+  const showNa = na;
   const color =
-    noFace
+    showNa || noFace
       ? "bg-gray-600"
       : pct >= SCORE_THRESHOLDS.GOOD
         ? "bg-green-500"
@@ -41,14 +47,14 @@ function ScoreBar({
     <div>
       <div className="flex justify-between text-xs mb-1">
         <span className="text-gray-400">{label}</span>
-        <span className={noFace ? "text-gray-500" : "text-white"}>
-          {noFace ? "No face" : `${pct}%`}
+        <span className={showNa || noFace ? "text-gray-500" : "text-white"}>
+          {showNa ? "n/a" : noFace ? "No face" : `${pct}%`}
         </span>
       </div>
       <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${color}`}
-          style={{ width: noFace ? "0%" : `${pct}%` }}
+          style={{ width: showNa || noFace ? "0%" : `${pct}%` }}
         />
       </div>
     </div>
@@ -83,6 +89,7 @@ export default function MetricsDisplay({
   debugStats,
   debugMode = false,
   onDebugModeChange,
+  studentJoined = true,
 }: Props) {
   if (!metrics && !debugStats) {
     return (
@@ -103,7 +110,7 @@ export default function MetricsDisplay({
         </h2>
         <div className="flex items-center gap-2">
           {videoQuality && <VideoQualityIndicator videoQuality={videoQuality} />}
-          {onDebugModeChange && (
+          {onDebugModeChange && studentJoined && (
             <label className="flex items-center gap-1.5 cursor-pointer">
               <span className="text-xs text-gray-400">Debug</span>
               <button
@@ -138,8 +145,13 @@ export default function MetricsDisplay({
               label="Eye Contact"
               value={tutor!.eye_contact_score}
               faceDetected={tutor!.face_detected}
+              na={!studentJoined}
             />
-            <ScoreBar label="Talk Time" value={tutor!.talk_time_percent} />
+            <ScoreBar
+              label="Talk Time"
+              value={tutor!.talk_time_percent}
+              na={!studentJoined}
+            />
           </div>
 
           <div className="border-t border-gray-800" />
@@ -154,22 +166,33 @@ export default function MetricsDisplay({
               label="Eye Contact"
               value={student!.eye_contact_score}
               faceDetected={student!.face_detected}
+              na={!studentJoined}
             />
-            <ScoreBar label="Talk Time" value={student!.talk_time_percent} />
+            <ScoreBar
+              label="Talk Time"
+              value={student!.talk_time_percent}
+              na={!studentJoined}
+            />
             <div className="flex items-center gap-2 text-xs">
               <span className="text-gray-400">Emotional state:</span>
               <span className="flex items-center gap-1.5">
-                <EmotionIcon state={student!.emotional_state} size="sm" />
-                <span
-                  className={
-                    EMOTION_COLORS[student!.emotional_state ?? "neutral"] ??
-                    "text-gray-400"
-                  }
-                >
-                  {(student!.emotional_state ?? "neutral").replace(/^./, (c) =>
-                    c.toUpperCase()
-                  )}
-                </span>
+                {studentJoined ? (
+                  <>
+                    <EmotionIcon state={student!.emotional_state} size="sm" />
+                    <span
+                      className={
+                        EMOTION_COLORS[student!.emotional_state ?? "neutral"] ??
+                        "text-gray-400"
+                      }
+                    >
+                      {(student!.emotional_state ?? "neutral").replace(/^./, (c) =>
+                        c.toUpperCase()
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-gray-500">-</span>
+                )}
               </span>
             </div>
           </div>
@@ -178,7 +201,9 @@ export default function MetricsDisplay({
           <div className="border-t border-gray-800 pt-3">
             <div className="text-xs text-gray-400 mb-1">Student talk ratio</div>
             <div className="text-lg font-bold text-white">
-              {(() => {
+              {!studentJoined ? (
+                <span className="text-gray-500">-</span>
+              ) : (() => {
                 const total =
                   tutor!.talk_time_percent + student!.talk_time_percent;
                 if (total === 0) return "—";

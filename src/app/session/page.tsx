@@ -73,6 +73,7 @@ function SessionContent() {
         debugMode={debugMode}
         onDebugModeChange={setDebugMode}
         debugToggleInPanel={isTeacher && metricsPanelOpen}
+        studentJoined={hasRemoteParticipant}
       />
 
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
@@ -117,6 +118,7 @@ function SessionContent() {
               debugStats={debugMode ? debugStats : null}
               debugMode={debugMode}
               onDebugModeChange={setDebugMode}
+              studentJoined={hasRemoteParticipant}
             />
           }
         />
@@ -129,6 +131,7 @@ function SessionContent() {
                 debugStats={debugStats}
                 debugMode={debugMode}
                 onDebugModeChange={setDebugMode}
+                studentJoined={hasRemoteParticipant}
               />
             </div>
           </div>
