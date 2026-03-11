@@ -134,9 +134,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         : { tutor: 0, student: 0 };
 
       const emotionScores = vp?.getStudentEmotionScores?.() ?? {
-        engaged: 0, attentive: 0, curious: 0, confident: 0, understanding: 0,
-        excited: 0, focused: 0, neutral: 0, thinking: 0, confused: 0,
-        frustrated: 0, tired: 0, defeated: 0, bored: 0, anxious: 0,
+        positive: 0, neutral: 0, negative: 0,
       };
       const emotionalState = student.emotional_state ?? "neutral";
 

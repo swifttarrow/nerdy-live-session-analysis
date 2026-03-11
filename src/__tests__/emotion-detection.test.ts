@@ -22,24 +22,18 @@ describe("emotion-detection", () => {
     expect(result).toBe("neutral");
   });
 
-  it("computeEmotionScores returns scores in [0,1]", () => {
+  it("computeEmotionScores returns scores in [0,1] for positive, neutral, negative", () => {
     const lm = mockLandmarks();
     const scores = computeEmotionScores(lm);
-    expect(scores.tired).toBeGreaterThanOrEqual(0);
-    expect(scores.tired).toBeLessThanOrEqual(1);
-    expect(scores.frustrated).toBeGreaterThanOrEqual(0);
-    expect(scores.frustrated).toBeLessThanOrEqual(1);
-    expect(scores.defeated).toBeGreaterThanOrEqual(0);
-    expect(scores.defeated).toBeLessThanOrEqual(1);
-    expect(scores.engaged).toBeGreaterThanOrEqual(0);
-    expect(scores.engaged).toBeLessThanOrEqual(1);
+    expect(scores.positive).toBeGreaterThanOrEqual(0);
+    expect(scores.positive).toBeLessThanOrEqual(1);
+    expect(scores.neutral).toBeGreaterThanOrEqual(0);
+    expect(scores.neutral).toBeLessThanOrEqual(1);
+    expect(scores.negative).toBeGreaterThanOrEqual(0);
+    expect(scores.negative).toBeLessThanOrEqual(1);
   });
 
-  const VALID_STATES = [
-    "engaged", "attentive", "curious", "confident", "understanding",
-    "excited", "focused", "neutral", "thinking", "confused",
-    "frustrated", "tired", "defeated", "bored", "anxious",
-  ];
+  const VALID_STATES = ["positive", "neutral", "negative"];
 
   it("detectEmotion returns valid EmotionalState", () => {
     const lm = mockLandmarks();
@@ -49,7 +43,7 @@ describe("emotion-detection", () => {
     expect(VALID_STATES).toContain(result);
   });
 
-  it("tired: low eye openness increases tired score", () => {
+  it("negative: low eye openness increases negative score", () => {
     const lm = mockLandmarks();
     // 159=left eye top, 145=left eye bottom - make them close (droopy)
     lm[159] = { x: 0.5, y: 0.4, z: 0 };
@@ -59,10 +53,10 @@ describe("emotion-detection", () => {
     lm[10] = { x: 0.5, y: 0.2, z: 0 };  // forehead
     lm[152] = { x: 0.5, y: 0.8, z: 0 }; // chin
     const scores = computeEmotionScores(lm);
-    expect(scores.tired).toBeGreaterThan(0);
+    expect(scores.negative).toBeGreaterThan(0);
   });
 
-  it("frustrated: brow down increases frustrated score", () => {
+  it("negative: brow down increases negative score", () => {
     const lm = mockLandmarks();
     lm[10] = { x: 0.5, y: 0.2, z: 0 };
     lm[152] = { x: 0.5, y: 0.8, z: 0 };
@@ -72,6 +66,6 @@ describe("emotion-detection", () => {
     lm[336] = { x: 0.6, y: 0.42, z: 0 };
     lm[362] = { x: 0.6, y: 0.41, z: 0 };
     const scores = computeEmotionScores(lm);
-    expect(scores.frustrated).toBeGreaterThan(0);
+    expect(scores.negative).toBeGreaterThan(0);
   });
 });

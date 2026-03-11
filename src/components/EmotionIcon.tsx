@@ -16,7 +16,7 @@ const SIZE_CLASS = {
 
 /**
  * Simple face-style SVG icons for each emotional state.
- * Each represents the expression (eyes, brows, mouth) associated with that state.
+ * positive = engaged/smiling, neutral = flat, negative = concerned/frowning.
  */
 function EmotionFaceIcon({
   state,
@@ -28,55 +28,11 @@ function EmotionFaceIcon({
   colorClass: string;
 }) {
   const faces: Record<string, React.ReactNode> = {
-    engaged: (
+    positive: (
       <>
         <ellipse cx="8" cy="10" rx="1.2" ry="1.5" fill="currentColor" />
         <ellipse cx="16" cy="10" rx="1.2" ry="1.5" fill="currentColor" />
         <path d="M10 15 Q12 17 14 15" fill="none" strokeWidth="1" />
-      </>
-    ),
-    attentive: (
-      <>
-        <circle cx="8" cy="10" r="1.5" fill="currentColor" />
-        <circle cx="16" cy="10" r="1.5" fill="currentColor" />
-      </>
-    ),
-    curious: (
-      <>
-        <path d="M7 9.5 L9 10.5 L7 11.5" fill="none" strokeWidth="1.2" />
-        <path d="M15 9.5 L17 10.5 L15 11.5" fill="none" strokeWidth="1.2" />
-        <path d="M6 8 L8 8" strokeWidth="1" />
-        <path d="M16 8 L18 8" strokeWidth="1" />
-      </>
-    ),
-    confident: (
-      <>
-        <path d="M8 10.5 Q8 9 9.5 9 Q10 9 10 10" fill="none" strokeWidth="1" />
-        <path d="M14 10.5 Q14 9 15.5 9 Q16 9 16 10" fill="none" strokeWidth="1" />
-        <path d="M10 15 Q12 17 14 15" fill="none" strokeWidth="1" />
-      </>
-    ),
-    understanding: (
-      <>
-        <path d="M8 10 L9 11 L8 12" fill="none" strokeWidth="1" />
-        <path d="M16 10 L17 11 L16 12" fill="none" strokeWidth="1" />
-        <path d="M10 15 L12 17 L14 15" fill="none" strokeWidth="1" />
-      </>
-    ),
-    excited: (
-      <>
-        <circle cx="8" cy="10" r="1.2" fill="currentColor" />
-        <circle cx="16" cy="10" r="1.2" fill="currentColor" />
-        <path d="M7 8 L8 7 M9 8 L8 7" strokeWidth="0.8" />
-        <path d="M15 8 L16 7 M17 8 L16 7" strokeWidth="0.8" />
-      </>
-    ),
-    focused: (
-      <>
-        <path d="M7 10 L9 10" strokeWidth="1.2" />
-        <path d="M15 10 L17 10" strokeWidth="1.2" />
-        <path d="M6 8.5 L8 9.5" strokeWidth="1" />
-        <path d="M18 8.5 L16 9.5" strokeWidth="1" />
       </>
     ),
     neutral: (
@@ -86,57 +42,11 @@ function EmotionFaceIcon({
         <path d="M10 15 L14 15" strokeWidth="1" />
       </>
     ),
-    thinking: (
-      <>
-        <path d="M7 10 L9 10" strokeWidth="1" />
-        <path d="M15 10 L17 10" strokeWidth="1" />
-        <path d="M7 8 L9 8" strokeWidth="0.8" />
-        <path d="M15 8 L17 8" strokeWidth="0.8" />
-      </>
-    ),
-    confused: (
-      <>
-        <path d="M7 9.5 L9 10.5 L7 11.5" fill="none" strokeWidth="1" />
-        <path d="M15 9.5 L17 10.5 L15 11.5" fill="none" strokeWidth="1" />
-        <path d="M8 8 L8 7" strokeWidth="1" />
-        <path d="M16 8 L16 7" strokeWidth="1" />
-      </>
-    ),
-    frustrated: (
+    negative: (
       <>
         <path d="M6 9 L8 8 L10 9" strokeWidth="1" />
         <path d="M14 9 L16 8 L18 9" strokeWidth="1" />
-        <path d="M9 15 L12 17 L15 15" fill="none" strokeWidth="1" />
-      </>
-    ),
-    tired: (
-      <>
-        <path d="M7 10.5 L9 10.5" strokeWidth="1" />
-        <path d="M15 10.5 L17 10.5" strokeWidth="1" />
-        <path d="M10 15 L12 14 L14 15" fill="none" strokeWidth="1" />
-      </>
-    ),
-    defeated: (
-      <>
-        <path d="M7 10.5 L9 10.5" strokeWidth="1" />
-        <path d="M15 10.5 L17 10.5" strokeWidth="1" />
         <path d="M9 16 L12 14 L15 16" fill="none" strokeWidth="1" />
-      </>
-    ),
-    bored: (
-      <>
-        <path d="M7 10 L9 10" strokeWidth="1" />
-        <path d="M15 10 L17 10" strokeWidth="1" />
-        <path d="M10 15 L14 15" strokeWidth="1" />
-      </>
-    ),
-    anxious: (
-      <>
-        <path d="M7 10 L9 10" strokeWidth="1" />
-        <path d="M15 10 L17 10" strokeWidth="1" />
-        <path d="M8 9 L8 8" strokeWidth="0.8" />
-        <path d="M16 9 L16 8" strokeWidth="0.8" />
-        <path d="M10 15 Q12 16 14 15" fill="none" strokeWidth="1" />
       </>
     ),
   };
@@ -161,23 +71,11 @@ function EmotionFaceIcon({
   );
 }
 
-/** Color mapping: positive=green, neutral=gray/blue, negative=amber/orange/rose */
-const EMOTION_COLORS: Record<string, string> = {
-  engaged: "text-emerald-400",
-  attentive: "text-emerald-400",
-  curious: "text-emerald-400",
-  confident: "text-emerald-400",
-  understanding: "text-emerald-400",
-  excited: "text-emerald-400",
-  focused: "text-emerald-400",
-  neutral: "text-gray-400",
-  thinking: "text-blue-400",
-  confused: "text-amber-400",
-  frustrated: "text-orange-400",
-  tired: "text-amber-400",
-  defeated: "text-rose-400",
-  bored: "text-amber-400",
-  anxious: "text-orange-400",
+/** Color mapping: positive=green, neutral=yellow, negative=red */
+export const EMOTION_COLORS: Record<string, string> = {
+  positive: "text-emerald-400",
+  neutral: "text-yellow-400",
+  negative: "text-red-400",
 };
 
 export default function EmotionIcon({
@@ -196,5 +94,3 @@ export default function EmotionIcon({
     />
   );
 }
-
-export { EMOTION_COLORS };

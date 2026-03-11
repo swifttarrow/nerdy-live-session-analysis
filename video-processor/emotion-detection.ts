@@ -2,45 +2,28 @@ import type { FaceLandmarkerResult, NormalizedLandmark } from "@mediapipe/tasks-
 
 /**
  * Student emotional states inferred from facial landmarks.
- * 15 states spanning positive (session going well) to negative (struggling).
+ * Consolidated to 3 states: positive (engagement), neutral, negative (struggling).
  */
-export type EmotionalState =
-  | "engaged"
-  | "attentive"
-  | "curious"
-  | "confident"
-  | "understanding"
-  | "excited"
-  | "focused"
-  | "neutral"
-  | "thinking"
-  | "confused"
-  | "frustrated"
-  | "tired"
-  | "defeated"
-  | "bored"
-  | "anxious";
+export type EmotionalState = "positive" | "neutral" | "negative";
 
-/** Session-positive states (engagement signals) */
-export const POSITIVE_STATES: EmotionalState[] = [
-  "engaged",
-  "attentive",
-  "curious",
-  "confident",
-  "understanding",
-  "excited",
-  "focused",
-];
+/** Raw scores [0, 1] for the 3 emotional states (for debug) */
+export interface EmotionScores {
+  positive: number;
+  neutral: number;
+  negative: number;
+}
 
-/** Session-negative states (struggling signals) */
-export const NEGATIVE_STATES: EmotionalState[] = [
-  "confused",
-  "frustrated",
-  "tired",
-  "defeated",
-  "bored",
-  "anxious",
-];
+export const ZERO_EMOTION_SCORES: EmotionScores = {
+  positive: 0,
+  neutral: 0,
+  negative: 0,
+};
+
+/** Threshold for emotion detection. Lowered for better negative-emotion sensitivity. */
+const EMOTION_THRESHOLD = 0.35;
+
+/** When positive and negative are close, favor negative (student may be struggling). */
+const NEGATIVE_FAVOR_MARGIN = 0.05;
 
 /**
  * MediaPipe Face Mesh landmark indices (478-point model).
@@ -60,50 +43,12 @@ const RIGHT_EYE_BOTTOM = 374;
 const MOUTH_LEFT = 61;
 const MOUTH_RIGHT = 291;
 const NOSE_TIP = 1;
-const LEFT_BROW_OUTER = 46;
-const RIGHT_BROW_OUTER = 276;
-
-export interface EmotionScores {
-  engaged: number;
-  attentive: number;
-  curious: number;
-  confident: number;
-  understanding: number;
-  excited: number;
-  focused: number;
-  neutral: number;
-  thinking: number;
-  confused: number;
-  frustrated: number;
-  tired: number;
-  defeated: number;
-  bored: number;
-  anxious: number;
-}
-
-const EMOTION_THRESHOLD = 0.45;
-
-export const ZERO_EMOTION_SCORES: EmotionScores = {
-  engaged: 0,
-  attentive: 0,
-  curious: 0,
-  confident: 0,
-  understanding: 0,
-  excited: 0,
-  focused: 0,
-  neutral: 0,
-  thinking: 0,
-  confused: 0,
-  frustrated: 0,
-  tired: 0,
-  defeated: 0,
-  bored: 0,
-  anxious: 0,
-};
 
 /**
  * Infer emotional state from face landmarks.
- * Returns the dominant emotion if any score exceeds threshold, else "neutral".
+ * Returns one of: positive, neutral, negative.
+ * - Lower threshold (0.35) for better sensitivity to negative expressions.
+ * - Favors negative when ambiguous (close scores) to surface struggling students.
  */
 export function detectEmotion(result: FaceLandmarkerResult): EmotionalState {
   const landmarks = result.faceLandmarks?.[0];
@@ -111,46 +56,31 @@ export function detectEmotion(result: FaceLandmarkerResult): EmotionalState {
 
   const scores = computeEmotionScores(landmarks);
 
-  const candidates = (
-    [
-      "engaged",
-      "attentive",
-      "curious",
-      "confident",
-      "understanding",
-      "excited",
-      "focused",
-      "thinking",
-      "confused",
-      "frustrated",
-      "tired",
-      "defeated",
-      "bored",
-      "anxious",
-    ] as const
-  ).filter((k) => scores[k] >= EMOTION_THRESHOLD);
+  const { positive, negative } = scores;
 
-  if (candidates.length === 0) return "neutral";
-
-  let best: EmotionalState = candidates[0];
-  let bestScore = scores[best];
-  for (const k of candidates) {
-    if (scores[k] > bestScore) {
-      best = k;
-      bestScore = scores[k];
-    }
+  // Favor negative when ambiguous: if negative is above threshold and
+  // (negative >= positive, or positive is below threshold, or scores are close)
+  if (
+    negative >= EMOTION_THRESHOLD &&
+    (negative >= positive || positive < EMOTION_THRESHOLD || negative >= positive - NEGATIVE_FAVOR_MARGIN)
+  ) {
+    return "negative";
   }
-  return best;
+
+  if (positive >= EMOTION_THRESHOLD) {
+    return "positive";
+  }
+
+  return "neutral";
 }
 
 /**
- * Compute raw emotion scores [0, 1] for each emotion type.
+ * Compute raw emotion scores [0, 1] for positive, neutral, and negative.
+ * Aggregates from granular face features (eyes, mouth, brows).
  */
 export function computeEmotionScores(landmarks: NormalizedLandmark[]): EmotionScores {
   const faceHeight = Math.abs(landmarks[CHIN].y - landmarks[FOREHEAD].y);
   if (faceHeight < 1e-6) return { ...ZERO_EMOTION_SCORES, neutral: 1 };
-
-  const scores: EmotionScores = { ...ZERO_EMOTION_SCORES };
 
   // --- Derived features ---
   const leftEyeOpen = Math.abs(
@@ -169,11 +99,6 @@ export function computeEmotionScores(landmarks: NormalizedLandmark[]): EmotionSc
 
   const smile = mouthMidY > (mouthLeftY + mouthRightY) / 2 ? 1 : 0;
   const frown = (mouthLeftY + mouthRightY) / 2 > mouthMidY ? 1 : 0;
-
-  const leftBrowGap = landmarks[LEFT_EYE_INNER].y - landmarks[LEFT_BROW_INNER].y;
-  const rightBrowGap =
-    landmarks[RIGHT_EYE_INNER].y - landmarks[RIGHT_BROW_INNER].y;
-  const browGap = (leftBrowGap + rightBrowGap) / 2 / faceHeight;
 
   const browDown =
     Math.max(
@@ -201,54 +126,30 @@ export function computeEmotionScores(landmarks: NormalizedLandmark[]): EmotionSc
   const cornersDown =
     ((mouthLeftY > mouthMidY ? 1 : 0) + (mouthRightY > mouthMidY ? 1 : 0)) / 2;
 
-  // --- Positive states ---
-  scores.engaged = Math.min(
-    1,
-    0.4 * eyeOpenness + 0.4 * smile + 0.2 * Math.max(0, 1 - furrowed)
-  );
-  scores.attentive = Math.min(1, 0.6 * eyeOpenness + 0.4 * (1 - headDown));
-  scores.curious = Math.min(1, 0.5 * raised + 0.5 * eyeOpenness);
-  scores.confident = Math.min(1, 0.6 * smile + 0.4 * (1 - furrowed));
-  scores.understanding = Math.min(
-    1,
-    0.5 * smile + 0.3 * (1 - furrowed) + 0.2 * eyeOpenness
-  );
-  scores.excited = Math.min(1, 0.6 * smile + 0.4 * eyeOpenness);
-  scores.focused = Math.min(
-    1,
-    0.5 * Math.min(1, furrowed * 0.8) + 0.5 * eyeOpenness
-  );
+  // --- Aggregate to 3 states ---
+  const positiveSignals = [
+    0.4 * eyeOpenness + 0.4 * smile + 0.2 * Math.max(0, 1 - furrowed),
+    0.6 * eyeOpenness + 0.4 * (1 - headDown),
+    0.5 * raised + 0.5 * eyeOpenness,
+    0.6 * smile + 0.4 * (1 - furrowed),
+    0.5 * smile + 0.3 * (1 - furrowed) + 0.2 * eyeOpenness,
+    0.6 * smile + 0.4 * eyeOpenness,
+  ];
+  const positive = Math.min(1, Math.max(...positiveSignals));
 
-  // --- Neutral / thinking ---
-  scores.neutral = Math.min(
-    1,
-    1 -
-      Math.max(
-        scores.engaged,
-        scores.frustrated,
-        scores.tired,
-        scores.defeated,
-        scores.bored
-      )
-  );
-  scores.thinking = Math.min(1, 0.6 * furrowed + 0.4 * (1 - smile));
+  const negativeSignals = [
+    0.6 * furrowed + 0.4 * raised,
+    0.7 * furrowed + 0.3 * cornersDown,
+    0.6 * (1 - eyeOpenness) + 0.4 * 0.5,
+    0.6 * (mouthClosed * 0.5 + frown * 0.5) + 0.4 * Math.min(1, headDown * 5),
+    0.7 * (1 - eyeOpenness) + 0.3 * 0.5,
+    0.5 * furrowed + 0.5 * cornersDown,
+    // Head down (e.g. head in hands) is often a disengagement/struggle signal
+    0.5 * Math.min(1, headDown * 4) + 0.5 * (1 - eyeOpenness),
+  ];
+  const negative = Math.min(1, Math.max(...negativeSignals));
 
-  // --- Negative states ---
-  scores.confused = Math.min(1, 0.6 * furrowed + 0.4 * raised);
-  scores.frustrated = Math.min(1, 0.7 * furrowed + 0.3 * cornersDown);
-  scores.tired = Math.min(
-    1,
-    0.6 * (1 - eyeOpenness) + 0.4 * Math.max(0, 1 - browGap / 0.08)
-  );
-  scores.defeated = Math.min(
-    1,
-    0.6 * (mouthClosed * 0.5 + frown * 0.5) + 0.4 * Math.min(1, headDown * 5)
-  );
-  scores.bored = Math.min(
-    1,
-    0.7 * (1 - eyeOpenness) + 0.3 * (1 - Math.abs(smile - 0.5) * 2)
-  );
-  scores.anxious = Math.min(1, 0.5 * furrowed + 0.5 * cornersDown);
+  const neutral = Math.min(1, 1 - Math.max(positive, negative));
 
-  return scores;
+  return { positive, neutral, negative };
 }

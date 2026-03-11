@@ -125,33 +125,14 @@ export function DebugMetricsContent({
           Emotional state: {emotionalState}
         </div>
         <div className="text-gray-500 text-[10px] mb-1">
-          Top raw scores (threshold 0.45):
+          Raw scores (threshold 0.35, favors negative when close):
         </div>
-        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-          {(
-            [
-              "engaged",
-              "attentive",
-              "curious",
-              "confident",
-              "understanding",
-              "excited",
-              "focused",
-              "thinking",
-              "confused",
-              "frustrated",
-              "tired",
-              "defeated",
-              "bored",
-              "anxious",
-            ] as const
-          )
+        <div className="grid grid-cols-2 gap-2">
+          {(["positive", "neutral", "negative"] as const)
             .map((k) => ({
               key: k,
               score: emotionScores[k as keyof typeof emotionScores] ?? 0,
             }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 3)
             .map(({ key, score }) => (
               <div key={key} className="flex items-center gap-2">
                 <EmotionIcon state={key} size="sm" />
