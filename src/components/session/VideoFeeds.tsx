@@ -63,13 +63,14 @@ export function VideoFeeds({
             You — {ROLE_LABELS[role]}
           </p>
           <div
-            ref={localVideoRef}
-            className={`bg-gray-800 rounded-lg overflow-hidden w-full flex items-center justify-center ${
+            className={`relative bg-gray-800 rounded-lg overflow-hidden w-full flex items-center justify-center ${
               layout === "focus-self" || layout === "side-by-side" ? "flex-1 min-h-0" : "aspect-video"
             }`}
           >
+            {/* Empty container for imperative video attachment - no React children to avoid removeChild conflicts */}
+            <div ref={localVideoRef} className="absolute inset-0" />
             {status !== "connected" && (
-              <span className="text-gray-500 text-sm">
+              <span className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm z-10 bg-gray-800">
                 {status === "connecting" ? "Connecting..." : "Waiting..."}
               </span>
             )}
@@ -84,13 +85,14 @@ export function VideoFeeds({
             {ROLE_LABELS[remoteRole]}
           </p>
           <div
-            ref={remoteVideoRef}
-            className={`bg-gray-800 rounded-lg overflow-hidden w-full flex items-center justify-center relative ${
+            className={`relative bg-gray-800 rounded-lg overflow-hidden w-full flex items-center justify-center ${
               layout === "focus-other" || layout === "side-by-side" ? "flex-1 min-h-0" : "aspect-video"
             }`}
           >
+            {/* Empty container for imperative video attachment - no React children to avoid removeChild conflicts */}
+            <div ref={remoteVideoRef} className="absolute inset-0" />
             {status === "connected" && !hasRemoteParticipant && (
-              <span className="text-gray-500 text-sm absolute inset-0 flex items-center justify-center bg-gray-800 z-10">
+              <span className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm z-10 bg-gray-800">
                 Waiting for {ROLE_LABELS[remoteRole].toLowerCase()}…
               </span>
             )}
