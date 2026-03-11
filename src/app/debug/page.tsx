@@ -102,16 +102,18 @@ export default function DebugPage() {
 
   const [debugPanelOpen, setDebugPanelOpen] = useState(true);
 
-  const canStart =
-    status === "idle" && tutorFile && studentFile;
+  const canStart = status === "idle" && tutorFile && studentFile;
   const isActive =
-    status === "loading" ||
-    status === "playing" ||
-    status === "paused";
+    status === "loading" || status === "playing" || status === "paused";
 
   const handleStart = () => {
     if (tutorFile && studentFile) {
-      startSession(tutorFile, studentFile, tutorContainerRef, studentContainerRef);
+      startSession(
+        tutorFile,
+        studentFile,
+        tutorContainerRef,
+        studentContainerRef,
+      );
     }
   };
 
@@ -177,8 +179,8 @@ export default function DebugPage() {
             <div className="w-full max-w-lg space-y-6">
               <p className="text-gray-400 text-sm text-center">
                 Upload pre-recorded videos to run analytics and verify
-                post-session report functionality. Both videos should have
-                audio for talk-time detection.
+                post-session report functionality. Both videos should have audio
+                for talk-time detection.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FileUploadZone
@@ -232,13 +234,25 @@ export default function DebugPage() {
                     aria-label={tutorMuted ? "Unmute teacher" : "Mute teacher"}
                   >
                     {tutorMuted ? (
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M11 5L6 9H2v6h4l5 4V5z" />
                         <line x1="23" y1="9" x2="17" y2="15" />
                         <line x1="17" y1="9" x2="23" y2="15" />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M11 5L6 9H2v6h4l5 4V5z" />
                       </svg>
                     )}
@@ -268,16 +282,30 @@ export default function DebugPage() {
                     onClick={toggleStudentMute}
                     className="absolute bottom-2 right-2 z-20 p-2 rounded-lg bg-black/60 hover:bg-black/80 text-white transition-colors"
                     title={studentMuted ? "Unmute student" : "Mute student"}
-                    aria-label={studentMuted ? "Unmute student" : "Mute student"}
+                    aria-label={
+                      studentMuted ? "Unmute student" : "Mute student"
+                    }
                   >
                     {studentMuted ? (
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M11 5L6 9H2v6h4l5 4V5z" />
                         <line x1="23" y1="9" x2="17" y2="15" />
                         <line x1="17" y1="9" x2="23" y2="15" />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M11 5L6 9H2v6h4l5 4V5z" />
                       </svg>
                     )}
@@ -303,11 +331,19 @@ export default function DebugPage() {
                 aria-label={status === "paused" ? "Resume" : "Pause"}
               >
                 {status === "paused" ? (
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 )}
@@ -357,11 +393,7 @@ export default function DebugPage() {
               <KudosToast key={k.id} kudos={k} onDismiss={dismissKudos} />
             ))}
           {nudges.map((nudge) => (
-            <NudgeToast
-              key={nudge.id}
-              nudge={nudge}
-              onDismiss={dismissNudge}
-            />
+            <NudgeToast key={nudge.id} nudge={nudge} onDismiss={dismissNudge} />
           ))}
         </div>
       )}

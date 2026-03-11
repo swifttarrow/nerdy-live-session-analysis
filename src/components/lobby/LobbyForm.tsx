@@ -45,7 +45,7 @@ export function LobbyForm({
     )
       return;
     router.push(
-      `/session?room=${encodeURIComponent(room)}&identity=${encodeURIComponent(id)}&role=${role}`
+      `/session?room=${encodeURIComponent(room)}&identity=${encodeURIComponent(id)}&role=${role}`,
     );
   }
 
@@ -157,7 +157,9 @@ export function LobbyForm({
         </form>
 
         <div className="mt-6 p-4 bg-gray-800 rounded-lg text-xs text-gray-400">
-          <p className="font-medium text-gray-300 mb-1">Two-participant demo:</p>
+          <p className="font-medium text-gray-300 mb-1">
+            Two-participant demo:
+          </p>
           <ol className="list-decimal list-inside space-y-1">
             <li>Open two browser tabs</li>
             <li>First tab: join as tutor (first to join)</li>

@@ -60,10 +60,19 @@ import type { EmotionScores } from "@video-processor/emotion-detection";
 
 export type SessionRole = "teacher" | "student";
 
+/** Single transcript segment for debug log */
+export interface TranscriptLogEntry {
+  role: "tutor" | "student";
+  text: string;
+  timestamp: number;
+}
+
 /** Debug stats exposed when debug mode is on */
 export interface DebugStats {
   /** Who is currently speaking: teacher, student, both, or neither */
   speakerState: "teacher" | "student" | "both" | "neither";
+  /** Transcript segments (debug page only; streamed as they are transcribed) */
+  transcriptLog?: TranscriptLogEntry[];
   /** Cumulative talk time in ms per role */
   talkTimeMs: { tutor: number; student: number };
   /** Raw emotion scores contributing to student emotional state */

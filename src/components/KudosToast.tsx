@@ -9,7 +9,7 @@ interface Props {
 }
 
 const ICON: Record<string, string> = {
-  open_ended_question: "❓",
+  open_ended_question: "💡",
   good_wait_time: "⏳",
   hypothetical_scenario: "🔮",
 };
@@ -22,7 +22,7 @@ export default function KudosToast({ kudos, onDismiss }: Props) {
 
   return (
     <div
-      className="flex items-start gap-3 bg-emerald-900/40 border border-emerald-600/50 rounded-xl px-4 py-3 shadow-lg w-72 animate-in slide-in-from-right"
+      className="flex items-start gap-3 bg-emerald-900/90 border border-emerald-600/70 rounded-xl px-4 py-3 shadow-lg w-72 animate-in slide-in-from-right"
       role="status"
       aria-live="polite"
     >

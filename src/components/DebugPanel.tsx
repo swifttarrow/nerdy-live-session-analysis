@@ -54,10 +54,9 @@ export function DebugMetricsContent({
     emotionalState,
     interruptions,
     responseLatency,
-    tutorMonologueSec,
-    eyeContact,
     videoQuality,
     pipelineLatencyMs,
+    transcriptLog,
   } = debugStats;
 
   const formatMs = (ms: number) => {
@@ -195,31 +194,40 @@ export function DebugMetricsContent({
         </div>
       </div>
 
-      {/* Tutor monologue */}
-      {tutorMonologueSec !== undefined && tutorMonologueSec > 0 && (
+      {/* Transcription log — always visible in debug (e.g. /debug page) so you can tell UI vs pipeline */}
+      {transcriptLog !== undefined && (
         <div>
-          <div className="text-gray-400 mb-1.5 font-medium">Tutor monologue</div>
-          <div className="bg-gray-800/50 rounded px-2 py-1.5">
-            <span className="text-amber-400">Current/last:</span>{" "}
-            {tutorMonologueSec.toFixed(1)}s
+          <div className="text-gray-400 mb-1.5 font-medium">
+            Transcription log {transcriptLog.length > 0 && `(${transcriptLog.length})`}
+          </div>
+          <div className="max-h-32 overflow-y-auto space-y-1.5 bg-gray-800/50 rounded px-2 py-2">
+            {transcriptLog.length === 0 ? (
+              <p className="text-gray-500 text-[11px] italic">
+                No segments yet. Tutor speech ≥1.5s will appear here after
+                Whisper transcribes.
+              </p>
+            ) : (
+              transcriptLog.map((entry, i) => (
+                <div
+                  key={`${entry.timestamp}-${i}`}
+                  className="text-[11px] leading-tight"
+                >
+                  <span
+                    className={
+                      entry.role === "tutor"
+                        ? "text-amber-400 font-medium"
+                        : "text-emerald-400 font-medium"
+                    }
+                  >
+                    {entry.role === "tutor" ? "Teacher" : "Student"}:
+                  </span>{" "}
+                  <span className="text-gray-300">{entry.text}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
-
-      {/* Eye contact */}
-      <div>
-        <div className="text-gray-400 mb-1.5 font-medium">Eye contact</div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-gray-800/50 rounded px-2 py-1.5">
-            <span className="text-amber-400">Teacher:</span>{" "}
-            {(eyeContact.tutor * 100).toFixed(0)}%
-          </div>
-          <div className="bg-gray-800/50 rounded px-2 py-1.5">
-            <span className="text-emerald-400">Student:</span>{" "}
-            {(eyeContact.student * 100).toFixed(0)}%
-          </div>
-        </div>
-      </div>
 
       {/* Video quality & pipeline */}
       <div className="flex flex-wrap gap-3 pt-1 border-t border-gray-800">

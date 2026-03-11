@@ -88,6 +88,9 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const kudosEngineRef = useRef<ReturnType<typeof createKudosEngine> | null>(null);
   const sessionPresetRef = useRef<SessionPreset>(sessionPreset);
   const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
+  const [transcriptLog, setTranscriptLog] = useState<
+    Array<{ role: "tutor" | "student"; text: string; timestamp: number }>
+  >([]);
 
   sessionPresetRef.current = sessionPreset;
 
@@ -182,10 +185,11 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         eyeContact,
         videoQuality: videoQualityState ?? videoQuality,
         pipelineLatencyMs,
+        transcriptLog,
       });
     }, INTERVALS.DEBUG_POLL_MS);
     return () => clearInterval(interval);
-  }, [status, metrics, videoQuality]);
+  }, [status, metrics, videoQuality, transcriptLog]);
 
   const startSession = useCallback(
     async (
@@ -278,7 +282,15 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
         kudosEngineRef.current = kudosEngine;
 
         const transcriptionOptions = {
-          onTranscriptReady: async (_role: "tutor" | "student", blob: Blob) => {
+          onTranscriptReady: async (
+            role: "tutor" | "student",
+            blob: Blob
+          ) => {
+            console.debug("[transcription] Received blob:", blob.size, "bytes, role:", role);
+            if (blob.size < 1000) {
+              console.debug("[transcription] Skipping: blob too small (<1KB), Whisper would return empty");
+              return;
+            }
             try {
               const formData = new FormData();
               formData.append("file", blob, "segment.webm");
@@ -286,12 +298,32 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
                 method: "POST",
                 body: formData,
               });
-              if (res.ok) {
-                const { text } = (await res.json()) as { text?: string };
-                if (text) await kudosEngineRef.current?.onTranscript(text);
+              const body = (await res.json().catch(() => ({}))) as {
+                text?: string;
+                error?: string;
+                detail?: string;
+              };
+              if (!res.ok) {
+                console.warn(
+                  "[transcription] API error:",
+                  res.status,
+                  body.error ?? body.detail ?? JSON.stringify(body)
+                );
+                return;
               }
+              const text = (body.text ?? "").trim();
+              if (!text) {
+                console.debug("[transcription] API returned empty text (silence or inaudible)");
+                return;
+              }
+              setTranscriptLog((prev) => {
+                const next = [...prev.slice(-19), { role, text, timestamp: Date.now() }];
+                return next;
+              });
+              console.debug("[transcription]", role, text.slice(0, 60) + (text.length > 60 ? "…" : ""));
+              await kudosEngineRef.current?.onTranscript(text);
             } catch (err) {
-              console.warn("[useDebugSession] Transcription failed:", err);
+              console.warn("[transcription] Failed:", err);
             }
           },
         };
@@ -421,6 +453,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     monologueTrackerRef.current = null;
     setVideoQuality(null);
     setDebugStats(null);
+    setTranscriptLog([]);
 
     let interruptionData = null;
     if (interruptionTrackerRef.current) {
