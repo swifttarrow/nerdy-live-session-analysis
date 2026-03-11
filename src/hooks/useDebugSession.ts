@@ -246,7 +246,11 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
             setNudges((prev) => [...prev.slice(-4), nudge]);
             allNudgesRef.current.push(nudge);
           },
-          config
+          config,
+          {
+            onKudos: (k) => setKudos((prev) => [...prev.slice(-4), k]),
+            preset: () => sessionPresetRef.current,
+          }
         );
 
         const interruptionTracker = createInterruptionTracker({
@@ -262,7 +266,10 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
 
         const kudosEngine = createKudosEngine(
           (k) => setKudos((prev) => [...prev.slice(-4), k]),
-          { preset: () => sessionPresetRef.current }
+          {
+            preset: () => sessionPresetRef.current,
+            classifyKudosUrl: API_PATHS.CLASSIFY_KUDOS,
+          }
         );
         kudosEngineRef.current = kudosEngine;
 

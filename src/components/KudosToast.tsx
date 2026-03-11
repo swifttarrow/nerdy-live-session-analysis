@@ -10,7 +10,7 @@ interface Props {
 
 const ICON: Record<string, string> = {
   open_ended_question: "❓",
-  probe_assumptions: "💡",
+  good_wait_time: "⏳",
   hypothetical_scenario: "🔮",
 };
 

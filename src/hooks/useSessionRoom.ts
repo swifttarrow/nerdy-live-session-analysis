@@ -279,7 +279,11 @@ export function useSessionRoom() {
           setNudges((prev) => [...prev.slice(-4), nudge]);
           allNudgesRef.current.push(nudge);
         },
-        config
+        config,
+        {
+          onKudos: (k) => setKudos((prev) => [...prev.slice(-4), k]),
+          preset: () => sessionPresetRef.current,
+        }
       );
       const interruptionTracker = createInterruptionTracker({
         onTutorInterruption: () => coachingEngine.recordTutorInterruption(),
@@ -296,7 +300,10 @@ export function useSessionRoom() {
         (k) => {
           setKudos((prev) => [...prev.slice(-4), k]);
         },
-        { preset: () => sessionPresetRef.current }
+        {
+          preset: () => sessionPresetRef.current,
+          classifyKudosUrl: API_PATHS.CLASSIFY_KUDOS,
+        }
       );
       kudosEngineRef.current = kudosEngine;
 
