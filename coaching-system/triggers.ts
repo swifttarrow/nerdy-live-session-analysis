@@ -8,9 +8,7 @@ export type TriggerType =
   | "interruptions_spike"   // M10: tutor→student interruptions spike
   | "student_hesitating"    // M10: student slow to respond repeatedly
   | "student_attention_drift" // M12: student sustained gaze away
-  | "student_tired"         // Student appears tired for threshold
-  | "student_frustrated"   // Student appears frustrated for threshold
-  | "student_defeated"      // Student appears defeated for threshold
+  | "student_negative"      // Student shows negative emotion for threshold (10+ sec)
   | "tutor_monologue_long"  // Tutor explaining too long without student involvement
   | "turn_taking_low";      // Turn-taking frequency too low
 
@@ -47,10 +45,8 @@ export interface TriggerState {
   // M10: interruption spike tracking
   /** Timestamps (ms) of recent tutor→student interruptions */
   recentTutorInterruptionTimes: number[];
-  // Student emotion tracking
-  consecutiveTiredSec: number;
-  consecutiveFrustratedSec: number;
-  consecutiveDefeatedSec: number;
+  // Student emotion tracking (consolidated to negative)
+  consecutiveNegativeSec: number;
 }
 
 export function createInitialTriggerState(): TriggerState {
@@ -62,9 +58,7 @@ export function createInitialTriggerState(): TriggerState {
     tutorStoppedAtMs: null,
     recentHesitationTimes: [],
     recentTutorInterruptionTimes: [],
-    consecutiveTiredSec: 0,
-    consecutiveFrustratedSec: 0,
-    consecutiveDefeatedSec: 0,
+    consecutiveNegativeSec: 0,
   };
 }
 
@@ -133,16 +127,10 @@ export function updateTriggerState(
     (t) => nowMs - t <= config.interruptionSpikeWindowMs
   );
 
-  // --- Student emotion: consecutive seconds ---
+  // --- Student emotion: consecutive seconds (negative only) ---
   const emotionalState = student.emotional_state ?? "neutral";
-  const tiredLike = ["tired", "bored"].includes(emotionalState);
-  const frustratedLike = ["frustrated", "confused", "anxious"].includes(emotionalState);
-  const consecutiveTiredSec = tiredLike ? state.consecutiveTiredSec + 1 : 0;
-  const consecutiveFrustratedSec = frustratedLike
-    ? state.consecutiveFrustratedSec + 1
-    : 0;
-  const consecutiveDefeatedSec =
-    emotionalState === "defeated" ? state.consecutiveDefeatedSec + 1 : 0;
+  const consecutiveNegativeSec =
+    emotionalState === "negative" ? state.consecutiveNegativeSec + 1 : 0;
 
   return {
     state: {
@@ -153,9 +141,7 @@ export function updateTriggerState(
       tutorStoppedAtMs,
       recentHesitationTimes,
       recentTutorInterruptionTimes,
-      consecutiveTiredSec,
-      consecutiveFrustratedSec,
-      consecutiveDefeatedSec,
+      consecutiveNegativeSec,
     },
     goodWaitTime,
   };
@@ -221,27 +207,11 @@ export const TRIGGERS: Trigger[] = [
     },
   },
   {
-    type: "student_tired",
-    headline: "Student appears tired",
-    suggestion: "Consider a short break or switching to a different activity",
+    type: "student_negative",
+    headline: "Student shows signs of struggle",
+    suggestion: "Try rephrasing, offering a hint, or switching to a simpler problem",
     evaluate(_metrics, state, config) {
-      return state.consecutiveTiredSec >= config.studentTiredSec;
-    },
-  },
-  {
-    type: "student_frustrated",
-    headline: "Student appears frustrated",
-    suggestion: "Try rephrasing the problem or offering a hint to reduce friction",
-    evaluate(_metrics, state, config) {
-      return state.consecutiveFrustratedSec >= config.studentFrustratedSec;
-    },
-  },
-  {
-    type: "student_defeated",
-    headline: "Student may feel defeated",
-    suggestion: "Acknowledge the difficulty and try a simpler problem or different approach",
-    evaluate(_metrics, state, config) {
-      return state.consecutiveDefeatedSec >= config.studentDefeatedSec;
+      return state.consecutiveNegativeSec >= config.studentNegativeSec;
     },
   },
   {

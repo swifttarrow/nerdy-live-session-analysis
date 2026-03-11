@@ -15,12 +15,12 @@ const TEST_CONFIG: CoachingConfig = {
   hesitationThresholdMs: 5_000,
   hesitationCountThreshold: 3,
   hesitationWindowMs: 120_000,
-  studentTiredSec: 15,
-  studentFrustratedSec: 12,
-  studentDefeatedSec: 12,
+  studentNegativeSec: 10,
   tutorMonologueThresholdSec: 90,
   turnTakingMinPerMinute: 0.5,
   turnTakingMinSessionSec: 0, // allow immediate fire in tests
+  goodWaitTimeMinMs: 3_000,
+  goodWaitTimeMaxMs: 8_000,
 };
 
 function makeMetrics(overrides: {
@@ -31,6 +31,7 @@ function makeMetrics(overrides: {
   studentEyeContact?: number;
   tutorMonologueSec?: number;
   tutorTurnsPerMinute?: number;
+  studentEmotionalState?: "positive" | "neutral" | "negative";
 } = {}): SessionMetrics {
   const tutor: SessionMetrics["metrics"]["tutor"] = {
     eye_contact_score: overrides.tutorEyeContact ?? 0.8,
@@ -49,6 +50,9 @@ function makeMetrics(overrides: {
         eye_contact_score: overrides.studentEyeContact ?? 0.75,
         talk_time_percent: overrides.studentTalk ?? 0.5,
         current_speaking: overrides.studentSpeaking ?? true,
+        ...(overrides.studentEmotionalState !== undefined
+          ? { emotional_state: overrides.studentEmotionalState }
+          : {}),
       },
     },
   };
@@ -169,6 +173,44 @@ describe("createCoachingEngine", () => {
       const m = makeMetrics();
       engine.evaluate(m);
       expect(nudges.some((n) => n.type === "turn_taking_low")).toBe(false);
+    });
+  });
+
+  describe("student_negative trigger", () => {
+    it("fires after student shows negative emotion for studentNegativeSec", () => {
+      const negativeConfig: CoachingConfig = {
+        ...TEST_CONFIG,
+        studentNegativeSec: 10,
+        cooldownSec: 9999,
+      };
+      const negEngine = createCoachingEngine((n) => nudges.push(n), negativeConfig);
+      const m = makeMetrics({ studentEmotionalState: "negative" });
+      for (let i = 0; i < 11; i++) negEngine.evaluate(m);
+      expect(nudges.some((n) => n.type === "student_negative")).toBe(true);
+    });
+
+    it("does not fire when student is positive or neutral", () => {
+      const m = makeMetrics({ studentEmotionalState: "positive" });
+      for (let i = 0; i < 20; i++) engine.evaluate(m);
+      expect(nudges.some((n) => n.type === "student_negative")).toBe(false);
+    });
+
+    it("resets counter when student emotion becomes non-negative", () => {
+      const negativeConfig: CoachingConfig = {
+        ...TEST_CONFIG,
+        studentNegativeSec: 10,
+        cooldownSec: 9999,
+      };
+      const negEngine = createCoachingEngine((n) => nudges.push(n), negativeConfig);
+      const negative = makeMetrics({ studentEmotionalState: "negative" });
+      const neutral = makeMetrics({ studentEmotionalState: "neutral" });
+      // 5 sec negative
+      for (let i = 0; i < 5; i++) negEngine.evaluate(negative);
+      // 1 sec neutral — resets
+      negEngine.evaluate(neutral);
+      // 5 more sec negative — should NOT fire yet (counter reset)
+      for (let i = 0; i < 5; i++) negEngine.evaluate(negative);
+      expect(nudges.some((n) => n.type === "student_negative")).toBe(false);
     });
   });
 

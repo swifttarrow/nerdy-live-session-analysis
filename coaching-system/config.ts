@@ -24,13 +24,9 @@ export interface CoachingConfig {
   hesitationCountThreshold: number;
   /** Time window (ms) for hesitation counting */
   hesitationWindowMs: number;
-  // Student emotion triggers
-  /** Seconds student must appear tired before nudge */
-  studentTiredSec: number;
-  /** Seconds student must appear frustrated before nudge */
-  studentFrustratedSec: number;
-  /** Seconds student must appear defeated before nudge */
-  studentDefeatedSec: number;
+  // Student emotion trigger
+  /** Seconds student must show negative emotion before nudge */
+  studentNegativeSec: number;
   // Tutor monologue trigger
   /** Tutor monologue above this (seconds) → nudge */
   tutorMonologueThresholdSec: number;
@@ -57,9 +53,7 @@ export const DEFAULT_CONFIG: CoachingConfig = {
   hesitationCountThreshold: 3,        // 3 long pauses in window
   hesitationWindowMs: 120_000,        // 2 min
   // Student emotion
-  studentTiredSec: 15,
-  studentFrustratedSec: 12,
-  studentDefeatedSec: 12,
+  studentNegativeSec: 10,
   // Tutor monologue (60–120s typical)
   tutorMonologueThresholdSec: 90,
   // Turn-taking: healthy tutoring has frequent handoffs
