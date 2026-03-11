@@ -8,6 +8,7 @@ export default defineConfig({
     environment: "node",
     globals: true,
     setupFiles: [],
+    exclude: ["e2e/**", "**/node_modules/**"],
   },
   resolve: {
     alias: {
