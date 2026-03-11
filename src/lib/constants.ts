@@ -46,10 +46,10 @@ export const INTERVALS = {
 export const VIDEO_ELEMENT_STYLES =
   "width:100%;height:100%;object-fit:cover;border-radius:0.5rem;";
 
-/** Score thresholds for MetricsDisplay (0–100 scale) */
+/** Score thresholds for MetricsDisplay (0–100 scale). Aligned with EyeContactOverlay for consistent green/amber/red. */
 export const SCORE_THRESHOLDS = {
-  GOOD: 70,
-  FAIR: 40,
+  GOOD: 60,
+  FAIR: 35,
   STUDENT_TALK_RATIO_GOOD: 35,
 } as const;
 

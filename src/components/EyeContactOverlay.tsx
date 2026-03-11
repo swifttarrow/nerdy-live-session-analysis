@@ -19,9 +19,9 @@ export function EyeContactOverlay({
   variant = "tutor",
 }: EyeContactOverlayProps) {
   const noFace = !faceDetected;
-  const isGood = score >= 0.5;
-  const isLow = score >= 0.3 && score < 0.5;
-  const isVeryLow = score < 0.3 && !noFace;
+  const isGood = score >= 0.6;
+  const isLow = score >= 0.35 && score < 0.6;
+  const isVeryLow = score < 0.35 && !noFace;
 
   const dotColor = noFace
     ? "bg-gray-500"
