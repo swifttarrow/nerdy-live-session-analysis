@@ -80,7 +80,7 @@ All video/audio processing runs entirely in the browser — no data is sent to a
 
 ## Deployment
 
-Deploy to [Fly.io](https://fly.io) or similar (WebRTC requires UDP — Railway is not supported).
+Deploy to [Vercel](https://vercel.com), [Railway](https://railway.app), [Fly.io](https://fly.io), or any standard host. LiveKit Cloud handles WebRTC.
 
 ```bash
 fly launch

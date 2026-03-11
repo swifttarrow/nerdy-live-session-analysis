@@ -187,8 +187,8 @@ Full transcription (Whisper, Deepgram) requires either server-side processing or
 ### 5. Rule-Based Coaching (not LLM real-time)
 Real-time LLM inference adds 500–2000 ms latency per nudge decision — incompatible with non-intrusive coaching. Rule-based triggers with configurable thresholds and per-trigger cooldowns achieve the same behavioral goals at zero latency and zero cost.
 
-### 6. Fly.io / LiveKit Cloud (not Railway)
-Railway does not support UDP, which is required for WebRTC STUN/TURN. LiveKit Cloud handles TURN relay infrastructure; the Next.js frontend deploys to Vercel.
+### 6. LiveKit Cloud for WebRTC
+LiveKit Cloud provides the WebRTC SFU and handles TURN/STUN. The Next.js frontend can deploy to Vercel, Railway, Fly.io, or any standard host.
 
 ---
 

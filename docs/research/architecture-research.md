@@ -45,7 +45,7 @@ Without WebRTC/LiveKit/SFU, we cannot get both feeds into one place for analysis
 | 4 | **Talk-time accuracy ≥95%** | Depends on diarization quality; VAD false positives/negatives; segment boundaries; real-time vs batch processing tradeoffs. |
 | 5 | **Coaching nudge timing** | Avoid fatigue; configurable thresholds; contextual triggers (e.g., “student silent 45 s” vs “low eye contact 30 s”); non-disruptive delivery. |
 | 6 | **Graceful degradation** | Poor video (low res, dropped frames), poor audio, connectivity issues; system must not crash and should degrade metrics gracefully. |
-| 7 | **Deployment & one-command run** | WebRTC needs UDP/TURN; Railway blocks inbound UDP; Fly.io more flexible; Docker/Compose for evaluators; persistent processes for stateful connections. |
+| 7 | **Deployment & one-command run** | LiveKit Cloud provides WebRTC; app can deploy to Railway, Vercel, Fly.io; Docker/Compose for evaluators; persistent processes for stateful connections. |
 | 8 | **Privacy & consent** | What is captured, retained, who can access; retention policies; compliance (e.g., FERPA, COPPA for minors). |
 
 ---
@@ -95,7 +95,7 @@ Tutor + Student → WebRTC/LiveKit (video call)
 
 **Weaknesses**
 
-- WebRTC requires UDP/TURN support; Railway blocks inbound UDP → use Fly.io or LiveKit Cloud.
+- Use LiveKit Cloud for WebRTC; the app can deploy to Railway, Vercel, or Fly.io.
 - Gaze accuracy may be lower than server-side models; limited to browser-supported models.
 - Diarization without clear channel separation is hard (two people on same mic).
 - Heavier client; older devices may struggle.
@@ -150,7 +150,7 @@ User → WebRTC → LiveKit SFU → Server
 - Higher latency (network + server inference).
 - Video/audio egress; privacy and bandwidth concerns.
 - Server cost scales with concurrent sessions.
-- Railway UDP limitations complicate WebRTC.
+- LiveKit Cloud handles WebRTC; app host choice is flexible.
 
 **Best Use Case**
 
@@ -243,11 +243,11 @@ User → Browser
 
 | Option | Description | Latency | Complexity | Deployment |
 |--------|-------------|---------|------------|------------|
-| **A: WebRTC** | RTP/UDP, sub-500 ms | Best | High | Needs UDP/TURN; Railway limited |
-| **B: WebSocket + MediaRecorder** | Chunked video/audio over WS | Higher | Medium | Works on Railway |
-| **C: LiveKit Cloud** | Managed WebRTC | Best | Low | Paid; no self-host UDP issues |
+| **A: WebRTC** | RTP/UDP, sub-500 ms | Best | High | LiveKit Cloud provides SFU/TURN |
+| **B: WebSocket + MediaRecorder** | Chunked video/audio over WS | Higher | Medium | Cannot deliver remote participant's video |
+| **C: LiveKit Cloud** | Managed WebRTC | Best | Low | Paid; app can deploy anywhere |
 
-**Recommendation:** **WebRTC/LiveKit is required** for the video call—we must conduct a live tutor–student session and receive both video feeds. Use **LiveKit Cloud** (managed, no UDP hosting) or **Fly.io + LiveKit self-hosted** for deployment. Railway is unsuitable because it blocks inbound UDP; WebSocket + MediaRecorder cannot deliver the remote participant's video to the analysis client.
+**Recommendation:** **WebRTC/LiveKit is required** for the video call—we must conduct a live tutor–student session and receive both video feeds. Use **LiveKit Cloud** for the SFU; the app can deploy to Railway, Vercel, Fly.io, or any standard host.
 
 ---
 
@@ -279,12 +279,12 @@ User → Browser
 
 | Option | Description | WebRTC | Cost | One-Command |
 |--------|-------------|--------|------|-------------|
-| **A: Railway** | Easy deploy; no inbound UDP | Limited | ~$5–20/mo | Yes |
-| **B: Fly.io** | Full UDP; global | Yes | ~$5–30/mo | Yes |
-| **C: LiveKit Cloud** | Managed WebRTC; no self-host | Yes | Pay-per-use | Yes |
-| **D: Vercel + separate worker** | Serverless + persistent worker | No (worker elsewhere) | Variable | More complex |
+| **A: Railway** | Easy deploy | Yes (via LiveKit Cloud) | ~$5–20/mo | Yes |
+| **B: Fly.io** | Global, Docker | Yes (via LiveKit Cloud) | ~$5–30/mo | Yes |
+| **C: LiveKit Cloud** | Managed WebRTC SFU | Yes | Pay-per-use | Yes |
+| **D: Vercel** | Serverless | Yes (via LiveKit Cloud) | Variable | Yes |
 
-**Recommendation:** **Fly.io** or **LiveKit Cloud** for MVP. WebRTC is required for the tutor–student video call; Railway blocks UDP and cannot host TURN. LiveKit Cloud avoids self-hosting; Fly.io enables self-hosted LiveKit. Choose based on budget and control needs.
+**Recommendation:** Use **LiveKit Cloud** for the WebRTC SFU. The Next.js app can deploy to Railway, Vercel, Fly.io, or any standard host.
 
 ---
 
@@ -369,7 +369,7 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 
 1. **Gaze accuracy below 85%** on diverse webcams/lighting; may require calibration or fallback to server-side model.
 2. **Diarization with single mic** — tutor and student on same channel may not reach 95% talk-time accuracy without strong models.
-3. **WebRTC deployment** — Railway blocks UDP; must use Fly.io or LiveKit Cloud for the video call. LiveKit Cloud simplifies this.
+3. **WebRTC deployment** — LiveKit Cloud provides the SFU; the app can deploy to Railway, Vercel, or Fly.io.
 4. **Latency budget overflow** — frame capture (33 ms) + inference (50–100 ms) + aggregation (50 ms) + render (16 ms) can exceed 500 ms under load.
 5. **Browser compatibility** — MediaPipe, WebCodecs, Web Workers vary across Safari/Firefox/Chrome.
 6. **Notification fatigue** — poorly tuned thresholds could make nudges annoying; needs config and testing.
@@ -378,7 +378,7 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 
 - MediaPipe Face Landmarker gaze-to-camera mapping for “eye contact” definition (angle threshold, distance).
 - WhisperLiveKit vs pyannote vs GPT-4o Transcribe diarization accuracy on tutoring-style audio.
-- Fly.io UDP behavior and TURN setup for WebRTC in production.
+- LiveKit Cloud TURN behavior for WebRTC in production.
 - Actual frame rate needed for 1–2 Hz metric updates (e.g., 1 fps may suffice vs 5 fps).
 
 ### Fast Experiments
@@ -500,5 +500,5 @@ Post-Session ──→ LLM ──→ Report ──→ PostgreSQL + S3
 - Google Cloud Vision pricing: $1.50/1K images
 - OpenAI Whisper: $0.006/min; GPT-4o Transcribe with Diarization: $0.006/min
 - WebRTC vs WebSocket: WebRTC sub-500 ms; WebSocket higher latency
-- LiveKit self-hosting: UDP 50000–60000, TURN; Railway blocks inbound UDP
+- LiveKit Cloud: managed WebRTC SFU and TURN
 - S3 Standard: ~$0.023/GB-month

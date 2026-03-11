@@ -181,7 +181,7 @@
 | **Decision**                                      | **Rationale**                                                                                                                                                                                            |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **WebRTC/LiveKit is required** for the video call | Tutor and student are typically remote; we need both feeds. WebRTC delivers remote stream to analysis client. Without it, we cannot analyze live tutor–student interaction (except same-room edge case). |
-| Use LiveKit Cloud or Fly.io; Railway unsuitable   | Railway blocks inbound UDP; WebRTC TURN needs UDP. LiveKit Cloud is managed; Fly.io supports self-hosted LiveKit.                                                                                        |
+| Use LiveKit Cloud for WebRTC                      | LiveKit Cloud provides the SFU and TURN/STUN; the app can deploy to Railway, Vercel, Fly.io, or any host.                                                                                                 |
 | Client-side metric aggregation                    | Lowest latency; no server round-trip for metrics; aligns with browser-first processing.                                                                                                                  |
 
 
@@ -418,7 +418,7 @@ When LLM suggests "Alternative technique," draw from core tutoring techniques:
 
 | **Decision**                                            | **Rationale**                                                                                                                       |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Fly.io or LiveKit Cloud** for MVP; Railway unsuitable | WebRTC is required for tutor–student video call. Railway blocks UDP. LiveKit Cloud is managed; Fly.io supports self-hosted LiveKit. |
+| **LiveKit Cloud** for WebRTC; app can use Railway, Vercel, Fly.io | LiveKit Cloud provides the SFU; the Next.js app deploys to any standard host. |
 | `docker compose up` or `npm run dev` with README        | Evaluator-friendly; one-command run.                                                                                                |
 
 

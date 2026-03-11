@@ -92,7 +92,7 @@ Definitions and comparisons for terms used in the SessionLens architecture resea
 - **Transport:** Uses UDP (RTP) by default for media; can fall back to TCP if UDP is blocked
 - **Architecture:** Peer-to-peer; servers used mainly for signaling and NAT traversal (STUN/TURN)
 - **Use cases:** Video calls, screen sharing, low-latency media streaming
-- **In this project:** Preferred for sub-500 ms latency when streaming video/audio to a server; requires UDP support from the deployment provider
+- **In this project:** LiveKit Cloud provides the WebRTC SFU; the app can deploy to any host (Vercel, Railway, Fly.io)
 
 ---
 
@@ -104,9 +104,9 @@ Definitions and comparisons for terms used in the SessionLens architecture resea
 | **Latency** | ~100–300 ms for video | Higher (data goes through server) |
 | **Architecture** | Peer-to-peer media | Client–server |
 | **Media handling** | Built for audio/video, A/V sync | General messaging; media must be chunked (e.g., MediaRecorder) |
-| **Deployment** | Needs UDP and TURN | Works on any TCP host (e.g., Railway) |
+| **Deployment** | LiveKit Cloud provides SFU/TURN | App can run on any host (Railway, Vercel, Fly.io) |
 
-**In this project:** WebSocket + MediaRecorder is recommended for MVP on Railway (no inbound UDP). WebRTC is preferred for production when UDP is available (e.g., Fly.io, LiveKit).
+**In this project:** We use WebRTC via LiveKit Cloud; the Next.js app deploys to Vercel, Railway, Fly.io, or any standard host.
 
 ---
 
@@ -130,7 +130,7 @@ Definitions and comparisons for terms used in the SessionLens architecture resea
 - **Characteristics:** No retransmission, no ordering guarantee, minimal overhead
 - **Trade-off:** Lower latency; some packets may be lost or arrive out of order
 - **Use cases:** Real-time media (video, voice), gaming, live streaming—where speed matters more than perfect delivery
-- **In this project:** WebRTC uses UDP for media; Railway blocks inbound UDP, which limits WebRTC deployment there
+- **In this project:** WebRTC uses UDP for media; LiveKit Cloud handles TURN/STUN, so the app host does not need UDP
 
 ---
 
@@ -150,7 +150,7 @@ Definitions and comparisons for terms used in the SessionLens architecture resea
 
 - **Problem:** A device behind NAT has a private IP; peers on the internet cannot initiate connections to it directly
 - **Solution:** STUN discovers the device’s public address; TURN relays traffic when direct connection fails
-- **In this project:** WebRTC needs NAT traversal (ICE, STUN, TURN) to connect peers; TURN servers require inbound UDP, which Railway does not support
+- **In this project:** WebRTC needs NAT traversal (ICE, STUN, TURN); LiveKit Cloud provides this; the app host does not need inbound UDP
 
 ---
 
@@ -165,7 +165,7 @@ Definitions and comparisons for terms used in the SessionLens architecture resea
 
 - **Flow:** Try direct connection → if it fails, use TURN to relay traffic through a server
 - **Cost:** TURN uses server bandwidth and CPU; STUN is lightweight
-- **In this project:** WebRTC uses both; TURN needs a server that accepts inbound UDP—Railway blocks this, Fly.io allows it
+- **In this project:** LiveKit Cloud provides STUN/TURN; the app can deploy to Railway, Vercel, Fly.io, or any host
 
 ---
 
@@ -176,7 +176,7 @@ UDP is often blocked or restricted for several reasons:
 - **Security:** UDP is harder to inspect and filter than TCP; some firewalls block it by default
 - **Abuse:** Used in amplification attacks (DNS, NTP); providers may restrict it to reduce risk
 - **Policy:** Corporate or institutional networks may allow only HTTP/HTTPS (TCP)
-- **Platform limits:** Some hosting providers (e.g., Railway) do not support inbound UDP for architectural or operational reasons
+- **Platform limits:** Some hosting providers do not support inbound UDP for architectural or operational reasons; with LiveKit Cloud, the app host does not need UDP
 - **Result:** WebRTC falls back to TCP when UDP is blocked, which increases latency and can degrade real-time media quality
 
 ---
@@ -187,16 +187,14 @@ UDP is often blocked or restricted for several reasons:
 
 Yes, especially for real-time media and WebRTC.
 
-| Provider | UDP support | WebRTC | Notes |
-|----------|-------------|--------|-------|
-| **Railway** | No inbound UDP | Limited | Easy deploy; blocks WebRTC TURN; fine for browser-only or WebSocket + MediaRecorder |
-| **Fly.io** | Full UDP | Yes | Global regions, Docker deploy; suitable for WebRTC and LiveKit |
-| **Vercel** | Serverless | No | Not for long-lived media; use a separate worker elsewhere |
-| **LiveKit Cloud** | Managed | Yes | Managed WebRTC; no self-hosted UDP setup |
+| Provider | For app deploy | WebRTC | Notes |
+|----------|----------------|--------|-------|
+| **Railway** | Yes | Yes (via LiveKit Cloud) | Easy deploy; LiveKit Cloud handles WebRTC |
+| **Fly.io** | Yes | Yes (via LiveKit Cloud) | Global regions, Docker deploy |
+| **Vercel** | Yes | Yes (via LiveKit Cloud) | Serverless; LiveKit Cloud handles media |
+| **LiveKit Cloud** | N/A (SFU) | Yes | Managed WebRTC SFU; handles TURN/STUN |
 
-**In this project:**  
-- **Browser-first (no video upload):** Railway is fine; WebRTC not required.  
-- **Server-side video/audio:** Fly.io or LiveKit Cloud recommended; Railway is unsuitable for WebRTC due to no inbound UDP.
+**In this project:** LiveKit Cloud provides the WebRTC SFU. The Next.js app (token server, API routes) can deploy to Railway, Vercel, Fly.io, or any standard host.
 
 ---
 
@@ -237,4 +235,3 @@ Some triggers (e.g., "involve student more") require a minimum session duration 
 - [Vosk](https://alphacephei.com/vosk/)
 - [OpenAI Whisper](https://openai.com/research/whisper)
 - [WebRTC](https://webrtc.org/)
-- [Railway UDP limitations](https://station.railway.com/questions/does-railway-allow-external-udp-traffic-e36d0dc8)

@@ -2,7 +2,7 @@
 
 ## Overview
 
-One-command setup and run; clear README; deploy to Fly.io or LiveKit Cloud (WebRTC required; Railway blocks UDP); publicly accessible URL.
+One-command setup and run; clear README; deploy to Vercel, Railway, Fly.io, or any host (LiveKit Cloud provides WebRTC); publicly accessible URL.
 
 **Source:** [MVP Plan Phase 7](../../2025-03-06-sessionlens-mvp.md#phase-7-deployment--polish)
 

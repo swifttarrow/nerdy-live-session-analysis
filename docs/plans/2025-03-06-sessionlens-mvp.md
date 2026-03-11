@@ -22,7 +22,7 @@ Build SessionLens—a browser-first, real-time engagement intelligence system fo
 | Constraints | Latency <500 ms; 1 Hz metric updates; eye contact ≥85%; talk-time ≥95% |
 
 **Key constraints discovered:**
-- WebRTC required for tutor–student video call; Railway blocks UDP → deploy to Fly.io or LiveKit Cloud
+- WebRTC required for tutor–student video call; LiveKit Cloud provides the SFU; app can deploy to Vercel, Railway, Fly.io, or any host
 - MediaPipe `detectForVideo()` is synchronous → consider Web Worker for long sessions
 - Diarization with single mic is hard → channel-based when stereo; simplified fallback for MVP
 
@@ -323,7 +323,7 @@ Build session UI: live metrics display, nudge toasts, session start/end flow, co
 
 ### Overview
 
-One-command setup and run; clear README; deploy to **Fly.io or LiveKit Cloud** (WebRTC required; Railway blocks UDP); publicly accessible URL.
+One-command setup and run; clear README; deploy to **Vercel, Railway, Fly.io**, or any host (LiveKit Cloud provides WebRTC); publicly accessible URL.
 
 ### Changes Required
 
@@ -336,7 +336,7 @@ One-command setup and run; clear README; deploy to **Fly.io or LiveKit Cloud** (
 - `Makefile` — `make run` = `npm run dev` or `docker compose up`
 
 **Deployment:**
-- **Fly.io** or **LiveKit Cloud** — WebRTC requires UDP; Railway is unsuitable
+- **Vercel, Railway, Fly.io** — app deploy; LiveKit Cloud provides WebRTC
 - LiveKit Cloud: use managed service; no self-hosted TURN
 - Ensure HTTPS for `getUserMedia` and WebRTC (required in production)
 - Backend: token generation for LiveKit room access

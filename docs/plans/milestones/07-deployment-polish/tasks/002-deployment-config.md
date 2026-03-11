@@ -13,7 +13,7 @@ Add deployment configuration for Fly.io or LiveKit Cloud.
 
 ## Notes
 
-- WebRTC requires UDP; Railway blocks UDP → use Fly.io or LiveKit Cloud
+- LiveKit Cloud provides WebRTC; app can deploy to Railway, Vercel, Fly.io, or any host
 - LiveKit Cloud: use managed service; no self-hosted TURN
 - Backend: token generation for LiveKit room access
 

@@ -21,7 +21,7 @@ High-level takeaways from each milestone and task, plus notable technical challe
 ### Technical Challenges
 
 - `getUserMedia()` cannot capture remote participants' video — only local camera. LiveKit's per-participant MediaStreamTracks are required for per-person face detection and VAD.
-- Railway blocks UDP (needed for WebRTC STUN/TURN); Fly.io or LiveKit Cloud required for deployment.
+- LiveKit Cloud provides the WebRTC SFU; the app can deploy to Vercel, Railway, Fly.io, or any standard host.
 
 ---
 

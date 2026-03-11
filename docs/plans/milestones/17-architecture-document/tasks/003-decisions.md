@@ -8,7 +8,7 @@ Document key architecture decisions and rationale.
 
 - [x] WebRTC/LiveKit required (getUserMedia cannot access remote video)
 - [x] Browser-first processing (latency, privacy)
-- [x] Fly.io/LiveKit Cloud (Railway blocks UDP)
+- [x] LiveKit Cloud for WebRTC; app can deploy to Railway, Vercel, Fly.io
 - [x] MediaPipe, Silero VAD choices
 - [x] Rule-based coaching (vs. LLM real-time)
 

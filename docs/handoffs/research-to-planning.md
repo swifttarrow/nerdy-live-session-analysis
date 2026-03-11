@@ -24,7 +24,7 @@
 5. **Gaze:** MediaPipe landmarks + temporal smoothing; target ≥85%.
 6. **Coaching:** Rule-based + state machine; configurable thresholds; cooldowns.
 7. **Post-session:** GPT-4o mini for summaries.
-8. **Deployment:** Fly.io or LiveKit Cloud (WebRTC required; Railway blocks UDP).
+8. **Deployment:** LiveKit Cloud for WebRTC; app can deploy to Vercel, Railway, Fly.io, or any host.
 
 ---
 
@@ -60,12 +60,12 @@ See `docs/research/video-pipeline-deep-dive.md` for:
 6. Coaching engine (2 triggers MVP → 5 full)
 7. Post-session (template → LLM)
 8. Dashboard / UI
-9. Deployment + one-command (Fly.io or LiveKit Cloud)
+9. Deployment + one-command (Vercel, Railway, Fly.io, or any host; LiveKit Cloud for WebRTC)
 
 ---
 
 ## Risks to Mitigate in Plan
 
 - Gaze accuracy: include calibration/validation step.
-- WebRTC deployment: use Fly.io or LiveKit Cloud; Railway blocks UDP.
+- WebRTC deployment: use LiveKit Cloud; app can deploy to Vercel, Railway, Fly.io, or any host.
 - Latency budget: allocate per-stage targets in plan.

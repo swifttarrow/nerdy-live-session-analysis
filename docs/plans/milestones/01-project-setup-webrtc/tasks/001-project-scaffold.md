@@ -17,7 +17,7 @@ Create the project structure, build tooling, and base configuration for a Vite/R
 ## Notes
 
 - Use Vite for fast dev; Node/React or Next.js acceptable
-- Railway blocks UDP → plan for Fly.io or LiveKit Cloud deployment
+- LiveKit Cloud provides WebRTC; app can deploy to Railway, Vercel, Fly.io, or any host
 - See plan for full file list
 
 ## Verification
