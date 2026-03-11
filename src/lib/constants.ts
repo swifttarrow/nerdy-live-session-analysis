@@ -34,6 +34,9 @@ export const DEFAULTS = {
   TOKEN_TTL: "4h",
 } as const;
 
+/** Grace period (ms) at session start during which nudges are neither shown nor captured */
+export const NUDGE_GRACE_PERIOD_MS = 30_000;
+
 /** Debug / polling intervals (ms) */
 export const INTERVALS = {
   DEBUG_POLL_MS: 500,

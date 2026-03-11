@@ -41,7 +41,7 @@ import {
 import type { NudgeEvent, KudosEvent, SessionPreset } from "@coaching-system/index";
 import { generateReport, computeTrends } from "@analytics-dashboard/index";
 import { saveSession, loadHistory } from "@/lib/session/session-store";
-import { API_PATHS, STORAGE_KEYS, VIDEO_ELEMENT_STYLES, INTERVALS } from "@/lib/constants";
+import { API_PATHS, NUDGE_GRACE_PERIOD_MS, STORAGE_KEYS, VIDEO_ELEMENT_STYLES, INTERVALS } from "@/lib/constants";
 
 export type DebugSessionStatus =
   | "idle"
@@ -245,6 +245,8 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
 
         const coachingEngine = createCoachingEngine(
           (nudge) => {
+            const start = sessionStartMsRef.current;
+            if (start === null || Date.now() - start < NUDGE_GRACE_PERIOD_MS) return;
             setNudges((prev) => [...prev.slice(-4), nudge]);
             allNudgesRef.current.push(nudge);
           },
