@@ -30,8 +30,10 @@ function SessionContent() {
     endSession,
     dismissNudge,
     dismissKudos,
-    isMuted,
-    toggleMute,
+    localMuted,
+    toggleLocalMute,
+    remoteMuted,
+    toggleRemoteMute,
     localVideoRef,
     remoteVideoRef,
     roomName,
@@ -71,8 +73,6 @@ function SessionContent() {
         onPresetChange={handlePresetChange}
         onSensitivityChange={handleSensitivityChange}
         onEndSession={endSession}
-        isMuted={isMuted}
-        onToggleMute={toggleMute}
         showModeControls={isTeacher}
         debugMode={debugMode}
         onDebugModeChange={setDebugMode}
@@ -118,6 +118,10 @@ function SessionContent() {
             layout={layout}
             localVideoRef={localVideoRef}
             remoteVideoRef={remoteVideoRef}
+            localMuted={localMuted}
+            onToggleLocalMute={toggleLocalMute}
+            remoteMuted={remoteMuted}
+            onToggleRemoteMute={toggleRemoteMute}
           />
         </div>
         <SessionSidePanel

@@ -143,7 +143,10 @@ export function useSessionRoom() {
 
   const [debugMode, setDebugMode] = useState(false);
   const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const [localMuted, setLocalMuted] = useState(false);
+  const [remoteMuted, setRemoteMuted] = useState(false);
+
+  const remoteAudioPlaybackRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setSensitivityPercent(loadSensitivityPercent());
@@ -420,9 +423,14 @@ export function useSessionRoom() {
             );
           });
         },
+        onRemoteAudioPlaybackReady: (el) => {
+          remoteAudioPlaybackRef.current = el;
+        },
         onRemoteDisconnect: () => {
           hasRemoteParticipantRef.current = false;
           setHasRemoteParticipant(false);
+          remoteAudioPlaybackRef.current = null;
+          setRemoteMuted(false);
           console.log("Remote participant disconnected");
         },
         onConnectionStateChange: (state) => {
@@ -519,17 +527,25 @@ export function useSessionRoom() {
     setKudos((prev) => prev.filter((k) => k.id !== id));
   }, []);
 
-  const toggleMute = useCallback(async () => {
+  const toggleLocalMute = useCallback(async () => {
     const room = roomRef.current;
     if (!room) return;
-    const next = !isMuted;
+    const next = !localMuted;
     try {
       await room.localParticipant.setMicrophoneEnabled(!next);
-      setIsMuted(next);
+      setLocalMuted(next);
     } catch (err) {
       console.warn("[useSessionRoom] Failed to toggle microphone:", err);
     }
-  }, [isMuted]);
+  }, [localMuted]);
+
+  const toggleRemoteMute = useCallback(() => {
+    const el = remoteAudioPlaybackRef.current;
+    if (!el) return;
+    const next = !remoteMuted;
+    el.muted = next;
+    setRemoteMuted(next);
+  }, [remoteMuted]);
 
   return {
     roomName,
@@ -554,8 +570,10 @@ export function useSessionRoom() {
     endSession,
     dismissNudge,
     dismissKudos,
-    isMuted,
-    toggleMute,
+    localMuted,
+    toggleLocalMute,
+    remoteMuted,
+    toggleRemoteMute,
     localVideoRef,
     remoteVideoRef,
   };

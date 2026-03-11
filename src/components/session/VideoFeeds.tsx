@@ -6,6 +6,56 @@ import { VIDEO_RING_CLASSES, ROLE_LABELS } from "@/lib/roles";
 
 export type VideoLayout = "side-by-side" | "focus-self" | "focus-other";
 
+function MuteButton({
+  muted,
+  onToggle,
+  title,
+  label,
+}: {
+  muted: boolean;
+  onToggle: () => void;
+  title: string;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`absolute bottom-2 right-2 z-20 p-2 rounded-lg transition-colors ${
+        muted
+          ? "bg-red-900/70 text-red-400 hover:bg-red-800/70"
+          : "bg-black/60 text-white hover:bg-black/80"
+      }`}
+      title={title}
+      aria-label={label}
+    >
+      {muted ? (
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M11 5L6 9H2v6h4l5 4V5z" />
+          <line x1="23" y1="9" x2="17" y2="15" />
+          <line x1="17" y1="9" x2="23" y2="15" />
+        </svg>
+      ) : (
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M11 5L6 9H2v6h4l5 4V5z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 interface VideoFeedsProps {
   role: SessionRole;
   remoteRole: ParticipantRole;
@@ -14,6 +64,11 @@ interface VideoFeedsProps {
   layout: VideoLayout;
   localVideoRef: RefObject<HTMLDivElement>;
   remoteVideoRef: RefObject<HTMLDivElement>;
+  /** Per-video mute: local = your mic, remote = hearing the other participant */
+  localMuted?: boolean;
+  onToggleLocalMute?: () => void;
+  remoteMuted?: boolean;
+  onToggleRemoteMute?: () => void;
 }
 
 export function VideoFeeds({
@@ -24,6 +79,10 @@ export function VideoFeeds({
   layout,
   localVideoRef,
   remoteVideoRef,
+  localMuted = false,
+  onToggleLocalMute,
+  remoteMuted = false,
+  onToggleRemoteMute,
 }: VideoFeedsProps) {
   const localRingClass =
     role === "teacher"
@@ -74,6 +133,14 @@ export function VideoFeeds({
                 {status === "connecting" ? "Connecting..." : "Waiting..."}
               </span>
             )}
+            {status === "connected" && onToggleLocalMute && (
+              <MuteButton
+                muted={localMuted}
+                onToggle={onToggleLocalMute}
+                title={localMuted ? "Unmute microphone" : "Mute microphone"}
+                label={localMuted ? "Unmute microphone" : "Mute microphone"}
+              />
+            )}
           </div>
         </div>
         <div
@@ -96,6 +163,23 @@ export function VideoFeeds({
                 Waiting for {ROLE_LABELS[remoteRole].toLowerCase()}…
               </span>
             )}
+            {status === "connected" &&
+              hasRemoteParticipant &&
+              onToggleRemoteMute && (
+                <MuteButton
+                  muted={remoteMuted}
+                  onToggle={onToggleRemoteMute}
+                  title={
+                    remoteMuted
+                      ? `Unmute ${ROLE_LABELS[remoteRole]}`
+                      : `Mute ${ROLE_LABELS[remoteRole]}`
+                  }
+                  label={
+                    remoteMuted
+                      ? `Unmute ${ROLE_LABELS[remoteRole]}` : `Mute ${ROLE_LABELS[remoteRole]}`
+                  }
+                />
+              )}
           </div>
         </div>
       </div>

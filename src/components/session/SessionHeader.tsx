@@ -14,9 +14,6 @@ interface SessionHeaderProps {
   onPresetChange: (preset: SessionPreset) => void;
   onSensitivityChange: (percent: number) => void;
   onEndSession: () => void;
-  /** When connected, show mute button. Optional = no mute UI */
-  isMuted?: boolean;
-  onToggleMute?: () => void;
   /** If false, mode controls (preset, sensitivity) are hidden (student view) */
   showModeControls?: boolean;
   /** Debug toggle – shown in header when debug off and panel doesn't show it (student / panel closed) */
@@ -37,8 +34,6 @@ export function SessionHeader({
   onPresetChange,
   onSensitivityChange,
   onEndSession,
-  isMuted = false,
-  onToggleMute,
   showModeControls = true,
   debugMode = false,
   onDebugModeChange,
@@ -99,43 +94,6 @@ export function SessionHeader({
         <span className={`text-xs px-2 py-1 rounded-full ${statusClass}`}>
           {status}
         </span>
-        {onToggleMute && status === "connected" && (
-          <button
-            type="button"
-            onClick={onToggleMute}
-            className={`p-2 rounded-lg transition-colors ${
-              isMuted
-                ? "bg-red-900/50 text-red-400 hover:bg-red-800/50"
-                : "bg-gray-700 text-white hover:bg-gray-600"
-            }`}
-            title={isMuted ? "Unmute microphone" : "Mute microphone"}
-            aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}
-          >
-            {isMuted ? (
-              <svg
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                <line x1="23" y1="9" x2="17" y2="15" />
-                <line x1="17" y1="9" x2="23" y2="15" />
-              </svg>
-            ) : (
-              <svg
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              </svg>
-            )}
-          </button>
-        )}
         <button
           onClick={onEndSession}
           className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white text-sm rounded-lg transition-colors"

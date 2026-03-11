@@ -22,6 +22,8 @@ export interface RoomConnectionCallbacks {
   onRemoteVideoTrack?: (element: HTMLVideoElement) => void;
   onLocalAudioTrack?: (stream: MediaStream) => void;
   onRemoteAudioTrack?: (stream: MediaStream) => void;
+  /** Called with the audio element used for remote playback; mute this element for per-video mute */
+  onRemoteAudioPlaybackReady?: (element: HTMLAudioElement) => void;
   onRemoteDisconnect?: () => void;
   onConnectionStateChange?: (state: ConnectionState) => void;
 }
@@ -66,8 +68,12 @@ export async function connectToRoom(
       } else if (track.kind === Track.Kind.Audio) {
         const mediaStream = new MediaStream([track.mediaStreamTrack]);
         callbacks.onRemoteAudioTrack?.(mediaStream);
-        // Also attach to an audio element so the remote participant is heard
-        track.attach();
+        // Create our own playback element so we can mute it (per-video mute)
+        const audioEl = document.createElement("audio");
+        audioEl.autoplay = true;
+        audioEl.srcObject = mediaStream;
+        void audioEl.play().catch(() => {});
+        callbacks.onRemoteAudioPlaybackReady?.(audioEl);
       }
     }
   );
