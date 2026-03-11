@@ -28,3 +28,5 @@ export {
 } from "./sensitivity";
 export type { SensitivityLevel } from "./sensitivity";
 export { DEFAULT_SENSITIVITY_PERCENT } from "./constants";
+export { createKudosEngine } from "./kudos";
+export type { KudosEvent, KudosType, KudosEngine } from "./kudos";
