@@ -3,3 +3,10 @@ node_modules
 .env.local
 .pnpm-store
 test-results
+
+# E2E test videos (user-provided; see e2e/fixtures/videos/README.md)
+e2e/fixtures/videos/*.mp4
+e2e/fixtures/videos/*.webm
+
+# Playwright
+playwright-report/
