@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: { bodySizeLimit: "10mb" },
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Handle WASM for onnxruntime-web / @ricky0123/vad-web
