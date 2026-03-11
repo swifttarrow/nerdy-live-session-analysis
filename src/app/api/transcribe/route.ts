@@ -15,20 +15,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let file: File;
+  let file: File | Blob;
   try {
     const formData = await req.formData();
     const f = formData.get("file");
-    if (!f || !(f instanceof File)) {
+    if (!f || !(f instanceof Blob)) {
       return NextResponse.json(
-        { error: "No audio file provided" },
+        { error: "No audio file provided", received: f ? typeof f : "null" },
         { status: 400 }
       );
     }
+    // Use Blob as-is (Node 18 lacks global File; OpenAI accepts Blob)
     file = f;
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[transcribe] formData parse error:", msg, err);
     return NextResponse.json(
-      { error: "Invalid request body" },
+      { error: "Invalid request body", detail: msg },
       { status: 400 }
     );
   }
@@ -52,9 +55,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ text });
   } catch (err) {
-    console.error("[transcribe] Whisper error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[transcribe] Whisper error:", msg, err);
     return NextResponse.json(
-      { error: "Transcription failed" },
+      { error: "Transcription failed", detail: msg },
       { status: 500 }
     );
   }
