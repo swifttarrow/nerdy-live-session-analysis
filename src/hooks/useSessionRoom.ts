@@ -143,6 +143,7 @@ export function useSessionRoom() {
 
   const [debugMode, setDebugMode] = useState(false);
   const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     setSensitivityPercent(loadSensitivityPercent());
@@ -518,7 +519,19 @@ export function useSessionRoom() {
     setKudos((prev) => prev.filter((k) => k.id !== id));
   }, []);
 
-    return {
+  const toggleMute = useCallback(async () => {
+    const room = roomRef.current;
+    if (!room) return;
+    const next = !isMuted;
+    try {
+      await room.localParticipant.setMicrophoneEnabled(!next);
+      setIsMuted(next);
+    } catch (err) {
+      console.warn("[useSessionRoom] Failed to toggle microphone:", err);
+    }
+  }, [isMuted]);
+
+  return {
     roomName,
     role,
     localRole,
@@ -541,6 +554,8 @@ export function useSessionRoom() {
     endSession,
     dismissNudge,
     dismissKudos,
+    isMuted,
+    toggleMute,
     localVideoRef,
     remoteVideoRef,
   };

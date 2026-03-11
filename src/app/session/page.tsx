@@ -30,6 +30,8 @@ function SessionContent() {
     endSession,
     dismissNudge,
     dismissKudos,
+    isMuted,
+    toggleMute,
     localVideoRef,
     remoteVideoRef,
     roomName,
@@ -69,6 +71,8 @@ function SessionContent() {
         onPresetChange={handlePresetChange}
         onSensitivityChange={handleSensitivityChange}
         onEndSession={endSession}
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
         showModeControls={isTeacher}
         debugMode={debugMode}
         onDebugModeChange={setDebugMode}
