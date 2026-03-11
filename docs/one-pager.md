@@ -54,6 +54,16 @@ Some signals must be computed with extremely low latency (<1–2s) to support co
 - "Tutor speaking 85% of time"
 - "Student hesitating repeatedly"
 
+**Live Socratic kudos** (Socratic preset only)
+
+Positive reinforcement when the tutor follows Socratic method practices:
+
+- **Open-ended probing questions** — "Why do you think that?", "Can you give an example?"
+- **Good wait time** — Tutor pauses 3–8 seconds before student responds, allowing think time
+- **Hypotheticals** — "What if we changed X?", "Suppose that..."
+
+Kudos use transcription (Whisper) plus LLM classification (gpt-4.1-nano) for open-ended-question and hypothetical detection, and response-latency metrics for wait time. Only shown when session preset is Socratic.
+
 **Post-session analytics**
 
 - Engagement score per session (optionally moderated by instructor delivery quality — see stretch)
