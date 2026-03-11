@@ -128,9 +128,14 @@ export function createVideoPipeline(): VideoPipeline {
 
       // --- Emotion detection (student only) ---
       const landmarks = result?.faceLandmarks?.[0];
-      if (role === "student" && result && landmarks && landmarks.length >= 478) {
-        studentEmotionScores = computeEmotionScores(landmarks);
-        studentEmotionalState = detectEmotion(result);
+      if (role === "student") {
+        if (result && landmarks && landmarks.length >= 478) {
+          studentEmotionScores = computeEmotionScores(landmarks);
+          studentEmotionalState = detectEmotion(result);
+        } else {
+          // No face detected (e.g. head in hands, turned away) → reset to neutral
+          studentEmotionalState = "neutral";
+        }
       }
 
       // --- Stage: metrics_emit (marks frame complete) ---
