@@ -43,9 +43,15 @@ export async function POST(req: NextRequest) {
 
   const client = new OpenAI({ apiKey });
 
+  // OpenAI SDK expects File-like (name, lastModified); Blob lacks these
+  const fileForUpload =
+    file instanceof File
+      ? file
+      : new File([file], "audio.webm", { type: file.type || "audio/webm" });
+
   try {
     const transcription = await client.audio.transcriptions.create({
-      file,
+      file: fileForUpload,
       model: "whisper-1",
       response_format: "text",
       language: "en",
