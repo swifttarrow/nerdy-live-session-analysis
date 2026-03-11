@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SessionRole } from "@/hooks/useRoomStatus";
+import { VarsityTutorsLogo } from "@/components/VarsityTutorsLogo";
 import { DEFAULTS } from "@/lib/constants";
 
 interface LobbyFormProps {
@@ -51,7 +52,10 @@ export function LobbyForm({
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-950 text-white">
       <div className="w-full max-w-md p-8 bg-gray-900 rounded-2xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-2 text-center">SessionLens</h1>
+        <h1 className="flex items-center justify-center gap-3 mb-2">
+          <VarsityTutorsLogo size={36} className="flex-shrink-0" />
+          <span className="text-3xl font-bold">SessionLens</span>
+        </h1>
         <p className="text-gray-400 text-center mb-8 text-sm">
           Real-time engagement intelligence for tutoring sessions
         </p>
