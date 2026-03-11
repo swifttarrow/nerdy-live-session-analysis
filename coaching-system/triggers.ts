@@ -68,6 +68,12 @@ export function createInitialTriggerState(): TriggerState {
   };
 }
 
+export interface TriggerStateUpdate {
+  state: TriggerState;
+  /** True when student responded after tutor stopped, with latency in good-wait-time range */
+  goodWaitTime?: boolean;
+}
+
 /**
  * Update per-trigger state based on latest metrics.
  * Called every 1 Hz from the coaching engine.
@@ -77,7 +83,7 @@ export function updateTriggerState(
   metrics: SessionMetrics,
   config: CoachingConfig,
   nowMs: number = Date.now()
-): TriggerState {
+): TriggerStateUpdate {
   const student = metrics.metrics.student;
   const tutor = metrics.metrics.tutor;
 
@@ -102,10 +108,17 @@ export function updateTriggerState(
     tutorStoppedAtMs = nowMs;
   }
 
+  let goodWaitTime = false;
   if (studentJustStarted && tutorStoppedAtMs !== null) {
     const latencyMs = nowMs - tutorStoppedAtMs;
     if (latencyMs >= config.hesitationThresholdMs) {
       recentHesitationTimes = [...recentHesitationTimes, nowMs];
+    }
+    if (
+      latencyMs >= (config.goodWaitTimeMinMs ?? 3_000) &&
+      latencyMs <= (config.goodWaitTimeMaxMs ?? 8_000)
+    ) {
+      goodWaitTime = true;
     }
     tutorStoppedAtMs = null;
   }
@@ -132,16 +145,19 @@ export function updateTriggerState(
     emotionalState === "defeated" ? state.consecutiveDefeatedSec + 1 : 0;
 
   return {
-    studentSilentSec,
-    lowEyeContactSec,
-    prevTutorSpeaking: tutor.current_speaking,
-    prevStudentSpeaking: student.current_speaking,
-    tutorStoppedAtMs,
-    recentHesitationTimes,
-    recentTutorInterruptionTimes,
-    consecutiveTiredSec,
-    consecutiveFrustratedSec,
-    consecutiveDefeatedSec,
+    state: {
+      studentSilentSec,
+      lowEyeContactSec,
+      prevTutorSpeaking: tutor.current_speaking,
+      prevStudentSpeaking: student.current_speaking,
+      tutorStoppedAtMs,
+      recentHesitationTimes,
+      recentTutorInterruptionTimes,
+      consecutiveTiredSec,
+      consecutiveFrustratedSec,
+      consecutiveDefeatedSec,
+    },
+    goodWaitTime,
   };
 }
 

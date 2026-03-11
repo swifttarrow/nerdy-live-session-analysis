@@ -39,6 +39,9 @@ export interface CoachingConfig {
   turnTakingMinPerMinute: number;
   /** Minimum session duration (sec) before turn_taking_low can fire */
   turnTakingMinSessionSec: number;
+  /** Socratic kudos: response latency in this range (ms) = good wait time */
+  goodWaitTimeMinMs: number;
+  goodWaitTimeMaxMs: number;
 }
 
 export const DEFAULT_CONFIG: CoachingConfig = {
@@ -62,4 +65,7 @@ export const DEFAULT_CONFIG: CoachingConfig = {
   // Turn-taking: healthy tutoring has frequent handoffs
   turnTakingMinPerMinute: 0.5,
   turnTakingMinSessionSec: 60,
+  // Socratic kudos: good wait time = 3–8 seconds
+  goodWaitTimeMinMs: 3_000,
+  goodWaitTimeMaxMs: 8_000,
 };

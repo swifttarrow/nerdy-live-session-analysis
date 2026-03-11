@@ -9,7 +9,7 @@ export type { CoachingEngine, NudgeEvent } from "./engine";
 export { DEFAULT_CONFIG } from "./config";
 export type { CoachingConfig } from "./config";
 export { TRIGGERS, createInitialTriggerState, updateTriggerState } from "./triggers";
-export type { TriggerType, Trigger, TriggerState } from "./triggers";
+export type { TriggerType, Trigger, TriggerState, TriggerStateUpdate } from "./triggers";
 export {
   SESSION_PRESETS,
   getPresetConfig,
@@ -29,4 +29,9 @@ export {
 export type { SensitivityLevel } from "./sensitivity";
 export { DEFAULT_SENSITIVITY_PERCENT } from "./constants";
 export { createKudosEngine } from "./kudos";
-export type { KudosEvent, KudosType, KudosEngine } from "./kudos";
+export type {
+  KudosEvent,
+  KudosType,
+  KudosEngine,
+  KudosClassification,
+} from "./kudos";

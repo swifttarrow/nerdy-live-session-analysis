@@ -6,6 +6,8 @@ import {
   updateTriggerState,
 } from "./triggers";
 import { DEFAULT_CONFIG, CoachingConfig } from "./config";
+import type { KudosEvent } from "./kudos";
+import type { SessionPreset } from "./presets";
 
 export interface NudgeEvent {
   id: string;
@@ -21,6 +23,15 @@ export interface CoachingEngine {
   recordTutorInterruption(): void;
 }
 
+const KUDOS_GOOD_WAIT_TIME_COOLDOWN_MS = 90_000;
+
+export interface CoachingEngineOptions {
+  /** Optional: called when good wait time detected (Socratic kudos 3) */
+  onKudos?: (kudos: KudosEvent) => void;
+  /** Preset getter; kudos only fire when preset is "socratic" */
+  preset?: () => SessionPreset;
+}
+
 /**
  * Rule-based coaching engine with per-trigger cooldowns.
  *
@@ -29,12 +40,14 @@ export interface CoachingEngine {
  */
 export function createCoachingEngine(
   onNudge: (nudge: NudgeEvent) => void,
-  config: CoachingConfig = DEFAULT_CONFIG
+  config: CoachingConfig = DEFAULT_CONFIG,
+  options?: CoachingEngineOptions
 ): CoachingEngine {
   let triggerState = createInitialTriggerState();
 
   // Track last fire time per trigger type
   const lastFiredAt: Partial<Record<TriggerType, number>> = {};
+  let lastGoodWaitTimeFiredAt = 0;
 
   function inCooldown(type: TriggerType, now: number): boolean {
     const last = lastFiredAt[type];
@@ -59,7 +72,26 @@ export function createCoachingEngine(
       const now = Date.now();
 
       // Update accumulated state (called at 1 Hz)
-      triggerState = updateTriggerState(triggerState, metrics, config, now);
+      const update = updateTriggerState(triggerState, metrics, config, now);
+      triggerState = update.state;
+
+      // Kudos 3: Good wait time (Socratic only)
+      if (
+        update.goodWaitTime &&
+        options?.onKudos &&
+        options?.preset?.() === "socratic" &&
+        now - lastGoodWaitTimeFiredAt >= KUDOS_GOOD_WAIT_TIME_COOLDOWN_MS
+      ) {
+        lastGoodWaitTimeFiredAt = now;
+        options.onKudos({
+          id: `kudos-good_wait_time-${now}`,
+          type: "good_wait_time",
+          headline: "Great use of wait time!",
+          message:
+            "You gave the student space to think before they responded.",
+          timestamp: now,
+        });
+      }
 
       for (const trigger of TRIGGERS) {
         if (inCooldown(trigger.type, now)) continue;
