@@ -52,6 +52,7 @@ import {
   DEFAULTS,
   STORAGE_KEYS,
   INTERVALS,
+  NUDGE_GRACE_PERIOD_MS,
   VIDEO_ELEMENT_STYLES,
 } from "@/lib/constants";
 import { sessionRoleToParticipantRole } from "@/lib/roles";
@@ -126,8 +127,10 @@ export function useSessionRoom() {
   const kudosEngineRef = useRef<ReturnType<typeof createKudosEngine> | null>(null);
   const sessionPresetRef = useRef<SessionPreset>(sessionPreset);
   const sessionStartMsRef = useRef<number | null>(null);
+  const hasRemoteParticipantRef = useRef(false);
 
   sessionPresetRef.current = sessionPreset;
+  hasRemoteParticipantRef.current = hasRemoteParticipant;
 
   const [debugMode, setDebugMode] = useState(false);
   const [debugStats, setDebugStats] = useState<DebugStats | null>(null);
@@ -238,6 +241,7 @@ export function useSessionRoom() {
   const startSession = useCallback(async () => {
     setStatus("connecting");
     setHasRemoteParticipant(false);
+    hasRemoteParticipantRef.current = false;
 
     try {
       const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
@@ -264,6 +268,8 @@ export function useSessionRoom() {
       videoPipelineRef.current = videoPipeline;
       const coachingEngine = createCoachingEngine(
         (nudge) => {
+          const start = sessionStartMsRef.current;
+          if (start === null || Date.now() - start < NUDGE_GRACE_PERIOD_MS) return;
           setNudges((prev) => [...prev.slice(-4), nudge]);
           allNudgesRef.current.push(nudge);
         },
@@ -331,7 +337,9 @@ export function useSessionRoom() {
           setMetrics(m);
           sessionMetricsHistory.current.push(m);
           setVideoQuality(videoPipelineRef.current?.getQualityStatus() ?? null);
-          coachingEngine.evaluate(m);
+          if (hasRemoteParticipantRef.current) {
+            coachingEngine.evaluate(m);
+          }
         },
         sessionStartMsRef.current ?? undefined
       );
@@ -354,6 +362,7 @@ export function useSessionRoom() {
           sampler.start();
         },
         onRemoteVideoTrack: (el) => {
+          hasRemoteParticipantRef.current = true;
           setHasRemoteParticipant(true);
           el.style.cssText = VIDEO_ELEMENT_STYLES;
           const container = remoteVideoRef.current;
@@ -402,6 +411,7 @@ export function useSessionRoom() {
           });
         },
         onRemoteDisconnect: () => {
+          hasRemoteParticipantRef.current = false;
           setHasRemoteParticipant(false);
           console.log("Remote participant disconnected");
         },
