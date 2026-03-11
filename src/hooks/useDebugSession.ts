@@ -69,6 +69,8 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const [sessionPreset, setSessionPreset] = useState<SessionPreset>(loadPreset);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [tutorMuted, setTutorMuted] = useState(false);
+  const [studentMuted, setStudentMuted] = useState(false);
 
   const aggregatorRef = useRef<MetricsAggregator | null>(null);
 
@@ -196,6 +198,8 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     ) => {
       setStatus("loading");
       setErrorMsg("");
+      setTutorMuted(false);
+      setStudentMuted(false);
       allNudgesRef.current = [];
       sessionMetricsHistory.current = [];
       sessionStartMsRef.current = Date.now();
@@ -497,6 +501,22 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     }
   }, []);
 
+  const toggleTutorMute = useCallback(() => {
+    const tutor = tutorVideoRef.current;
+    if (!tutor) return;
+    const next = !tutor.muted;
+    tutor.muted = next;
+    setTutorMuted(next);
+  }, []);
+
+  const toggleStudentMute = useCallback(() => {
+    const student = studentVideoRef.current;
+    if (!student) return;
+    const next = !student.muted;
+    student.muted = next;
+    setStudentMuted(next);
+  }, []);
+
   return {
     status,
     errorMsg,
@@ -518,5 +538,9 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
     dismissKudos,
     tutorVideoRef,
     studentVideoRef,
+    tutorMuted,
+    studentMuted,
+    toggleTutorMute,
+    toggleStudentMute,
   };
 }
