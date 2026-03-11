@@ -66,6 +66,7 @@
 | 29 | [29-interruptions-tier2-transcription](./29-interruptions-tier2-transcription/) | Complete (Stretch) |
 | 30 | [30-instructor-delivery-quality](./30-instructor-delivery-quality/) | Pending (Stretch) |
 | 31 | [31-engagement-score-delivery-moderation](./31-engagement-score-delivery-moderation/) | Pending (Stretch) |
+| 32 | [32-socratic-kudos](./32-socratic-kudos/) | Complete |
 
 ## Quick Links
 
