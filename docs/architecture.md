@@ -140,7 +140,7 @@ The 500 ms target is met with ~5.5× headroom. See `docs/latency.md` for instrum
 Derived from MediaPipe 478-point landmarks:
 - **Iris centering** (60% weight): normalized offset of iris from eye socket center; 1.0 = perfectly centered
 - **Head facing** (40% weight): face symmetry (yaw) + nose-midpoint alignment (pitch)
-- EMA smoothed (α = 0.25) to reduce jitter; missing-face handled with "last value" strategy
+- EMA smoothed (α = 0.55) for responsive feedback; missing-face decays toward 0 so gaze-away shows promptly
 
 ### Talk-Time Percent [0–1]
 - Silero VAD fires `speechStart` / `speechEnd` per participant audio track
