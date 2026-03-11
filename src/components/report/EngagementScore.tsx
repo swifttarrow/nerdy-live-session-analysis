@@ -14,61 +14,65 @@ const COMPONENT_CONFIG = [
   {
     key: "talkBalance" as const,
     label: "Talk balance",
-    weight: "40%",
+    weight: 0.4,
     color: "bg-cyan-500",
-    getValue: (b: EngagementBreakdown) => b.talkBalance / 0.4,
+    getSubScore: (b: EngagementBreakdown) => b.talkBalance / 0.4,
     getContribution: (b: EngagementBreakdown) => b.talkBalance,
   },
   {
     key: "tutorEyeContact" as const,
     label: "Tutor eye contact",
-    weight: "20%",
+    weight: 0.2,
     color: "bg-amber-500",
-    getValue: (b: EngagementBreakdown) => b.tutorEyeContact / 0.2,
+    getSubScore: (b: EngagementBreakdown) => b.tutorEyeContact / 0.2,
     getContribution: (b: EngagementBreakdown) => b.tutorEyeContact,
   },
   {
     key: "studentEyeContact" as const,
     label: "Student eye contact",
-    weight: "40%",
+    weight: 0.4,
     color: "bg-emerald-500",
-    getValue: (b: EngagementBreakdown) => b.studentEyeContact / 0.4,
+    getSubScore: (b: EngagementBreakdown) => b.studentEyeContact / 0.4,
     getContribution: (b: EngagementBreakdown) => b.studentEyeContact,
   },
 ] as const;
 
-function StackedBreakdownBar({ breakdown }: { breakdown: EngagementBreakdown }) {
-  const segments = COMPONENT_CONFIG.map((cfg) => ({
-    ...cfg,
-    contribution: cfg.getContribution(breakdown),
-  }));
-
+/**
+ * Per-component bars: each category shows its own 0–100% bar (sub-score).
+ * Weight is labeled separately so "how well you did" vs "how much it counts" is clear.
+ */
+function ComponentBreakdown({ breakdown }: { breakdown: EngagementBreakdown }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <p className="text-gray-400 text-xs font-medium">
-        Score breakdown by category
+        How you scored in each category (weighted to get the total above)
       </p>
-      <div className="h-4 bg-gray-800 rounded-lg overflow-hidden flex">
-        {segments.map(({ key, contribution, color }) => {
-          const pct = Math.max(0, Math.min(100, contribution * 100));
+      <div className="space-y-3">
+        {COMPONENT_CONFIG.map(({ key, label, weight, color, getSubScore, getContribution }) => {
+          const subScore = getSubScore(breakdown);
+          const subPct = Math.round(Math.max(0, Math.min(1, subScore)) * 100);
+          const contribution = getContribution(breakdown);
+          const contribPts = Math.round(contribution * 100);
+
           return (
-            <div
-              key={key}
-              className={`h-full transition-all ${color} first:rounded-l-md last:rounded-r-md`}
-              style={{ width: `${pct}%` }}
-              title={`${Math.round(contribution * 100)}%`}
-            />
-          );
-        })}
-      </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-        {segments.map(({ label, weight, color, getValue }) => {
-          const score = Math.round(getValue(breakdown) * 100);
-          return (
-            <div key={label} className="flex items-center gap-1.5">
-              <div className={`w-2 h-2 rounded-sm ${color}`} />
-              <span className="text-gray-400">{label} ({weight}):</span>
-              <span className="text-gray-200 font-medium">{score}%</span>
+            <div key={key} className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">
+                  {label}
+                  <span className="text-gray-500 font-normal ml-1">
+                    (worth {Math.round(weight * 100)}% of total)
+                  </span>
+                </span>
+                <span className="text-gray-200 font-medium tabular-nums">
+                  {subPct}% → +{contribPts} pts
+                </span>
+              </div>
+              <div className="h-2 bg-gray-800 rounded-md overflow-hidden">
+                <div
+                  className={`h-full transition-all rounded-md ${color}`}
+                  style={{ width: `${subPct}%` }}
+                />
+              </div>
             </div>
           );
         })}
@@ -100,7 +104,7 @@ export function EngagementScore({
       </div>
       {engagementBreakdown && (
         <div className="pt-4 border-t border-gray-800">
-          <StackedBreakdownBar breakdown={engagementBreakdown} />
+          <ComponentBreakdown breakdown={engagementBreakdown} />
         </div>
       )}
     </div>
