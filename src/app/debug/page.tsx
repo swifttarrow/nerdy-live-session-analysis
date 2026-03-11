@@ -94,6 +94,10 @@ export default function DebugPage() {
     togglePause,
     dismissNudge,
     dismissKudos,
+    tutorMuted,
+    studentMuted,
+    toggleTutorMute,
+    toggleStudentMute,
   } = useDebugSession();
 
   const [debugPanelOpen, setDebugPanelOpen] = useState(true);
@@ -219,6 +223,27 @@ export default function DebugPage() {
                   ref={tutorContainerRef}
                   className="absolute inset-0 flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
                 />
+                {status !== "loading" && (
+                  <button
+                    type="button"
+                    onClick={toggleTutorMute}
+                    className="absolute bottom-2 right-2 z-20 p-2 rounded-lg bg-black/60 hover:bg-black/80 text-white transition-colors"
+                    title={tutorMuted ? "Unmute teacher" : "Mute teacher"}
+                    aria-label={tutorMuted ? "Unmute teacher" : "Mute teacher"}
+                  >
+                    {tutorMuted ? (
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                        <line x1="23" y1="9" x2="17" y2="15" />
+                        <line x1="17" y1="9" x2="23" y2="15" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                      </svg>
+                    )}
+                  </button>
+                )}
                 {metrics && (
                   <EyeContactOverlay
                     score={metrics.metrics.tutor.eye_contact_score}
@@ -237,6 +262,27 @@ export default function DebugPage() {
                   ref={studentContainerRef}
                   className="absolute inset-0 flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
                 />
+                {status !== "loading" && (
+                  <button
+                    type="button"
+                    onClick={toggleStudentMute}
+                    className="absolute bottom-2 right-2 z-20 p-2 rounded-lg bg-black/60 hover:bg-black/80 text-white transition-colors"
+                    title={studentMuted ? "Unmute student" : "Mute student"}
+                    aria-label={studentMuted ? "Unmute student" : "Mute student"}
+                  >
+                    {studentMuted ? (
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                        <line x1="23" y1="9" x2="17" y2="15" />
+                        <line x1="17" y1="9" x2="23" y2="15" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                      </svg>
+                    )}
+                  </button>
+                )}
                 {metrics && (
                   <EyeContactOverlay
                     score={metrics.metrics.student.eye_contact_score}
@@ -249,6 +295,23 @@ export default function DebugPage() {
           </div>
           {status !== "loading" && duration > 0 && (
             <div className="flex items-center gap-3 mt-2">
+              <button
+                type="button"
+                onClick={togglePause}
+                className="flex-shrink-0 p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+                title={status === "paused" ? "Resume" : "Pause"}
+                aria-label={status === "paused" ? "Resume" : "Pause"}
+              >
+                {status === "paused" ? (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                  </svg>
+                )}
+              </button>
               <span className="text-xs text-gray-400 tabular-nums w-10">
                 {formatTime(currentTime)}
               </span>
