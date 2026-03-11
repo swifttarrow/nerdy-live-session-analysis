@@ -8,6 +8,7 @@ import type { ParticipantRole } from "./talk-time";
 import type { InterruptionTracker } from "./interruptions";
 import type { ResponseLatencyTracker } from "./response-latency";
 import type { MonologueTracker } from "./monologue-length";
+import { createTranscriptionCapturer } from "./transcription-capture";
 
 export interface AudioPipelineOutput {
   talkTimePercent: number;
@@ -36,6 +37,11 @@ export interface AudioPipeline {
   destroy(): void;
 }
 
+export interface TranscriptionOptions {
+  /** Called when a speech segment is ready for transcription (tutor only). */
+  onTranscriptReady: (role: ParticipantRole, blob: Blob) => void;
+}
+
 /**
  * Create the audio analysis pipeline.
  * Connects each participant's MediaStream to VAD → talk-time aggregation.
@@ -47,16 +53,19 @@ export interface AudioPipeline {
  * @param responseLatencyTracker - optional M21 tracker; receives speech start/end events
  * @param monologueTracker - optional; tracks tutor monologue length
  * @param rollingTalkWindowMs - window for rolling talk ratio (default 3 min)
+ * @param transcriptionOptions - optional; when provided, captures tutor speech for transcription
  */
 export function createAudioPipeline(
   interruptionTracker?: InterruptionTracker | null,
   responseLatencyTracker?: ResponseLatencyTracker | null,
   monologueTracker?: MonologueTracker | null,
-  rollingTalkWindowMs: number = DEFAULT_ROLLING_TALK_WINDOW_MS
+  rollingTalkWindowMs: number = DEFAULT_ROLLING_TALK_WINDOW_MS,
+  transcriptionOptions?: TranscriptionOptions | null
 ): AudioPipeline {
 
   const aggregator = createTalkTimeAggregator();
   const vadInstances: Array<{ destroy(): void }> = [];
+  const transcriptionCapturers = new Map<ParticipantRole, ReturnType<typeof createTranscriptionCapturer>>();
   const rolesWithTracks = new Set<ParticipantRole>();
   let sessionStartMs: number | null = null;
 
@@ -132,17 +141,31 @@ export function createAudioPipeline(
 
       trackCallbacks.push({ role, onUpdate });
 
+      // Set up transcription capture for tutor when requested
+      if (transcriptionOptions && role === "tutor") {
+        const capturer = createTranscriptionCapturer(stream);
+        transcriptionCapturers.set(role, capturer);
+      }
+
       void createVad(stream, {
         onSpeechStart: () => {
+          transcriptionCapturers.get(role)?.start();
           onSpeechEvent(role);
           onUpdate(toOutput(aggregator.getState(role), role));
         },
         onSpeechEnd: () => {
+          const blobPromise = transcriptionCapturers.get(role)?.stop();
           onSpeechEndEvent(role);
           onUpdate(toOutput(aggregator.getState(role), role));
+          if (transcriptionOptions && blobPromise) {
+            void blobPromise.then((blob) => {
+              if (blob) transcriptionOptions.onTranscriptReady(role, blob);
+            });
+          }
         },
         onVADMisfire: () => {
           if (aggregator.getState(role).speaking) {
+            transcriptionCapturers.get(role)?.stop();
             onSpeechEndEvent(role);
             onUpdate(toOutput(aggregator.getState(role), role));
           }
@@ -171,6 +194,10 @@ export function createAudioPipeline(
         vad.destroy();
       }
       vadInstances.length = 0;
+      for (const capturer of transcriptionCapturers.values()) {
+        capturer.destroy();
+      }
+      transcriptionCapturers.clear();
     },
   };
 }

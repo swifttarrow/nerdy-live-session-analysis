@@ -9,7 +9,11 @@ export type { SessionMetrics, ParticipantMetrics } from "./metrics-schema";
 export { createMetricsAggregator } from "./aggregator";
 export type { MetricsAggregator } from "./aggregator";
 export { createAudioPipeline } from "./audio/pipeline";
-export type { AudioPipeline, AudioPipelineOutput } from "./audio/pipeline";
+export type {
+  AudioPipeline,
+  AudioPipelineOutput,
+  TranscriptionOptions,
+} from "./audio/pipeline";
 export { createTalkTimeAggregator } from "./audio/talk-time";
 export type { TalkTimeAggregator, TalkTimeState, ParticipantRole } from "./audio/talk-time";
 export { createInterruptionTracker, detectOverlaps } from "./audio/interruptions";
