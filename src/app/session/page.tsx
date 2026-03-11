@@ -39,9 +39,6 @@ function SessionContent() {
     roomName,
     localRole,
     remoteRole,
-    debugMode,
-    setDebugMode,
-    debugStats,
   } = useSessionRoom();
 
   const [consented, setConsented] = useState(false);
@@ -74,10 +71,6 @@ function SessionContent() {
         onSensitivityChange={handleSensitivityChange}
         onEndSession={endSession}
         showModeControls={isTeacher}
-        debugMode={debugMode}
-        onDebugModeChange={setDebugMode}
-        debugToggleInPanel={isTeacher && metricsPanelOpen}
-        studentJoined={hasRemoteParticipant}
       />
 
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
@@ -131,27 +124,10 @@ function SessionContent() {
             <MetricsDisplay
               metrics={metrics}
               videoQuality={videoQuality}
-              debugStats={debugMode ? debugStats : null}
-              debugMode={debugMode}
-              onDebugModeChange={setDebugMode}
               studentJoined={hasRemoteParticipant}
             />
           }
         />
-        {debugMode && (!isTeacher || !metricsPanelOpen) && (
-          <div className="fixed bottom-4 left-4 z-40 max-w-sm max-h-[70vh] overflow-hidden flex flex-col rounded-2xl bg-gray-900 shadow-xl">
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <MetricsDisplay
-                metrics={metrics}
-                videoQuality={videoQuality}
-                debugStats={debugStats}
-                debugMode={debugMode}
-                onDebugModeChange={setDebugMode}
-                studentJoined={hasRemoteParticipant}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
       {status === "error" && (

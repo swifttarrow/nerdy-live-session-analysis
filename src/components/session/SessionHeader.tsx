@@ -16,13 +16,6 @@ interface SessionHeaderProps {
   onEndSession: () => void;
   /** If false, mode controls (preset, sensitivity) are hidden (student view) */
   showModeControls?: boolean;
-  /** Debug toggle – shown in header when debug off and panel doesn't show it (student / panel closed) */
-  debugMode?: boolean;
-  onDebugModeChange?: (enabled: boolean) => void;
-  /** When true, panel has the toggle so header hides it */
-  debugToggleInPanel?: boolean;
-  /** When false, debug toggle is hidden until both users are present */
-  studentJoined?: boolean;
 }
 
 export function SessionHeader({
@@ -35,10 +28,6 @@ export function SessionHeader({
   onSensitivityChange,
   onEndSession,
   showModeControls = true,
-  debugMode = false,
-  onDebugModeChange,
-  debugToggleInPanel = false,
-  studentJoined = true,
 }: SessionHeaderProps) {
   const statusClass =
     status === "connected"
@@ -70,26 +59,6 @@ export function SessionHeader({
             <SessionTypeSelector value={sessionPreset} onChange={onPresetChange} />
             <SensitivitySelector value={sensitivityPercent} onChange={onSensitivityChange} />
           </>
-        )}
-        {onDebugModeChange && studentJoined && !debugMode && !debugToggleInPanel && (
-          <label className="flex items-center gap-2 cursor-pointer">
-            <span className="text-xs text-gray-400">Debug</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={debugMode}
-              onClick={() => onDebugModeChange(!debugMode)}
-              className={`relative w-9 h-5 rounded-full transition-colors ${
-                debugMode ? "bg-cyan-600" : "bg-gray-700"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                  debugMode ? "translate-x-4" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </label>
         )}
         <span className={`text-xs px-2 py-1 rounded-full ${statusClass}`}>
           {status}

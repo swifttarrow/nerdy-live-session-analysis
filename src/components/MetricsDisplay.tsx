@@ -10,12 +10,9 @@ import { SCORE_THRESHOLDS } from "@/lib/constants";
 interface Props {
   metrics: SessionMetrics | null;
   videoQuality?: VideoQualityState | null;
-  /** When provided, debug sections are shown inline (debug mode on) */
+  /** When provided, debug sections are shown inline */
   debugStats?: DebugStats | null;
-  /** When provided, a debug toggle is shown in the panel header */
-  debugMode?: boolean;
-  onDebugModeChange?: (enabled: boolean) => void;
-  /** When false, metrics show placeholders and debug toggle is disabled */
+  /** When false, metrics show placeholders */
   studentJoined?: boolean;
 }
 
@@ -87,8 +84,6 @@ export default function MetricsDisplay({
   metrics,
   videoQuality,
   debugStats,
-  debugMode = false,
-  onDebugModeChange,
   studentJoined = true,
 }: Props) {
   if (!metrics && !debugStats) {
@@ -108,29 +103,7 @@ export default function MetricsDisplay({
         <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
           Live Metrics
         </h2>
-        <div className="flex items-center gap-2">
-          {videoQuality && <VideoQualityIndicator videoQuality={videoQuality} />}
-          {onDebugModeChange && studentJoined && (
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <span className="text-xs text-gray-400">Debug</span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={debugMode}
-                onClick={() => onDebugModeChange(!debugMode)}
-                className={`relative w-8 h-4 rounded-full transition-colors ${
-                  debugMode ? "bg-cyan-600" : "bg-gray-700"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${
-                    debugMode ? "translate-x-4" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </label>
-          )}
-        </div>
+        {videoQuality && <VideoQualityIndicator videoQuality={videoQuality} />}
       </div>
 
       {metrics ? (

@@ -100,8 +100,6 @@ export default function DebugPage() {
     toggleStudentMute,
   } = useDebugSession();
 
-  const [debugPanelOpen, setDebugPanelOpen] = useState(true);
-
   const canStart = status === "idle" && tutorFile && studentFile;
   const isActive =
     status === "loading" || status === "playing" || status === "paused";
@@ -370,9 +368,7 @@ export default function DebugPage() {
               <MetricsDisplay
                 metrics={metrics}
                 videoQuality={videoQuality}
-                debugStats={debugPanelOpen ? debugStats : null}
-                debugMode={debugPanelOpen}
-                onDebugModeChange={(v) => setDebugPanelOpen(v)}
+                debugStats={debugStats}
               />
             </div>
           </aside>
