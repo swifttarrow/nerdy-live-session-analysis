@@ -16,12 +16,13 @@
 | **Speech detection signal** (Silero VAD boolean) | Talk-time percent, interruption detection, voice energy | **No** |
 | **Audio RMS energy** (scalar, not audio) | Voice energy level | **No** |
 | **Aggregated metrics JSON** (1 Hz payload) | Coaching triggers, post-session report | Only if persisted to DB (opt-in; not implemented in MVP) |
+| **Tutor speech/transcript** | LLM recommendations, flagged moments, coaching insights | Only when LLM features are invoked; not stored in MVP |
 
 ### What SessionLens Does NOT Capture
 
 - ❌ Raw video frames or video recordings
 - ❌ Raw audio recordings or audio streams (no audio egress to server)
-- ❌ Transcripts or speech content
+- ❌ **Student** transcripts or speech content — only tutor speech is captured; this mitigates the bulk of privacy risk when the student is a minor
 - ❌ Biometric templates or facial embeddings
 - ❌ Screen content or keystrokes
 
