@@ -2,7 +2,7 @@
  * Exponential Moving Average (EMA) smoother for eye contact scores.
  *
  * new_value = α * raw + (1 - α) * previous
- * α ≈ 0.25 — responsive but not jittery
+ * α ≈ 0.55 — responsive to gaze changes within ~1–2 seconds
  */
 export interface EmaSmootherOptions {
   alpha?: number; // smoothing factor [0, 1]; default 0.25

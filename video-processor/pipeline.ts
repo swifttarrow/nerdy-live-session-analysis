@@ -55,8 +55,8 @@ export function createVideoPipeline(): VideoPipeline {
   let initInProgress = false;
 
   const smoothers: Record<StreamRole, EmaSmoother> = {
-    tutor: createEmaSmoother({ alpha: 0.25 }),
-    student: createEmaSmoother({ alpha: 0.25 }),
+    tutor: createEmaSmoother({ alpha: 0.55, missingStrategy: "zero" }),
+    student: createEmaSmoother({ alpha: 0.55, missingStrategy: "zero" }),
   };
 
   const scores: Record<StreamRole, number> = {
