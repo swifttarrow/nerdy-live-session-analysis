@@ -1,4 +1,4 @@
-.PHONY: run build test lint setup
+.PHONY: run build test test:e2e lint setup
 
 run:
 	npm run dev
@@ -8,6 +8,9 @@ build:
 
 test:
 	npm test
+
+test:e2e:
+	npm run test:e2e
 
 lint:
 	npm run lint

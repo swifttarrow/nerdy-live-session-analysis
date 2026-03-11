@@ -40,6 +40,17 @@ make test
 # or: npm test
 ```
 
+### E2E (Playwright)
+
+One full-flow test: upload → start → play through entire video → report with metric bands:
+
+```bash
+make test:e2e
+# or: npm run test:e2e
+```
+
+Add two videos to `e2e/fixtures/videos/` (tutor.mp4, student.mp4). For longer clips, set `E2E_VIDEO_DURATION_SEC` (default 90). See `e2e/fixtures/videos/README.md`.
+
 ## Building
 
 ```bash
