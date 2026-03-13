@@ -5,7 +5,6 @@ interface RecommendationsSectionProps {
   llmRecs: Recommendation[];
   llmLoading: boolean;
   llmError: string | null;
-  onFetchLlm: () => void;
 }
 
 export function RecommendationsSection({
@@ -13,7 +12,6 @@ export function RecommendationsSection({
   llmRecs,
   llmLoading,
   llmError,
-  onFetchLlm,
 }: RecommendationsSectionProps) {
   const displayRecs = llmRecs.length > 0 ? llmRecs : recommendations;
 
@@ -35,16 +33,11 @@ export function RecommendationsSection({
         </div>
       ))}
 
-      {llmRecs.length === 0 && (
-        <button
-          onClick={onFetchLlm}
-          disabled={llmLoading}
-          className="w-full py-2 mt-2 bg-violet-700 hover:bg-violet-600 disabled:opacity-50 text-white text-sm rounded-xl transition-colors font-medium"
-        >
-          {llmLoading
-            ? "Getting personalized recommendations..."
-            : "Get AI-Personalized Recommendations"}
-        </button>
+      {llmLoading && llmRecs.length === 0 && (
+        <div className="flex items-center gap-2 py-2 text-sm text-gray-400">
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-violet-400" />
+          Getting AI recommendations...
+        </div>
       )}
       {llmError && (
         <p className="text-red-400 text-xs mt-1">

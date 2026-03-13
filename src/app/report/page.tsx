@@ -16,8 +16,7 @@ import type { SessionMetrics } from "@metrics-engine/metrics-schema";
 
 export default function ReportPage() {
   const router = useRouter();
-  const { report, llmRecs, llmLoading, llmError, fetchLlmRecommendations } =
-    useReportData();
+  const { report, llmRecs, llmLoading, llmError } = useReportData();
 
   if (!report) {
     return (
@@ -64,7 +63,6 @@ export default function ReportPage() {
           llmRecs={llmRecs}
           llmLoading={llmLoading}
           llmError={llmError}
-          onFetchLlm={fetchLlmRecommendations}
         />
         <InterruptionsSection summary={summary} />
         <FlaggedMomentsSection flaggedMoments={flaggedMoments} />

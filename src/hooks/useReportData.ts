@@ -22,30 +22,31 @@ export function useReportData() {
     }
   }, []);
 
-  const fetchLlmRecommendations = async () => {
+  // Fire AI recommendations fetch automatically when report loads (non-blocking)
+  useEffect(() => {
     if (!report) return;
     setLlmLoading(true);
     setLlmError(null);
-    try {
-      const res = await fetch(API_PATHS.RECOMMENDATIONS, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(report.summary),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      setLlmRecs(data.recommendations ?? []);
-    } catch (err) {
-      setLlmError(
-        err instanceof Error ? err.message : "Failed to fetch recommendations"
-      );
-    } finally {
-      setLlmLoading(false);
-    }
-  };
+    fetch(API_PATHS.RECOMMENDATIONS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(report.summary),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error ?? `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        setLlmRecs(data.recommendations ?? []);
+      })
+      .catch((err) => {
+        setLlmError(
+          err instanceof Error ? err.message : "Failed to fetch recommendations"
+        );
+      })
+      .finally(() => setLlmLoading(false));
+  }, [report?.sessionId]);
 
-  return { report, llmRecs, llmLoading, llmError, fetchLlmRecommendations };
+  return { report, llmRecs, llmLoading, llmError };
 }
