@@ -11,7 +11,6 @@ export type SensitivityLevel = "low" | "medium" | "high";
 export const SENSITIVITY_CONFIGS: Record<SensitivityLevel, Partial<CoachingConfig>> = {
   low: {
     studentSilentSec: 60,
-    tutorTalkThreshold: 0.90,
     eyeContactThreshold: 0.4,
     eyeContactDurationSec: 45,
     cooldownSec: 180,
@@ -22,7 +21,6 @@ export const SENSITIVITY_CONFIGS: Record<SensitivityLevel, Partial<CoachingConfi
   medium: {}, // uses DEFAULT_CONFIG as-is
   high: {
     studentSilentSec: 30,
-    tutorTalkThreshold: 0.80,
     eyeContactThreshold: 0.5,
     eyeContactDurationSec: 20,
     cooldownSec: 90,

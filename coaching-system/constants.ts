@@ -23,6 +23,3 @@ export const SENSITIVITY_MIGRATE_PERCENT = {
 
 /** Default sensitivity when no stored value */
 export const DEFAULT_SENSITIVITY_PERCENT = 50;
-
-/** Default preset when no stored value */
-export const DEFAULT_SESSION_PRESET = "socratic" as const;

@@ -3,7 +3,6 @@ import type { CoachingConfig } from "./config";
 
 export type TriggerType =
   | "student_silent"
-  | "tutor_talk_dominant"
   | "low_eye_contact"
   | "interruptions_spike"   // M10: tutor→student interruptions spike
   | "student_hesitating"    // M10: student slow to respond repeatedly
@@ -157,18 +156,6 @@ export const TRIGGERS: Trigger[] = [
     suggestion: "Try asking a comprehension check question",
     evaluate(_metrics, state, config) {
       return state.studentSilentSec >= config.studentSilentSec;
-    },
-  },
-  {
-    type: "tutor_talk_dominant",
-    headline: "You're doing most of the talking",
-    suggestion: "Pause and invite the student to respond",
-    evaluate(metrics, _state, config) {
-      // Prefer rolling-window ratio when available (more responsive for realtime)
-      const ratio =
-        metrics.metrics.tutor.talk_time_percent_rolling ??
-        metrics.metrics.tutor.talk_time_percent;
-      return ratio >= config.tutorTalkThreshold;
     },
   },
   {

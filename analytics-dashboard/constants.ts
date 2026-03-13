@@ -33,7 +33,6 @@ export const SEVERITY = {
 /** Trigger type strings (mirrors TriggerType; includes emotion types for future nudges) */
 export const TRIGGER_TYPES = {
   STUDENT_SILENT: "student_silent",
-  TUTOR_TALK_DOMINANT: "tutor_talk_dominant",
   LOW_EYE_CONTACT: "low_eye_contact",
   INTERRUPTIONS_SPIKE: "interruptions_spike",
   STUDENT_HESITATING: "student_hesitating",
@@ -46,7 +45,6 @@ export const TRIGGER_TYPES = {
 /** Map trigger type to flagged moment severity */
 export const TRIGGER_SEVERITY: Record<string, (typeof SEVERITY)[keyof typeof SEVERITY]> = {
   [TRIGGER_TYPES.STUDENT_SILENT]: SEVERITY.WARNING,
-  [TRIGGER_TYPES.TUTOR_TALK_DOMINANT]: SEVERITY.WARNING,
   [TRIGGER_TYPES.INTERRUPTIONS_SPIKE]: SEVERITY.WARNING,
   [TRIGGER_TYPES.STUDENT_NEGATIVE]: SEVERITY.WARNING,
   [TRIGGER_TYPES.TUTOR_MONOLOGUE_LONG]: SEVERITY.WARNING,

@@ -1,8 +1,11 @@
 import type { CoachingConfig } from "./config";
 import { DEFAULT_CONFIG } from "./config";
-import { STORAGE_KEYS, DEFAULT_SESSION_PRESET } from "./constants";
+import { STORAGE_KEYS } from "./constants";
 
 export type SessionPreset = "lecture" | "practice" | "socratic";
+
+/** Fallback preset when nothing is stored (no default mode toggle) */
+export const INITIAL_PRESET: SessionPreset = "lecture";
 
 export interface PresetDefinition {
   id: SessionPreset;
@@ -16,30 +19,27 @@ export const SESSION_PRESETS: PresetDefinition[] = [
     id: "lecture",
     label: "Lecture",
     tooltip:
-      "• Student ideally talks ~30% of the time\n• Tutor-led; student silence up to 90 seconds before a nudge\n• Best for explaining concepts",
+      "• Tutor monologue up to 5 minutes before a nudge\n• Best for explaining concepts",
     config: {
-      tutorTalkThreshold: 0.92, // higher tolerance for tutor talk
-      studentSilentSec: 90,     // longer silence OK during explanations
+      tutorMonologueThresholdSec: 300, // 5 min
     },
   },
   {
     id: "practice",
     label: "Practice",
     tooltip:
-      "• Student ideally talks ~50% of the time\n• Balanced; student silence over 30 seconds triggers a nudge\n• Best when student works through problems with guidance",
+      "• Tutor monologue over 60 seconds triggers a nudge\n• Best when student works through problems with guidance",
     config: {
-      tutorTalkThreshold: 0.80,
-      studentSilentSec: 30, // student silence during practice is a concern
+      tutorMonologueThresholdSec: 60,
     },
   },
   {
     id: "socratic",
     label: "Socratic",
     tooltip:
-      "• Student ideally talks ~70% of the time\n• Student-led; silence over 20 seconds triggers a nudge\n• Shorter cooldowns; best for discussion",
+      "• Tutor monologue over 30 seconds triggers a nudge\n• Shorter cooldowns; best for student-led discussion",
     config: {
-      tutorTalkThreshold: 0.70, // tutor should speak much less
-      studentSilentSec: 20,
+      tutorMonologueThresholdSec: 30,
       cooldownSec: 60,
     },
   },
@@ -60,7 +60,7 @@ export function loadPreset(): SessionPreset {
       return stored as SessionPreset;
     }
   } catch {}
-  return DEFAULT_SESSION_PRESET;
+  return INITIAL_PRESET;
 }
 
 export function savePreset(preset: SessionPreset): void {

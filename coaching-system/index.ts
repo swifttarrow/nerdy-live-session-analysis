@@ -17,7 +17,7 @@ export {
   loadPreset,
   savePreset,
 } from "./presets";
-export { DEFAULT_SESSION_PRESET } from "./constants";
+export { INITIAL_PRESET } from "./presets";
 export type { SessionPreset, PresetDefinition } from "./presets";
 export {
   applySensitivity,
