@@ -152,14 +152,6 @@ export default function DebugPage() {
               >
                 {status}
               </span>
-              {status !== "loading" && (
-                <button
-                  onClick={togglePause}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors"
-                >
-                  {status === "paused" ? "Resume" : "Pause"}
-                </button>
-              )}
               <button
                 onClick={endSession}
                 className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white text-sm rounded-lg transition-colors"
