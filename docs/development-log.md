@@ -107,9 +107,9 @@ workaround to prevent users joining as same role)
 3. **LLM recommendations** — Replacing template-based recommendations with `claude-haiku-4-5` would add ~$0.0004/session and support more personalized coaching.
 4. **Multi-tab / multi-browser testing** — Full integration tests with two real browser sessions to validate LiveKit track routing end-to-end.
 5. **Confidence intervals on gaze** — Reporting uncertainty with the score would help tutors calibrate trust in the metric.
-6. **Personalization** - incorporating student's learning preferences,
+6. **Personalization** - ~~incorporating student's learning preferences,
 perhaps tutor's learning preferences as well. For example, if a 
 student says they learn best via visuals, we could nudge the tutor
-to draw something.
+to draw something.~~ Not impactful based on education research.
 7. **Use Case Flexibility** - screen sharing, teacher with multiple students, cameras off, etc.
 
