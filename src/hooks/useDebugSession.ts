@@ -66,7 +66,7 @@ export function useDebugSession(options: UseDebugSessionOptions = {}) {
   const [nudges, setNudges] = useState<NudgeEvent[]>([]);
   const [kudos, setKudos] = useState<KudosEvent[]>([]);
   const [sensitivityPercent, setSensitivityPercent] = useState(loadSensitivityPercent);
-  const [sessionPreset, setSessionPreset] = useState<SessionPreset>(loadPreset);
+  const [sessionPreset, setSessionPreset] = useState<SessionPreset>(() => loadPreset());
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [tutorMuted, setTutorMuted] = useState(false);

@@ -41,7 +41,7 @@ import {
   type NudgeEvent,
   type KudosEvent,
   type SessionPreset,
-  DEFAULT_SESSION_PRESET,
+  INITIAL_PRESET,
   DEFAULT_SENSITIVITY_PERCENT,
 } from "@coaching-system/index";
 import { saveSession, loadHistory } from "@/lib/session/session-store";
@@ -121,7 +121,7 @@ export function useSessionRoom() {
     DEFAULT_SENSITIVITY_PERCENT
   );
   const [sessionPreset, setSessionPreset] =
-    useState<SessionPreset>(DEFAULT_SESSION_PRESET);
+    useState<SessionPreset>(INITIAL_PRESET);
 
   const localVideoRef = useRef<HTMLDivElement>(null);
   const remoteVideoRef = useRef<HTMLDivElement>(null);

@@ -10,8 +10,8 @@ interface Props {
 
 const ICON: Record<string, string> = {
   student_silent: "🤔",
-  tutor_talk_dominant: "💬",
   low_eye_contact: "👁️",
+  tutor_monologue_long: "💬",
   interruptions_spike: "✋",
   student_hesitating: "⏳",
 };
