@@ -14,6 +14,8 @@ export interface SessionReport {
   summary: SessionSummary;
   recommendations: Recommendation[];
   flaggedMoments: FlaggedMoment[];
+  /** Session preset used when generating report (for participation ideal % display) */
+  preset?: SessionPreset;
 }
 
 export interface GenerateReportOptions {
@@ -64,5 +66,6 @@ export function generateReport(
     summary,
     recommendations,
     flaggedMoments,
+    preset: options?.preset,
   };
 }

@@ -55,7 +55,10 @@ export default function ReportPage() {
           engagementBreakdown={summary.engagementBreakdown}
           studentTalkRatio={summary.studentTalkRatio}
         />
-        <ParticipationSection summary={summary} />
+        <ParticipationSection
+          summary={summary}
+          preset={(report as { preset?: string }).preset}
+        />
         <AttentionCyclesSection summary={summary} />
         <TrendsSection summary={summary} />
         <RecommendationsSection
