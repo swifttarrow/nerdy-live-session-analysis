@@ -17,7 +17,7 @@ export type { SessionTrends, MetricTrend, TrendDirection } from "./trends";
 export { segmentAttention, detectDriftPattern } from "./attention-cycles";
 export type { AttentionCycles, AttentionSegment } from "./attention-cycles";
 export { classifyParticipation, participationDescription } from "./participation";
-export type { ParticipationLabel, ParticipationThresholds } from "./participation";
+export type { ParticipationLabel } from "./participation";
 export { computeTalkBalanceScore, TALK_BALANCE_CENTER } from "./talk-balance";
 export { SessionSummarySchema } from "./summary-schema";
 export type { SessionSummaryInput } from "./summary-schema";

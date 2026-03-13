@@ -68,6 +68,7 @@ export function aggregateSessionSummary(
   const n = metricsHistory.length;
 
   if (n === 0) {
+    const pLabel = classifyParticipation(0, preset);
     return {
       sessionId,
       durationSec: 0,
@@ -78,8 +79,8 @@ export function aggregateSessionSummary(
       studentTalkRatio: 0,
       engagementScore: 0,
       sampleCount: 0,
-      participationLabel: classifyParticipation(0),
-      participationDescription: participationDescription(classifyParticipation(0)),
+      participationLabel: pLabel,
+      participationDescription: participationDescription(pLabel),
       attentionCycles: { segments: [], pattern: null },
     };
   }
@@ -121,8 +122,8 @@ export function aggregateSessionSummary(
     studentEyeContact: 0.4 * avgStudentEyeContact,
   };
 
-  // M22: participation label
-  const pLabel = classifyParticipation(studentTalkRatio);
+  // M22: participation label (normal distribution centered on preset ideal)
+  const pLabel = classifyParticipation(studentTalkRatio, preset);
   const pDesc = participationDescription(pLabel);
 
   // M23: attention cycles

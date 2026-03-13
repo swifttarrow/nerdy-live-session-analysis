@@ -1,34 +1,35 @@
-export type ParticipationLabel = "passive" | "moderate" | "engaged";
+import type { SessionPreset } from "@coaching-system/presets";
+import { TALK_BALANCE_CENTER } from "./talk-balance";
 
-export interface ParticipationThresholds {
-  passiveBelow: number;   // default 0.20
-  engagedAbove: number;   // default 0.40
-}
+export type ParticipationLabel = "great" | "good" | "needs_improvement";
 
-const DEFAULT_THRESHOLDS: ParticipationThresholds = {
-  passiveBelow: 0.20,
-  engagedAbove: 0.40,
-};
+/** Ideal center (μ) per preset; σ = 0.2. Great: |z| ≤ 0.5, Good: |z| ≤ 1, Needs improvement: |z| > 1 */
+const SIGMA = 0.2;
+const DEFAULT_CENTER = 0.5;
 
 /**
- * Classify student talk ratio into participation label.
+ * Classify student talk ratio into participation label using a normal distribution
+ * centered on the preset's ideal. For Socratic, ideal ≈70%.
  */
 export function classifyParticipation(
   studentTalkRatio: number,
-  thresholds: ParticipationThresholds = DEFAULT_THRESHOLDS
+  preset?: SessionPreset
 ): ParticipationLabel {
-  if (studentTalkRatio < thresholds.passiveBelow) return "passive";
-  if (studentTalkRatio >= thresholds.engagedAbove) return "engaged";
-  return "moderate";
+  const center = preset ? TALK_BALANCE_CENTER[preset] : DEFAULT_CENTER;
+  const z = Math.abs((studentTalkRatio - center) / SIGMA);
+
+  if (z <= 0.5) return "great";
+  if (z <= 1) return "good";
+  return "needs_improvement";
 }
 
 export function participationDescription(label: ParticipationLabel): string {
   switch (label) {
-    case "passive":
-      return "Student was mostly passive — little opportunity for knowledge retrieval or self-explanation.";
-    case "moderate":
-      return "Student had moderate participation — some back-and-forth but room to improve.";
-    case "engaged":
-      return "Student was actively engaged — good balance of tutor instruction and student expression.";
+    case "great":
+      return "Student talk time was close to the ideal for this session type — strong participation balance.";
+    case "good":
+      return "Student participation was within a good range for this session type — room to fine-tune.";
+    case "needs_improvement":
+      return "Student talk time was outside the ideal range for this session type — consider adjusting the balance.";
   }
 }

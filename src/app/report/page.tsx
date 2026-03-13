@@ -54,6 +54,7 @@ export default function ReportPage() {
         <EngagementScore
           engagementScore={summary.engagementScore}
           engagementBreakdown={summary.engagementBreakdown}
+          studentTalkRatio={summary.studentTalkRatio}
         />
         <ParticipationSection summary={summary} />
         <AttentionCyclesSection summary={summary} />
