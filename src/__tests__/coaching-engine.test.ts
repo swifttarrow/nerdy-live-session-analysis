@@ -5,7 +5,6 @@ import type { CoachingConfig } from "@coaching-system/config";
 
 const TEST_CONFIG: CoachingConfig = {
   studentSilentSec: 5,        // 5s for test speed
-  tutorTalkThreshold: 0.85,
   eyeContactThreshold: 0.5,
   eyeContactDurationSec: 3,   // 3s for test speed
   cooldownSec: 60,
@@ -27,6 +26,7 @@ function makeMetrics(overrides: {
   tutorTalk?: number;
   studentTalk?: number;
   studentSpeaking?: boolean;
+  tutorSpeaking?: boolean;
   tutorEyeContact?: number;
   studentEyeContact?: number;
   tutorMonologueSec?: number;
@@ -36,7 +36,7 @@ function makeMetrics(overrides: {
   const tutor: SessionMetrics["metrics"]["tutor"] = {
     eye_contact_score: overrides.tutorEyeContact ?? 0.8,
     talk_time_percent: overrides.tutorTalk ?? 0.5,
-    current_speaking: true,
+    current_speaking: overrides.tutorSpeaking ?? true,
   };
   if (overrides.tutorMonologueSec !== undefined) tutor.tutor_monologue_sec = overrides.tutorMonologueSec;
   if (overrides.tutorTurnsPerMinute !== undefined) tutor.tutor_turns_per_minute = overrides.tutorTurnsPerMinute;
@@ -95,30 +95,6 @@ describe("createCoachingEngine", () => {
       // 4 more seconds of silence — should NOT fire yet (counter reset)
       for (let i = 0; i < 4; i++) engine.evaluate(silent);
       expect(nudges.some((n) => n.type === "student_silent")).toBe(false);
-    });
-  });
-
-  describe("tutor_talk_dominant trigger", () => {
-    it("fires when tutor talk time exceeds threshold", () => {
-      const m = makeMetrics({ tutorTalk: 0.90, studentTalk: 0.10 });
-      engine.evaluate(m);
-      expect(nudges.some((n) => n.type === "tutor_talk_dominant")).toBe(true);
-    });
-
-    it("uses rolling ratio when available", () => {
-      const m = makeMetrics({
-        tutorTalk: 0.50, // session-level below threshold
-        studentTalk: 0.50,
-      });
-      (m.metrics.tutor as Record<string, unknown>).talk_time_percent_rolling = 0.90;
-      engine.evaluate(m);
-      expect(nudges.some((n) => n.type === "tutor_talk_dominant")).toBe(true);
-    });
-
-    it("does not fire when tutor talk is below threshold", () => {
-      const m = makeMetrics({ tutorTalk: 0.60, studentTalk: 0.40 });
-      engine.evaluate(m);
-      expect(nudges.some((n) => n.type === "tutor_talk_dominant")).toBe(false);
     });
   });
 
@@ -221,10 +197,11 @@ describe("createCoachingEngine", () => {
         cooldownSec: 9999, // effectively never
       };
       const e2 = createCoachingEngine((n) => nudges.push(n), shortCooldownConfig);
-      const m = makeMetrics({ tutorTalk: 0.90 });
+      const m = makeMetrics({ tutorSpeaking: true, studentSpeaking: false });
+      (m.metrics.tutor as Record<string, unknown>).tutor_monologue_sec = 95;
       // Evaluate many times
       for (let i = 0; i < 20; i++) e2.evaluate(m);
-      const count = nudges.filter((n) => n.type === "tutor_talk_dominant").length;
+      const count = nudges.filter((n) => n.type === "tutor_monologue_long").length;
       expect(count).toBe(1); // fired exactly once due to cooldown
     });
   });
@@ -313,7 +290,8 @@ describe("createCoachingEngine", () => {
 
   describe("nudge event structure", () => {
     it("nudge has all required fields", () => {
-      const m = makeMetrics({ tutorTalk: 0.90 });
+      const m = makeMetrics({ tutorSpeaking: true, studentSpeaking: false });
+      (m.metrics.tutor as Record<string, unknown>).tutor_monologue_sec = 95;
       engine.evaluate(m);
       const nudge = nudges[0];
       expect(nudge).toBeDefined();

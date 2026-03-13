@@ -12,7 +12,6 @@ import type { CoachingConfig } from "@coaching-system/config";
 
 const FAST_CONFIG: CoachingConfig = {
   studentSilentSec: 3,
-  tutorTalkThreshold: 0.8,
   eyeContactThreshold: 0.4,
   eyeContactDurationSec: 3,
   cooldownSec: 9999, // prevent cooldown from interfering with integration test
@@ -37,16 +36,19 @@ function makeMetrics(overrides: {
   tutorEyeContact?: number;
   studentEyeContact?: number;
   studentAttentionDrift?: boolean;
+  tutorMonologueSec?: number;
 } = {}): SessionMetrics {
+  const tutor: SessionMetrics["metrics"]["tutor"] = {
+    eye_contact_score: overrides.tutorEyeContact ?? 0.8,
+    talk_time_percent: overrides.tutorTalk ?? 0.5,
+    current_speaking: overrides.tutorSpeaking ?? true,
+  };
+  if (overrides.tutorMonologueSec !== undefined) tutor.tutor_monologue_sec = overrides.tutorMonologueSec;
   return {
     timestamp: new Date().toISOString(),
     session_id: "integration-test",
     metrics: {
-      tutor: {
-        eye_contact_score: overrides.tutorEyeContact ?? 0.8,
-        talk_time_percent: overrides.tutorTalk ?? 0.5,
-        current_speaking: overrides.tutorSpeaking ?? true,
-      },
+      tutor,
       student: {
         eye_contact_score: overrides.studentEyeContact ?? 0.7,
         talk_time_percent: overrides.studentTalk ?? 0.5,
@@ -74,10 +76,10 @@ describe("coaching pipeline integration", () => {
     expect(nudges.some((n) => n.type === "student_silent")).toBe(true);
   });
 
-  it("fires tutor_talk_dominant for unbalanced session", () => {
-    const dominantMetrics = makeMetrics({ tutorTalk: 0.95, studentTalk: 0.05 });
-    engine.evaluate(dominantMetrics);
-    expect(nudges.some((n) => n.type === "tutor_talk_dominant")).toBe(true);
+  it("fires tutor_monologue_long when tutor monologue exceeds threshold", () => {
+    const monologueMetrics = makeMetrics({ tutorMonologueSec: 95 });
+    engine.evaluate(monologueMetrics);
+    expect(nudges.some((n) => n.type === "tutor_monologue_long")).toBe(true);
   });
 
   it("fires student_attention_drift when student attention_drift is true", () => {
@@ -87,10 +89,10 @@ describe("coaching pipeline integration", () => {
   });
 
   it("cooldowns respected across multi-trigger session", () => {
-    const dominantMetrics = makeMetrics({ tutorTalk: 0.95 });
+    const monologueMetrics = makeMetrics({ tutorMonologueSec: 95 });
     // Evaluate 20 times — cooldown=9999s means first fire only
-    for (let i = 0; i < 20; i++) engine.evaluate(dominantMetrics);
-    const count = nudges.filter((n) => n.type === "tutor_talk_dominant").length;
+    for (let i = 0; i < 20; i++) engine.evaluate(monologueMetrics);
+    const count = nudges.filter((n) => n.type === "tutor_monologue_long").length;
     expect(count).toBe(1);
   });
 });
