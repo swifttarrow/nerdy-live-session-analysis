@@ -5,7 +5,7 @@ import { STORAGE_KEYS } from "./constants";
 export type SessionPreset = "lecture" | "practice" | "socratic";
 
 /** Fallback preset when nothing is stored (no default mode toggle) */
-export const INITIAL_PRESET: SessionPreset = "lecture";
+export const INITIAL_PRESET: SessionPreset = "socratic";
 
 export interface PresetDefinition {
   id: SessionPreset;
