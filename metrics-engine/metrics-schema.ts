@@ -14,7 +14,7 @@ export const ParticipantMetricsSchema = z.object({
   energy_level: z.number().min(0).max(1).optional(),
   /** M12: sustained attention drift (looking away > threshold) */
   attention_drift: z.boolean().optional(),
-  /** Student emotional state from face landmarks (tired, frustrated, defeated) */
+  /** Student emotional state from face landmarks (positive, neutral, negative) */
   emotional_state: EmotionalStateSchema.optional(),
   /** Rolling-window talk ratio (2–5 min) for realtime nudge; uses this when available */
   talk_time_percent_rolling: z.number().min(0).max(1).optional(),

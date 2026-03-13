@@ -32,7 +32,7 @@ export interface VideoPipeline {
    */
   processFrame(role: StreamRole, imageData: ImageData, timestampMs: number): number | null;
   getLatestScores(): VideoPipelineOutput;
-  /** Student's current emotional state (tired, frustrated, defeated, neutral) */
+  /** Student's current emotional state (positive, neutral, negative) */
   getStudentEmotionalState(): EmotionalState;
   /** Raw emotion scores [0,1] contributing to emotional state (for debug) */
   getStudentEmotionScores(): EmotionScores;

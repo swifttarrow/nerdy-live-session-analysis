@@ -34,7 +34,7 @@ export interface MetricsAggregator {
   updateEnergyLevel(role: StreamRole, level: number): void;
   /** M12: update attention drift flag for a participant */
   updateAttentionDrift(role: StreamRole, drifting: boolean): void;
-  /** Update student emotional state (tired, frustrated, defeated, neutral) */
+  /** Update student emotional state (positive, neutral, negative) */
   updateEmotionalState(role: StreamRole, state: import("./metrics-schema").EmotionalState): void;
   start(): void;
   stop(): void;
