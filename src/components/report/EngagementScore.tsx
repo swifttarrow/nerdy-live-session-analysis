@@ -15,7 +15,7 @@ interface EngagementScoreProps {
 const COMPONENT_CONFIG = [
   {
     key: "talkBalance" as const,
-    label: "% time student talked",
+    label: "Student participation",
     weight: 0.4,
     color: "bg-cyan-500",
     getSubScore: (b: EngagementBreakdown) => b.talkBalance / 0.4,
@@ -57,9 +57,6 @@ function ComponentBreakdown({
 }) {
   return (
     <div className="space-y-4">
-      <p className="text-gray-400 text-xs font-medium">
-        How you scored in each category (weighted to get the total above)
-      </p>
       <div className="space-y-3">
         {COMPONENT_CONFIG.map(
           ({ key, label, weight, color, getSubScore, getContribution, getDisplayPct }) => {
@@ -75,14 +72,9 @@ function ComponentBreakdown({
           return (
             <div key={key} className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-gray-300">
-                  {label}
-                  <span className="text-gray-500 font-normal ml-1">
-                    (worth {Math.round(weight * 100)}% of total)
-                  </span>
-                </span>
+                <span className="text-gray-300">{label}</span>
                 <span className="text-gray-200 font-medium tabular-nums">
-                  {subPct}% → +{contribPts} pts
+                  +{contribPts} pts
                 </span>
               </div>
               <div className="h-2 bg-gray-800 rounded-md overflow-hidden">
@@ -117,8 +109,7 @@ export function EngagementScore({
       <div className="text-center mb-4">
         <p className="text-gray-400 text-sm mb-2">Overall Engagement Score</p>
         <p className={`text-6xl font-bold ${engagementColor}`}>
-          {engagementPct}
-          <span className="text-3xl text-gray-500">%</span>
+          {engagementPct} <span className="text-gray-500">/ 100</span>
         </p>
       </div>
       {engagementBreakdown && (
