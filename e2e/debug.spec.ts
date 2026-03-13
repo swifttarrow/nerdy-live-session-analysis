@@ -143,9 +143,11 @@ test.describe("Debug path", () => {
     ).toBe(true);
 
     // ─── 9. Verify report UI sections ─────────────────────────────────────
-    await expect(page.getByText("Key Metrics")).toBeVisible();
     await expect(
       page.getByText("Overall Engagement Score", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Recommendations" })
     ).toBeVisible();
 
     // ─── 10. Run Another Debug navigates back ───────────────────────────────
